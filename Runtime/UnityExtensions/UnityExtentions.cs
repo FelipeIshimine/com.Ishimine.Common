@@ -32,10 +32,7 @@ public static class UnityExtentions
     public static void PlayCoroutine(this MonoBehaviour source, ref IEnumerator rutine, Func<IEnumerator> rutineMethod)
     {
         if (!source.isActiveAndEnabled)
-        {
             throw new Exception("El objeto está desactivado o el componente disabled.");
-            return;
-        }   
 
         if (rutine != null)
             source.StopCoroutine(rutine);

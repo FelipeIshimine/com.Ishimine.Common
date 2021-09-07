@@ -27,7 +27,6 @@ public class QuickComponentSingleton : MonoBehaviour
 
     private static T Get<T>(Type type) where T : Component
     {
-        return singletons[type] as T;
         if (singletons.TryGetValue(type, out Component value))
             return value as T;
         return null;

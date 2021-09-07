@@ -15,7 +15,8 @@ public class ConstantRotation : MonoBehaviour
 
     private void OnDisable()
     {
-        _time = 0;
+        if(resetOnDisable)
+            _time = 0;
     }
 
     private void Update()
