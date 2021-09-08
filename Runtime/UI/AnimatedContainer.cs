@@ -60,14 +60,14 @@ public class AnimatedContainer : MonoBehaviour
 
     [TabGroup("Scale")] public bool useScale = true;
     [EnableIf("useScale"), TabGroup("Scale")] public AnimationCurve curveInScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    [EnableIf("useScale"), TabGroup("Scale")] public Vector2 targetScale = new Vector2(0, 1);
+    [EnableIf("useScale"), TabGroup("Scale")] public Vector3 targetScale = new Vector3(1, 0, 1);
     [EnableIf("useScale"), TabGroup("Scale")] public AnimationCurve curveOutScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     [TabGroup("Movement")] public bool useMovement = true;
     [EnableIf("useMovement"), TabGroup("Movement")] public Direction direction = Direction.Down;
     [EnableIf("useMovement"), TabGroup("Movement")] public AnimationCurve curveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [EnableIf("useMovement"), TabGroup("Movement")] public AnimationCurve curveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    private Vector2 targetPosition;
+    private Vector3 targetPosition;
 
     private bool initialized = false;
 
@@ -117,16 +117,16 @@ public class AnimatedContainer : MonoBehaviour
         switch (direction)
         {
             case Direction.Right:
-                targetPosition = Vector2.right * Parent.rect.width;
+                targetPosition = Vector3.right * Parent.rect.width;
                 break;
             case Direction.Left:
-                targetPosition = Vector2.left * Parent.rect.width;
+                targetPosition = Vector3.left * Parent.rect.width;
                 break;
             case Direction.Up:
-                targetPosition = Vector2.up * Parent.rect.height;
+                targetPosition = Vector3.up * Parent.rect.height;
                 break;
             case Direction.Down:
-                targetPosition = Vector2.down * Parent.rect.height;
+                targetPosition = Vector3.down * Parent.rect.height;
                 break;
             default:
                 break;
@@ -135,22 +135,22 @@ public class AnimatedContainer : MonoBehaviour
             rectTransform.anchoredPosition = targetPosition;
     }
 
-    public Vector2 GetTargetPosition()
+    public Vector3 GetTargetPosition()
     {
         switch (direction)
         {
             case Direction.Right:
-                return targetPosition = Vector2.right * Parent.rect.width;
+                return targetPosition = Vector3.right * Parent.rect.width;
             case Direction.Left:
-                return targetPosition = Vector2.left * Parent.rect.width;
+                return targetPosition = Vector3.left * Parent.rect.width;
             case Direction.Up:
-                return targetPosition = Vector2.up * Parent.rect.height;
+                return targetPosition = Vector3.up * Parent.rect.height;
             case Direction.Down:
-                return targetPosition = Vector2.down * Parent.rect.height;
+                return targetPosition = Vector3.down * Parent.rect.height;
             default:
                 break;
         }
-        return targetPosition = Vector2.zero;
+        return targetPosition = Vector3.zero;
     }
 
 
@@ -256,7 +256,7 @@ public class AnimatedContainer : MonoBehaviour
     private IEnumerator OpenRutine(Action postAction = null)
     {
         InAnimation = true;
-        yield return AnimationRutine(durationIn, Vector2.zero, curveIn, Vector2.one, curveInScale, 1, alphaCurveIn,
+        yield return AnimationRutine(durationIn, Vector3.zero, curveIn, Vector3.one, curveInScale, 1, alphaCurveIn,
             () =>
             {
                 InAnimation = false;
@@ -266,20 +266,20 @@ public class AnimatedContainer : MonoBehaviour
     }
 
     private IEnumerator AnimationRutine(float duration,
-        Vector2 targetPosition, AnimationCurve movementCurve,
-        Vector2 targetScale, AnimationCurve scaleCurve,
+        Vector3 targetPosition, AnimationCurve movementCurve,
+        Vector3 targetScale, AnimationCurve scaleCurve,
         float targetAlpha, AnimationCurve alphaCurve,
         Action postAction)
     {
         float t = 0;
-        Vector2 startPosition = RectTransform.anchoredPosition;
-        Vector2 startScale = RectTransform.localScale;
+        Vector3 startPosition = RectTransform.anchoredPosition;
+        Vector3 startScale = RectTransform.localScale;
         float startAlpha = 1 - targetAlpha;
 
         Action step = null;
 
-        if (useMovement) step += () => RectTransform.anchoredPosition = Vector2.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(t));
-        if (useScale) step += () => RectTransform.localScale = Vector2.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(t));
+        if (useMovement) step += () => RectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(t));
+        if (useScale) step += () => RectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(t));
         if (useAlpha) step += () => canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, targetAlpha, alphaCurve.Evaluate(t));
 
         do
@@ -306,9 +306,9 @@ public class AnimatedContainer : MonoBehaviour
 
     public void SetValue(float currentFill, AnimationCurve movementCurve, AnimationCurve scaleCurve, AnimationCurve alphaCurveIn)
     {
-        Vector2 startPosition = GetTargetPosition();
-        if (useMovement) RectTransform.anchoredPosition = Vector2.LerpUnclamped(startPosition, Vector2.zero, movementCurve.Evaluate(currentFill));
-        if (useScale) RectTransform.localScale = Vector2.LerpUnclamped(Vector2.zero, Vector2.one, scaleCurve.Evaluate(currentFill));
+        Vector3 startPosition = GetTargetPosition();
+        if (useMovement) RectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, Vector3.zero, movementCurve.Evaluate(currentFill));
+        if (useScale) RectTransform.localScale = Vector3.LerpUnclamped(Vector3.zero, Vector3.one, scaleCurve.Evaluate(currentFill));
         if (useAlpha) canvasGroup.alpha = Mathf.LerpUnclamped(0, 1, alphaCurveIn.Evaluate(currentFill)); 
     }
     
