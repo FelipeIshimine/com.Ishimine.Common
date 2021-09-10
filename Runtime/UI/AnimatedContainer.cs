@@ -48,6 +48,7 @@ public class AnimatedContainer : MonoBehaviour
     private bool _alreadyStarted = false; 
         
     [ShowInInspector] public bool IsOpen { get; private set; }
+    [ShowInInspector] public bool IsClosed => !IsOpen;
     public bool InAnimation { get; private set; }
 
     public TimeType timeType = TimeType.unscaled;
