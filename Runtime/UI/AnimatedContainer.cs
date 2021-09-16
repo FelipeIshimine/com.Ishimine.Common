@@ -213,6 +213,8 @@ public class AnimatedContainer : MonoBehaviour
         }
         else
         {
+            canvasGroup.blocksRaycasts = true;
+            canvasGroup.interactable = true;
             postAction?.Invoke();
         }
     }
