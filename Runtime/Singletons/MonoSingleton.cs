@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T>
+public class BaseMonoSingleton<T> : MonoBehaviour where T : BaseMonoSingleton<T>
 {
     public static event Action<T> OnInitialized;
     public bool setInactiveOnStart = false;

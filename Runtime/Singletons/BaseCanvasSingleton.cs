@@ -2,12 +2,14 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-public abstract class CanvasSingleton<T> : MonoSingleton<T> where T : CanvasSingleton<T>
+public abstract class BaseCanvasSingleton<T> : BaseMonoSingleton<T> where T : BaseCanvasSingleton<T>
 {
-    [SerializeField] protected AnimatedContainer mainContainer;
+    [SerializeField] private AnimatedContainer mainContainer;
+    protected AnimatedContainer MainContainer => mainContainer;
 
     public bool deactivateOnClose = true;
 
+       
     protected virtual void OnValidate()
     {
         if (mainContainer == null)
@@ -72,4 +74,8 @@ public abstract class CanvasSingleton<T> : MonoSingleton<T> where T : CanvasSing
         else
             mainContainer.Close();
     }
+
+
+
+
 }

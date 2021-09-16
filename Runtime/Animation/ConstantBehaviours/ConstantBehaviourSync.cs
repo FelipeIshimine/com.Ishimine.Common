@@ -12,9 +12,9 @@ public class ConstantBehaviourSync : MonoBehaviour
 
     [SerializeField] private ConstantBehaviour[] constantBehaviours;
 
+    public bool resetOnEnable = true;
 
     private void OnDurationChange() => speed = 1 / duration;
-
     private void OnSpeedChange() => duration = 1 / speed;
 
     private void OnValidate()
@@ -27,6 +27,7 @@ public class ConstantBehaviourSync : MonoBehaviour
                 item.SetDuration(duration);
             if(syncTimeOffset)
                 item.SetTimeOffset(timeOffset);
+            item.resetOnEnable = resetOnEnable;
         }
     }
 }

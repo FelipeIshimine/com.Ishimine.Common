@@ -5,20 +5,22 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 using UnityEngine.Events;
 
-
 /// <summary>
 /// Conteiner generico para animar canvas con coroutinas.
 /// Si la animacion por movimiento no encaja bien, revisar que el Root del container este bien posicionados
 /// </summary>
 public class AnimatedContainer : MonoBehaviour
 {
+    public Action<bool> OnOpenOrClose;
+    public Action OnOpen;
+    public Action OnClose;
     public enum Direction { Right, Left, Up, Down }
-    public enum TimeType { scaled, unscaled }
+    public enum TimeType { Scaled, Unscaled }
 
     public enum Order { Open, Close, Show, Hide }
 
     public float durationIn = .3f;
-   
+
     public float durationOut = .3f;
     IEnumerator rutine;
     [SerializeField] private RectTransform parent;
@@ -27,12 +29,12 @@ public class AnimatedContainer : MonoBehaviour
         get
         {
             if (!parent)
-                parent = transform.parent as RectTransform; 
+                parent = transform.parent as RectTransform;
             return parent;
         }
     }
 
-    [SerializeField]private RectTransform rectTransform;
+    [SerializeField] private RectTransform rectTransform;
     RectTransform RectTransform
     {
         get
@@ -45,13 +47,25 @@ public class AnimatedContainer : MonoBehaviour
 
     public bool deactivateOnHide = true;
     public bool startHidden = true;
-    private bool _alreadyStarted = false; 
-        
-    [ShowInInspector] public bool IsOpen { get; private set; }
+    private bool _alreadyStarted = false;
+
+    private bool _isOpen;
+
+    [ShowInInspector] public bool IsOpen 
+    {
+        get => _isOpen; 
+        private set
+        {
+            _isOpen = value;
+            OnOpenOrClose?.Invoke(_isOpen);
+            if(_isOpen)     OnOpen?.Invoke();
+            else            OnClose?.Invoke();
+        }
+    }
     [ShowInInspector] public bool IsClosed => !IsOpen;
     public bool InAnimation { get; private set; }
 
-    public TimeType timeType = TimeType.unscaled;
+    public TimeType timeType = TimeType.Unscaled;
 
     [TabGroup("Alpha")] public bool useAlpha = true;
     public CanvasGroup canvasGroup;
@@ -72,7 +86,6 @@ public class AnimatedContainer : MonoBehaviour
 
     private bool initialized = false;
 
-
     private void Awake()
     {
         Initialize();
@@ -80,10 +93,10 @@ public class AnimatedContainer : MonoBehaviour
 
     private void OnValidate()
     {
-        if(canvasGroup == null)
+        if (canvasGroup == null)
         {
             canvasGroup = GetComponent<CanvasGroup>();
-            if(canvasGroup == null)
+            if (canvasGroup == null)
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
     }
@@ -91,7 +104,7 @@ public class AnimatedContainer : MonoBehaviour
     {
         if (initialized) return;
         initialized = true;
-        
+
         if (RectTransform == null)
             rectTransform = transform as RectTransform;
 
@@ -105,7 +118,7 @@ public class AnimatedContainer : MonoBehaviour
         }
 
         if (_alreadyStarted) return;
-        if(startHidden)
+        if (startHidden)
             Hide();
         else
             Show();
@@ -132,7 +145,7 @@ public class AnimatedContainer : MonoBehaviour
             default:
                 break;
         }
-        if(overrideCurrentPosition)
+        if (overrideCurrentPosition)
             rectTransform.anchoredPosition = targetPosition;
     }
 
@@ -155,7 +168,7 @@ public class AnimatedContainer : MonoBehaviour
     }
 
 
-    [Button,ButtonGroup("Animated")]
+    [Button, ButtonGroup("Animated")]
     public void Close()
     {
         _alreadyStarted = true;
@@ -181,14 +194,14 @@ public class AnimatedContainer : MonoBehaviour
         }
     }
 
-    [Button,ButtonGroup("Animated")]
+    [Button, ButtonGroup("Animated")]
     public void Open()
     {
         Open(null);
     }
 
     public void Open(Action postAction)
-    {   
+    {
         _alreadyStarted = true;
         gameObject.SetActive(true);
         if (!IsOpen)
@@ -204,12 +217,12 @@ public class AnimatedContainer : MonoBehaviour
         }
     }
 
-    [Button,ButtonGroup("Snap")]
+    [Button, ButtonGroup("Snap")]
     public void Hide()
     {
         _alreadyStarted = true;
 
-        if(useMovement)
+        if (useMovement)
             RectTransform.anchoredPosition = targetPosition;
 
         if (useScale)
@@ -219,23 +232,23 @@ public class AnimatedContainer : MonoBehaviour
             canvasGroup.alpha = 0;
 
         IsOpen = false;
-        
+
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
-        
-        if(deactivateOnHide)
+
+        if (deactivateOnHide)
             gameObject.SetActive(false);
     }
 
-    [Button,ButtonGroup("Snap")]
+    [Button, ButtonGroup("Snap")]
     public void Show()
     {
         _alreadyStarted = true;
         //Debug.Log($"{this} Show");
 
         gameObject.SetActive(true);
-        
-        if(useMovement) RectTransform.anchoredPosition = Vector3.zero;
+
+        if (useMovement) RectTransform.anchoredPosition = Vector3.zero;
         SetValue(1, curveIn, curveInScale, alphaCurveIn);
         IsOpen = true;
         canvasGroup.interactable = true;
@@ -246,7 +259,7 @@ public class AnimatedContainer : MonoBehaviour
     {
         InAnimation = true;
         yield return AnimationRutine(durationOut, targetPosition, curveOut, targetScale, curveOutScale, 0, alphaCurveOut,
-            ()=>
+            () =>
             {
                 InAnimation = false;
                 Hide();
@@ -285,7 +298,7 @@ public class AnimatedContainer : MonoBehaviour
 
         do
         {
-            t += ((timeType == TimeType.scaled) ? Time.deltaTime : Time.unscaledDeltaTime) / duration;
+            t += ((timeType == TimeType.Scaled) ? Time.deltaTime : Time.unscaledDeltaTime) / duration;
             step?.Invoke();
             yield return null;
         } while (t < 1);
@@ -310,23 +323,23 @@ public class AnimatedContainer : MonoBehaviour
         Vector3 startPosition = GetTargetPosition();
         if (useMovement) RectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, Vector3.zero, movementCurve.Evaluate(currentFill));
         if (useScale) RectTransform.localScale = Vector3.LerpUnclamped(Vector3.zero, Vector3.one, scaleCurve.Evaluate(currentFill));
-        if (useAlpha) canvasGroup.alpha = Mathf.LerpUnclamped(0, 1, alphaCurveIn.Evaluate(currentFill)); 
+        if (useAlpha) canvasGroup.alpha = Mathf.LerpUnclamped(0, 1, alphaCurveIn.Evaluate(currentFill));
     }
-    
+
     public void Toggle(bool animated)
     {
         if (animated)
         {
-            if(IsOpen)
+            if (IsOpen)
                 Close();
-            else 
+            else
                 Open();
         }
         else
         {
-            if(IsOpen)
+            if (IsOpen)
                 Hide();
-            else 
+            else
                 Show();
         }
     }
@@ -341,7 +354,7 @@ public class AnimatedContainer : MonoBehaviour
                     Open(callback);
                     break;
                 }
-                else goto case Order.Show;                   
+                else goto case Order.Show;
             case Order.Close:
                 if (gameObject.activeInHierarchy)
                 {
