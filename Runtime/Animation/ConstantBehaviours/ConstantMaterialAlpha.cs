@@ -18,11 +18,7 @@ public class ConstantMaterialAlpha : ConstantBehaviour
 
     protected override void Process(float nTime)
     {
-        Debug.Log(nTime);
         if (_material != null)
-        {
             _material.color = gradient.Evaluate(Mathf.Repeat(nTime, 1));
-            Debug.Log(_material.color);
-        }
     }
 }
