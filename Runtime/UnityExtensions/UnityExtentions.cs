@@ -590,7 +590,6 @@ public static class UnityExtentions
         for (int i = value.Count-1; i >= 0; i--)
             Object.Destroy(value[i]);
     }
-
     public static int GetIndexOfClosest(this Transform source, List<Transform> targets)
     {
         float minDistance = float.MaxValue;
@@ -613,6 +612,17 @@ public static class UnityExtentions
             from type in assembly.GetTypes()
             where (type.IsSubclassOf(typeof(T)) && !type.IsAbstract)
             select type;
+    }
+
+    public static Color ColorFromString(this string value, bool useAlpha)
+    {
+        int aux = value.GetHashCode();
+        Color c;
+        c.b = ((aux) & 0xFF) / 255f;
+        c.g = ((aux >> 8) & 0xFF) / 255f;
+        c.r = ((aux >> 16) & 0xFF) / 255f;
+        c.a = useAlpha ? ((aux >> 24) & 0xFF) / 255f : 1;
+        return c;
     }
 }
 
@@ -663,4 +673,7 @@ public static class MaterialExtensions
         material.EnableKeyword("_ALPHABLEND_ON");
         material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
     }
+
+
+
 }

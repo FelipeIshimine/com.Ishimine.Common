@@ -15,7 +15,8 @@ public class AutoTimer
     
     public float Progress => _currentValue / Duration;
     public float CountdownValue => Duration - _currentValue;
-    public float CurrentValue => _currentValue;
+    public float Current => _currentValue;
+    public float Remaining => Duration - Current;
 
     public AutoTimer(float duration, bool loop)
     {
@@ -37,11 +38,12 @@ public class AutoTimer
         OnTick = onTickProgressCallback;
     }
 
-    public void Tick(float delta)
+    public bool Tick(float delta)
     {
-        if(Completed) return;
+        if(Completed) 
+            return true;
         _currentValue += delta;
-        
+
         if (_currentValue >= Duration)
         {
             OnCompleted?.Invoke();
@@ -52,6 +54,7 @@ public class AutoTimer
         }
         else
             OnTick?.Invoke(Progress);
+        return Completed;
     }
 
     public void Restart()
