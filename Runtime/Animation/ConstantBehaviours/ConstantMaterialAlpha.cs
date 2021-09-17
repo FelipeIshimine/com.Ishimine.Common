@@ -3,33 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ConstantMaterialAlpha : MonoBehaviour
+public class ConstantMaterialAlpha : ConstantBehaviour
 {
-    public float speed = 1;
-    public float timeOffset;
-    
     public Renderer _renderer;
     private Material _material;
 
     public Gradient gradient; 
-    
-    private float _time;
-    
-    public void Awake()
+
+    protected override void Awake()
     {
+        base.Awake();
         _material = _renderer.material;
-        _time = timeOffset;
     }
 
-    private void OnValidate()
+    protected override void Process(float nTime)
     {
-        if (!_renderer)
-            _renderer = GetComponent<Renderer>();
-    }
-
-    public void Update()
-    {
-        _time += Time.deltaTime * speed;
-        _material.color = gradient.Evaluate(Mathf.Repeat(_time,1));
+        Debug.Log(nTime);
+        if (_material != null)
+        {
+            _material.color = gradient.Evaluate(Mathf.Repeat(nTime, 1));
+            Debug.Log(_material.color);
+        }
     }
 }

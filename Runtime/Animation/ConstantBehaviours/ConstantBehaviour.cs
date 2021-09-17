@@ -34,7 +34,7 @@ public abstract class ConstantBehaviour : MonoBehaviour
             ResetTime();
     }
 
-    public void Update()
+    protected virtual void Update()
     {
         _time += Time.deltaTime / duration;
         Process(_time);
