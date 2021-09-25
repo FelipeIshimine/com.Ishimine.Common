@@ -13,12 +13,14 @@ public static class UnityTilemapExtensions
     }
     public static void Replace(this Tilemap tilemap, Dictionary<TileBase, TileBase> replacementPairs)
     {
+        Debug.Log("Replace");
         tilemap.CompressBounds();
 
         foreach (Vector3Int coordinate in tilemap.cellBounds.allPositionsWithin)
         {
             TileBase targetTile = tilemap.GetTile(coordinate);
-            if (targetTile == null || !replacementPairs.ContainsKey(targetTile)) continue;
+            if (targetTile == null || !replacementPairs.ContainsKey(targetTile)) 
+                continue;
 
             var matrix = tilemap.GetTransformMatrix(coordinate);
 

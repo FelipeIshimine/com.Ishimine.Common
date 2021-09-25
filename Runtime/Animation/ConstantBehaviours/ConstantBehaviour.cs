@@ -59,7 +59,7 @@ public abstract class ConstantBehaviour : MonoBehaviour
         OnSpeedChange();
     }
 
-    private void OnValidate()
+    protected virtual void OnValidate()
     {
         Process(timeOffset);
     }
