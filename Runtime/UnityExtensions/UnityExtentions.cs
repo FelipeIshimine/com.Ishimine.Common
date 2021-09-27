@@ -101,10 +101,12 @@ public static class UnityExtentions
 
     public static void WaitAndExecute(this MonoBehaviour source, ref IEnumerator rutine, float waitTime, bool isRealTime, Action callback)
     {
-        source.PlayCoroutine(ref rutine, () => WaitAndExecuteRutine(source, waitTime, isRealTime, callback));
+        if (callback == null)
+            Debug.LogError("Callback is null");
+        source.PlayCoroutine(ref rutine, () => WaitAndExecuteRutine(waitTime, isRealTime, callback));
     }
 
-    public static IEnumerator WaitAndExecuteRutine(this MonoBehaviour source, float waitTime, bool isRealTime, Action callback)
+    public static IEnumerator WaitAndExecuteRutine(float waitTime, bool isRealTime, Action callback)
     {
         if (isRealTime)
             yield return new WaitForSecondsRealtime(waitTime);
