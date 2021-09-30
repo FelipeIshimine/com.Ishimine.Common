@@ -7,7 +7,6 @@ using Random = UnityEngine.Random;
 
 public class ConstantSquash : MonoBehaviour
 {
-    public Vector3 multiplier = new Vector3(1, 1, 1);
     public float cycleMultiplier;
     public float scale;
     public AnimationCurve squashCurve;
