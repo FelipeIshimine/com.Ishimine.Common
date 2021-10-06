@@ -74,8 +74,14 @@ public abstract class BaseCanvasSingleton<T> : BaseMonoSingleton<T> where T : Ba
         else
             mainContainer.Close();
     }
+    
+    public void ToggleInstance()
+    {
+        if (MainContainer.IsClosed)
+            MainContainer.Open();
+        else
+            MainContainer.Close();
+    }
 
-
-
-
+    public static void Toggle() => Instance.ToggleInstance();
 }
