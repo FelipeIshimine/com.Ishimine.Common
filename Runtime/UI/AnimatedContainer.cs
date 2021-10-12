@@ -6,14 +6,14 @@ using Sirenix.OdinInspector;
 using UnityEngine.Events;
 
 /// <summary>
-/// Conteiner generico para animar canvas con coroutinas.
+/// Conteiner generico para animar canvas con 'coroutines'.
 /// Si la animacion por movimiento no encaja bien, revisar que el Root del container este bien posicionados
 /// </summary>
 public class AnimatedContainer : MonoBehaviour
 {
     public Action<bool> OnOpenOrClose;
-    public Action OnOpen;
-    public Action OnClose;
+    public event Action OnOpen;
+    public event Action OnClose;
     public enum Direction { Right, Left, Up, Down }
     public enum TimeType { Scaled, Unscaled }
 
@@ -22,9 +22,10 @@ public class AnimatedContainer : MonoBehaviour
     public float durationIn = .3f;
 
     public float durationOut = .3f;
-    IEnumerator rutine;
+    private IEnumerator _routine;
     [SerializeField] private RectTransform parent;
-    RectTransform Parent
+
+    private RectTransform Parent
     {
         get
         {
@@ -35,7 +36,8 @@ public class AnimatedContainer : MonoBehaviour
     }
 
     [SerializeField] private RectTransform rectTransform;
-    RectTransform RectTransform
+
+    private RectTransform RectTransform
     {
         get
         {
@@ -73,12 +75,12 @@ public class AnimatedContainer : MonoBehaviour
     [EnableIf("useAlpha"), TabGroup("Alpha")] public AnimationCurve alphaCurveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [EnableIf("useAlpha"), TabGroup("Alpha")] public AnimationCurve alphaCurveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-    [TabGroup("Scale")] public bool useScale = true;
+    [TabGroup("Scale")] public bool useScale = false;
     [EnableIf("useScale"), TabGroup("Scale")] public AnimationCurve curveInScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [EnableIf("useScale"), TabGroup("Scale")] public Vector3 targetScale = new Vector3(1, 0, 1);
     [EnableIf("useScale"), TabGroup("Scale")] public AnimationCurve curveOutScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-    [TabGroup("Movement")] public bool useMovement = true;
+    [TabGroup("Movement")] public bool useMovement = false;
     [EnableIf("useMovement"), TabGroup("Movement")] public Direction direction = Direction.Down;
     [EnableIf("useMovement"), TabGroup("Movement")] public AnimationCurve curveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [EnableIf("useMovement"), TabGroup("Movement")] public AnimationCurve curveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
@@ -183,9 +185,9 @@ public class AnimatedContainer : MonoBehaviour
         if (IsOpen && gameObject.activeSelf && gameObject.activeInHierarchy)
         {
             canvasGroup.interactable = false;
-            if (rutine != null) StopCoroutine(rutine);
-            rutine = CloseRutine(postAction);
-            StartCoroutine(rutine);
+            if (_routine != null) StopCoroutine(_routine);
+            _routine = CloseRutine(postAction);
+            StartCoroutine(_routine);
             IsOpen = false;
         }
         else
@@ -206,9 +208,9 @@ public class AnimatedContainer : MonoBehaviour
         gameObject.SetActive(true);
         if (!IsOpen)
         {
-            if (rutine != null) StopCoroutine(rutine);
-            rutine = OpenRutine(postAction);
-            StartCoroutine(rutine);
+            if (_routine != null) StopCoroutine(_routine);
+            _routine = OpenRutine(postAction);
+            StartCoroutine(_routine);
             IsOpen = true;
         }
         else
