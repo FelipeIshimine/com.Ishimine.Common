@@ -165,12 +165,12 @@ public static class UnityExtentions
         return GetDifference(startPos, endPos).normalized;
     }
 
-    public static float GetMagnitud(this Vector2 startPos, Vector2 endPos)
+    public static float GetMagnitude(this Vector2 startPos, Vector2 endPos)
     {
         return GetDifference(startPos, endPos).magnitude;
     }
 
-    public static float GetMagnitud(this Vector3 startPos, Vector3 endPos)
+    public static float GetMagnitude(this Vector3 startPos, Vector3 endPos)
     {
         return GetDifference(startPos, endPos).magnitude;
     }
@@ -195,15 +195,9 @@ public static class UnityExtentions
         return Mathf.LerpUnclamped(startPos.x, startPos.y, t);
     }
        
-    public static Vector2 GetDifference(this Vector2 startPos, Vector2 endPos)
-    {
-        return (endPos - startPos);
-    }
+    public static Vector2 GetDifference(this Vector2 startPos, Vector2 endPos) => (endPos - startPos);
 
-    public static Vector3 GetDifference(this Vector3 startPos, Vector3 endPos)
-    {
-        return GetDifference((Vector2)startPos, (Vector2)endPos);
-    }
+    public static Vector3 GetDifference(this Vector3 startPos, Vector3 endPos) =>(endPos - startPos);
 
     public static float GetAngle(this Vector2 startPos, Vector2 endPos)
     {
