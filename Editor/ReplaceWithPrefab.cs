@@ -5,13 +5,13 @@ public class ReplaceWithPrefab : EditorWindow
 {
     [SerializeField] private GameObject prefab;
 
-    [MenuItem("Tools/Replace With Prefab")]
+    [MenuItem("Tools/Replace With/Other Prefab")]
     static void CreateReplaceWithPrefab()
     {
         EditorWindow.GetWindow<ReplaceWithPrefab>();
     }
     
-    [MenuItem("GameObject/Replace With Prefab",false, 10)]
+    [MenuItem("GameObject/Replace With/Other Prefab",false, 10)]
     static void CreateReplaceWithPrefabRickClick()
     {
         EditorWindow.GetWindow<ReplaceWithPrefab>();
