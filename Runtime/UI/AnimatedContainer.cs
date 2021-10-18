@@ -25,6 +25,7 @@ public class AnimatedContainer : MonoBehaviour
     private IEnumerator _routine;
     [SerializeField] private RectTransform parent;
 
+    public bool blockRaycasts = true;
     private RectTransform Parent
     {
         get
@@ -186,7 +187,7 @@ public class AnimatedContainer : MonoBehaviour
         {
             canvasGroup.interactable = false;
             if (_routine != null) StopCoroutine(_routine);
-            _routine = CloseRutine(postAction);
+            _routine = CloseRoutine(postAction);
             StartCoroutine(_routine);
             IsOpen = false;
         }
@@ -209,13 +210,13 @@ public class AnimatedContainer : MonoBehaviour
         if (!IsOpen)
         {
             if (_routine != null) StopCoroutine(_routine);
-            _routine = OpenRutine(postAction);
+            _routine = OpenRoutine(postAction);
             StartCoroutine(_routine);
             IsOpen = true;
         }
         else
         {
-            canvasGroup.blocksRaycasts = true;
+            canvasGroup.blocksRaycasts = blockRaycasts;
             canvasGroup.interactable = true;
             postAction?.Invoke();
         }
@@ -256,10 +257,10 @@ public class AnimatedContainer : MonoBehaviour
         SetValue(1, curveIn, curveInScale, alphaCurveIn);
         IsOpen = true;
         canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = true;
+        canvasGroup.blocksRaycasts = blockRaycasts;
     }
 
-    private IEnumerator CloseRutine(Action postAction = null)
+    private IEnumerator CloseRoutine(Action postAction = null)
     {
         InAnimation = true;
         yield return AnimationRutine(durationOut, targetPosition, curveOut, targetScale, curveOutScale, 0, alphaCurveOut,
@@ -271,7 +272,7 @@ public class AnimatedContainer : MonoBehaviour
             });
     }
 
-    private IEnumerator OpenRutine(Action postAction = null)
+    private IEnumerator OpenRoutine(Action postAction = null)
     {
         InAnimation = true;
         yield return AnimationRutine(durationIn, Vector3.zero, curveIn, Vector3.one, curveInScale, 1, alphaCurveIn,
