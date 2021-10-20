@@ -1,5 +1,6 @@
 ﻿using System;
 using Sirenix.OdinInspector;
+using UnityEngine;
 
 [System.Serializable]
 public class AutoTimer
@@ -38,6 +39,7 @@ public class AutoTimer
         OnTick = onTickProgressCallback;
     }
 
+
     public bool Tick(float delta)
     {
         if(Completed) 
@@ -64,5 +66,5 @@ public class AutoTimer
         OnRestart?.Invoke();
     }
 
-    public override string ToString() => $"Timer:{_currentValue:F2}/{Duration:F2}. Progress:{Progress:F2}";
+    public override string ToString() => $"Timer:{_currentValue:F2}/{Duration:F2}. Progress:{Progress:F2} Loop:{Loop} Completed:{Completed}";
 }
