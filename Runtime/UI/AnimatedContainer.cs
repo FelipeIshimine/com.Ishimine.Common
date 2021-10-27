@@ -11,6 +11,7 @@ using UnityEngine.Events;
 /// </summary>
 public class AnimatedContainer : MonoBehaviour
 {
+    public bool debugPrint = false;
     public Action<bool> OnOpenOrClose;
     public event Action OnOpen;
     public event Action OnClose;
@@ -181,7 +182,7 @@ public class AnimatedContainer : MonoBehaviour
 
     public void Close(Action postAction = null)
     {
-        //Debug.Log($"{this} Close");
+        if(debugPrint) Debug.Log($"{this} Close");
 
         if (IsOpen && gameObject.activeSelf && gameObject.activeInHierarchy)
         {
@@ -205,6 +206,8 @@ public class AnimatedContainer : MonoBehaviour
 
     public void Open(Action postAction)
     {
+        if(debugPrint) Debug.Log($"{this} Open");
+        
         _alreadyStarted = true;
         gameObject.SetActive(true);
         if (!IsOpen)
@@ -225,6 +228,8 @@ public class AnimatedContainer : MonoBehaviour
     [Button, ButtonGroup("Snap")]
     public void Hide()
     {
+        if(debugPrint) Debug.Log($"{this} Hide");
+
         _alreadyStarted = true;
 
         if (useMovement)
@@ -248,6 +253,8 @@ public class AnimatedContainer : MonoBehaviour
     [Button, ButtonGroup("Snap")]
     public void Show()
     {
+        if(debugPrint) Debug.Log($"{this} Show");
+
         _alreadyStarted = true;
         //Debug.Log($"{this} Show");
 
