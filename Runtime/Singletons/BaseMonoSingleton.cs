@@ -46,6 +46,8 @@ public class BaseMonoSingleton<T> : MonoBehaviour where T : BaseMonoSingleton<T>
         _instance = null;
     }
 
-    public static void SetActive(bool value) => Instance.gameObject.SetActive(value);
+    public static void SetActive(bool value) => Instance.SetActiveInstance(value);
+    
+    protected virtual void SetActiveInstance(bool value) => Instance.gameObject.SetActive(value);
 
 }
