@@ -723,6 +723,8 @@ public static class UnityStringExtensions
         "#ffff00ff"
     };
 
+    public static string ApplyColor(this string source, Color color)=> $"<color={ColorUtility.ToHtmlStringRGB(color)}>{source}</color>";
+
     public static string ApplyColor(this string source, StringColor stringColor)=> $"<color={ColorCodes[(int)stringColor]}>{source}</color>";
     public static string ApplyConditionalColor(this string source, StringColor trueStringColor, StringColor falseStringColor, bool value)=> ApplyColor(source, value ? trueStringColor : falseStringColor);
     
