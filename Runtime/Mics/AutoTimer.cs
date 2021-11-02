@@ -48,6 +48,7 @@ public class AutoTimer
 
         if (_currentValue >= Duration)
         {
+            OnTick?.Invoke(1);
             OnCompleted?.Invoke();
             if (Loop)
                 _currentValue = 0;
