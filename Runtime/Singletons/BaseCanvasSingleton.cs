@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -42,6 +43,23 @@ public abstract class BaseCanvasSingleton<T> : BaseMonoSingleton<T> where T : Ba
     
     public static void Close(Action callback=null) => Instance.CloseInstance(callback);
 
+    public static async void CloseAsync()
+    {
+        bool ready = false;
+        void SetReady() => ready = true;
+        Instance.CloseInstance(SetReady);
+        while (!ready)
+            await Task.Yield();
+    }
+    
+    public static async void OpenAsync()
+    {
+        bool ready = false;
+        void SetReady() => ready = true;
+        Instance.OpenInstance(SetReady);
+        while (!ready)
+            await Task.Yield();
+    }
     
     public static void Show() => Instance.ShowInstance();
     public static void Hide() => Instance.HideInstance();
