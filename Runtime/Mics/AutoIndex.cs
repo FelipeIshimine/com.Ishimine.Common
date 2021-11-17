@@ -8,8 +8,8 @@ public class AutoIndex
     private readonly int _maxValue;
     private readonly Func<int> _maxValueFunc;
 
-    [ShowInInspector, HorizontalGroup("A")]public int Value { get; private set; } = 0;
-    [ShowInInspector, HorizontalGroup("A")]public int MaxValue => _maxValueFunc?.Invoke() ?? _maxValue;
+    [ShowInInspector, HorizontalGroup("A")] public int Value { get; private set; } = 0;
+    [ShowInInspector, HorizontalGroup("A")] public int MaxValue => _maxValueFunc?.Invoke() ?? _maxValue;
 
     private readonly Func<int,int> _calculate;
 
@@ -18,9 +18,12 @@ public class AutoIndex
         Loop,
         PingPong
     }
+
+    private readonly Mode _mode;
     
     public AutoIndex(int maxValue, Mode mode = Mode.Loop)
     {
+        _mode = mode;
         _maxValue = maxValue;
         if (mode == Mode.Loop)
             _calculate = CalculateRepeat;
@@ -39,7 +42,9 @@ public class AutoIndex
        
     public int Next()
     {
+        Debug.Log($"|||  Pre Next Value{Value}");
         Value = _calculate.Invoke(1);
+        Debug.Log($"|||  Post Next Value{Value}");
         return Value;
     }
     public int Previous()
@@ -57,7 +62,15 @@ public class AutoIndex
     public static implicit operator int(AutoIndex autoIndex) => autoIndex.Value;
 
     private int CalculateRepeat(int offset) =>  (int)Mathf.Repeat(Value + offset, MaxValue);
-    private int CalculatePingPong(int offset) =>  (int)Mathf.PingPong(Value + offset, MaxValue);
     
-    
+    private int CalculatePingPong(int offset)
+    {
+        float nValue = (offset + Value);
+        Debug.Log($"NValue:{nValue} MaxValue:{MaxValue}");
+        Debug.Log(Mathf.PingPong(3, 2));
+        nValue =(int)Mathf.PingPong(nValue, MaxValue-1);
+        Debug.Log($"NValue:{nValue} MaxValue:{MaxValue}");
+        return Mathf.RoundToInt(nValue);
+    }
+    public override string ToString() => $"Value:{Value} MaxValue:{MaxValue} Mode:{_mode.ToString()}";
 }
