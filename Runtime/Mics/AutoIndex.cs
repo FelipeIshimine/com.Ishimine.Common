@@ -13,11 +13,7 @@ public class AutoIndex
 
     private readonly Func<int,int> _calculate;
 
-    public enum Mode
-    {
-        Loop,
-        PingPong
-    }
+    public enum Mode { Loop, PingPong }
 
     private readonly Mode _mode;
     
