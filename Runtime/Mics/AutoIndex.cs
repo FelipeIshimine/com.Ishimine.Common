@@ -42,9 +42,7 @@ public class AutoIndex
        
     public int Next()
     {
-        Debug.Log($"|||  Pre Next Value{Value}");
         Value = _calculate.Invoke(1);
-        Debug.Log($"|||  Post Next Value{Value}");
         return Value;
     }
     public int Previous()
@@ -66,10 +64,7 @@ public class AutoIndex
     private int CalculatePingPong(int offset)
     {
         float nValue = (offset + Value);
-        Debug.Log($"NValue:{nValue} MaxValue:{MaxValue}");
-        Debug.Log(Mathf.PingPong(3, 2));
         nValue =(int)Mathf.PingPong(nValue, MaxValue-1);
-        Debug.Log($"NValue:{nValue} MaxValue:{MaxValue}");
         return Mathf.RoundToInt(nValue);
     }
     public override string ToString() => $"Value:{Value} MaxValue:{MaxValue} Mode:{_mode.ToString()}";
