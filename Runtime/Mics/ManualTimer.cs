@@ -15,7 +15,9 @@ public class ManualTimer
     [ShowInInspector] public readonly float Duration;
     [ShowInInspector] private float _currentValue = 0;
     
-    public float Progress => _currentValue / Duration;
+    public float ProgressUnclamped => _currentValue / Duration;
+    public float Progress => Mathf.Clamp01(_currentValue / Duration);
+
     public float CountdownValue => Duration - _currentValue;
     public float Current => _currentValue;
     public float Remaining => Duration - Current;
