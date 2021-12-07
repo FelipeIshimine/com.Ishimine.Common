@@ -25,20 +25,20 @@ public class GlobalUpdate : BaseMonoSingleton<GlobalUpdate>
     private void Update()
     {
         while (UpdateEventQueue.Count > 0)
-            UpdateEventQueue.Dequeue().Invoke();
+            UpdateEventQueue.Dequeue()?.Invoke();
         OnUpdateEvent?.Invoke();
     }
 
     private void LateUpdate()
     {
         while (LateUpdateEventQueue.Count > 0)
-            LateUpdateEventQueue.Dequeue().Invoke();
+            LateUpdateEventQueue.Dequeue()?.Invoke();
         OnLateUpdateEvent?.Invoke();
     }
     private void FixedUpdate()
     {
         while (FixedUpdateEventQueue.Count > 0)
-            FixedUpdateEventQueue.Dequeue().Invoke();
+            FixedUpdateEventQueue.Dequeue()?.Invoke();
         OnFixedUpdateEvent?.Invoke();
     }
     private void OnApplicationPause(bool value) => OnApplicationPauseEvent?.Invoke(value);
