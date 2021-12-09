@@ -154,6 +154,13 @@ public static class UnityExtensions
     {
         return mask == (mask | (1 << layer));
     }
+    
+    public static Vector3 RotateAround(this Vector3 point, Vector3 pivot, Vector3 angles) {
+        Vector3 dir = point - pivot; // get point direction relative to pivot
+        dir = Quaternion.Euler(angles) * dir; // rotate it
+        point = dir + pivot; // calculate rotated point
+        return point; // return it
+    }
 
     public static Vector2 GetDirection(this Vector2 startPos, Vector2 endPos)
     {
