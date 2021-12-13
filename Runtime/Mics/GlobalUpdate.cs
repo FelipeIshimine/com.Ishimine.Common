@@ -15,11 +15,12 @@ public class GlobalUpdate : BaseMonoSingleton<GlobalUpdate>
     public static readonly Queue<Action> LateUpdateEventQueue = new Queue<Action>();
     public static readonly Queue<Action> FixedUpdateEventQueue = new Queue<Action>();
 
-    [RuntimeInitializeOnLoadMethod]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
         var go = new GameObject().AddComponent<GlobalUpdate>();
         go.name = "Global Update";
+        DontDestroyOnLoad(go);
     }
 
     private void Update()
