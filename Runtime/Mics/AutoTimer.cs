@@ -1,71 +1,92 @@
 ﻿using System;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 [System.Serializable]
-public class AutoTimer
+public class AutoTimer : ManualTimer, IDisposable
 {
-    public event Action OnCompleted;
-    public event Action OnRestart;
-    public event Action<float> OnTick;
+	public readonly DeltaTimeType DeltaTimeType;
+
+	private Func<float> _getDelta;
+
+	public AutoTimer(float duration, bool loop, DeltaTimeType deltaTimeType) : base(duration, loop)
+	{
+		DeltaTimeType = deltaTimeType;
+		SetDelta(deltaTimeType);
+	}
+
+	public AutoTimer(float duration, bool loop, DeltaTimeType deltaTimeType, Action callback) : base(duration, loop, callback)
+	{
+		DeltaTimeType = deltaTimeType;
+		SetDelta(deltaTimeType);
+	}
+
+	public AutoTimer(float duration, bool loop, DeltaTimeType deltaTimeType, Action<float> onTickProgressCallback, Action callback) : base(duration, loop, onTickProgressCallback, callback)
+	{
+		DeltaTimeType = deltaTimeType;
+		SetDelta(deltaTimeType);
+	}
+
+	private void SetDelta(DeltaTimeType deltaTimeType)
+	{
+		switch (deltaTimeType)
+		{
+			case DeltaTimeType.deltaTime:
+				_getDelta = () => Time.deltaTime;
+				break;
+			case DeltaTimeType.fixedDeltaTime:
+				_getDelta = () => Time.fixedDeltaTime;
+				break;
+			case DeltaTimeType.unscaledDeltaTime:
+				_getDelta = () => Time.unscaledTime;
+				break;
+			case DeltaTimeType.fixedUnscaledDeltaTime:
+				_getDelta = () => Time.fixedUnscaledDeltaTime;
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(deltaTimeType), deltaTimeType, null);
+		}
+		Register();
+	}
     
-    public bool Completed { get; private set; }
-    [ShowInInspector] public readonly bool Loop;
-    [ShowInInspector] public readonly float Duration;
-    [ShowInInspector] private float _currentValue = 0;
-    
-    public float Progress => _currentValue / Duration;
-    public float CountdownValue => Duration - _currentValue;
-    public float Current => _currentValue;
-    public float Remaining => Duration - Current;
+	private void Register()
+	{
+		switch (DeltaTimeType)
+		{
+			case DeltaTimeType.deltaTime:
+			case DeltaTimeType.unscaledDeltaTime:
+				GlobalUpdate.OnUpdateEvent += Tick;
+				break;
+			case DeltaTimeType.fixedDeltaTime:
+			case DeltaTimeType.fixedUnscaledDeltaTime:
+				GlobalUpdate.OnFixedUpdateEvent += Tick;
+				break;
+			default:
+				throw new ArgumentOutOfRangeException();
+		}
+	}
 
-    public AutoTimer(float duration, bool loop)
-    {
-        Duration = duration;
-        Completed = duration == 0;
-        Loop = loop;
-    }
-    
-    public AutoTimer(float duration, bool loop, Action callback)
-    {
-        Duration = duration;
-        Completed = duration == 0;
-        Loop = loop;
-        OnCompleted += callback;
-    }
+	private void Unregister()
+	{
+		switch (DeltaTimeType)
+		{
+			case DeltaTimeType.deltaTime:
+			case DeltaTimeType.unscaledDeltaTime:
+				GlobalUpdate.OnUpdateEvent -= Tick;
+				break;
+			case DeltaTimeType.fixedDeltaTime:
+			case DeltaTimeType.fixedUnscaledDeltaTime:
+				GlobalUpdate.OnFixedUpdateEvent -= Tick;
+				break;
+			default:
+				throw new ArgumentOutOfRangeException();
+		}
+	}
 
-    public AutoTimer(float duration, bool loop, Action<float> onTickProgressCallback, Action callback) : this(duration, loop, callback)
-    {
-        OnTick = onTickProgressCallback;
-    }
+	public void Dispose()
+	{
+		Unregister();
+		_getDelta = null;
+	}
 
-
-    public bool Tick(float delta)
-    {
-        if(Completed) 
-            return true;
-        _currentValue += delta;
-
-        if (_currentValue >= Duration)
-        {
-            OnTick?.Invoke(1);
-            OnCompleted?.Invoke();
-            if (Loop)
-                _currentValue = 0;
-            else
-                Completed = true;
-        }
-        else
-            OnTick?.Invoke(Progress);
-        return Completed;
-    }
-
-    public void Restart()
-    {
-        Completed = Duration == 0;
-        _currentValue = 0;
-        OnRestart?.Invoke();
-    }
-
-    public override string ToString() => $"Timer:{_currentValue:F2}/{Duration:F2}. Progress:{Progress:F2} Loop:{Loop} Completed:{Completed}";
+	private void Tick() => Tick(_getDelta.Invoke());
 }

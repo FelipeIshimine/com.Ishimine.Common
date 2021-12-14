@@ -38,10 +38,10 @@ public abstract class BaseCanvasSingleton<T> : BaseMonoSingleton<T> where T : Ba
             }
         }
     }
-
-    public static void Open(Action callback=null) => Instance.OpenInstance(callback); 
-    
-    public static void Close(Action callback=null) => Instance.CloseInstance(callback);
+    public static void Open() => Open(null);
+    public static void Close() => Close(null);
+    public static void Open(Action callback) => Instance.OpenInstance(callback); 
+    public static void Close(Action callback) => Instance.CloseInstance(callback);
 
     public static async void CloseAsync()
     {

@@ -115,6 +115,46 @@ public static class UnityExtensions
 
         callback.Invoke();
     }
+    
+    public static void WaitForNextFrameAndExecute(this MonoBehaviour source, ref IEnumerator rutine, Action callback)
+    {
+        if (callback == null)
+            Debug.LogError("Callback is null");
+        source.PlayCoroutine(ref rutine, () => WaitForNextFrameRoutine(callback));
+    }
+
+    public static IEnumerator WaitForNextFrameRoutine(Action callback)
+    {
+        yield return null;
+        callback.Invoke();
+    }
+
+    public static void WaitForFixedUpdateAndExecute(this MonoBehaviour source, ref IEnumerator rutine, Action callback)
+    {
+        if (callback == null)
+            Debug.LogError("Callback is null");
+        source.PlayCoroutine(ref rutine, () => WaitForFixedUpdateRoutine(callback));
+    }
+    
+
+    public static IEnumerator WaitForFixedUpdateRoutine(Action callback)
+    {
+        yield return new WaitForFixedUpdate();
+        callback.Invoke();
+    }
+    
+    public static void WaitForEndOfFrameAndExecute(this MonoBehaviour source, ref IEnumerator rutine, Action callback)
+    {
+        if (callback == null)
+            Debug.LogError("Callback is null");
+        source.PlayCoroutine(ref rutine, () => WaitForEndOfFrameRoutine(callback));
+    }
+    
+    public static IEnumerator WaitForEndOfFrameRoutine(Action callback)
+    {
+        yield return new WaitForEndOfFrame();
+        callback.Invoke();
+    }
 
     public static bool IsBetweenInclusive(this int value, Vector2Int minMax)
     {

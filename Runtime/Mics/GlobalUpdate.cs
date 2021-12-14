@@ -3,78 +3,47 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class GlobalUpdate : MonoBehaviour
+public class GlobalUpdate : BaseMonoSingleton<GlobalUpdate>
 {
-    private static bool initialized = false;
+    public static event Action<bool> OnApplicationPauseEvent;
+    public static event Action<bool> OnApplicationFocusEvent;
+    public static event Action OnUpdateEvent;
+    public static event  Action OnFixedUpdateEvent;
+    public static event  Action OnLateUpdateEvent;
 
-    private static Action globalUpdateEvent;
-    public static Action OnUpdateEvent
-    {
-        get 
-        {
-            Initialize();
-            return globalUpdateEvent; 
-        }
-        set { globalUpdateEvent = value; }
-    }
+    public static readonly Queue<Action> UpdateEventQueue = new Queue<Action>();
+    public static readonly Queue<Action> LateUpdateEventQueue = new Queue<Action>();
+    public static readonly Queue<Action> FixedUpdateEventQueue = new Queue<Action>();
 
-    private static Action globalFixedUpdateEvent;
-    public static Action OnFixedUpdateEvent
-    {
-        get { 
-            Initialize();
-            return globalFixedUpdateEvent; }
-        set { globalFixedUpdateEvent = value; }
-    }
-
-    private static Action globalLateUpdateEvent;
-    public static Action OnLateUpdateEvent
-    {
-        get { 
-            Initialize();
-            return globalLateUpdateEvent; }
-        set { globalLateUpdateEvent = value; }
-    }
-
-    private static GlobalUpdate instance = null;
-
-    [RuntimeInitializeOnLoadMethod]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
-        if (initialized) return;
-        initialized = true;
-        instance = new GameObject().AddComponent<GlobalUpdate>();
-        DontDestroyOnLoad(instance);
-        instance.gameObject.name = "Global Update";
-
-        globalUpdateEvent = null;
-        globalFixedUpdateEvent = null;
-        globalLateUpdateEvent = null;
+        var go = new GameObject().AddComponent<GlobalUpdate>();
+        go.name = "Global Update";
+        DontDestroyOnLoad(go);
     }
-
-    public static void _StartCoroutine(IEnumerator rutine)
-    {
-        instance.StartCoroutine(rutine);
-    }
-
 
     private void Update()
     {
+        while (UpdateEventQueue.Count > 0)
+            UpdateEventQueue.Dequeue()?.Invoke();
         OnUpdateEvent?.Invoke();
     }
 
     private void LateUpdate()
     {
+        while (LateUpdateEventQueue.Count > 0)
+            LateUpdateEventQueue.Dequeue()?.Invoke();
         OnLateUpdateEvent?.Invoke();
     }
-
     private void FixedUpdate()
     {
+        while (FixedUpdateEventQueue.Count > 0)
+            FixedUpdateEventQueue.Dequeue()?.Invoke();
         OnFixedUpdateEvent?.Invoke();
     }
-
-    internal static void _StartCoroutine(object transitionOut)
-    {
-        throw new NotImplementedException();
-    }
+    private void OnApplicationPause(bool value) => OnApplicationPauseEvent?.Invoke(value);
+    private void OnApplicationFocus(bool value) => OnApplicationFocusEvent?.Invoke(value);
+    
+    
 }
