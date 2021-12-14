@@ -194,7 +194,19 @@ public static class UnityExtensions
     {
         return mask == (mask | (1 << layer));
     }
-    
+
+    public static Vector2 Rotate(this Vector2 v, float degrees)
+    {
+        float radians = degrees * Mathf.Deg2Rad;
+        float sin = Mathf.Sin(radians);
+        float cos = Mathf.Cos(radians);
+
+        float tx = v.x;
+        float ty = v.y;
+
+        return new Vector2(cos * tx - sin * ty, sin * tx + cos * ty);
+    }
+
     public static Vector3 RotateAround(this Vector3 point, Vector3 pivot, Vector3 angles) {
         Vector3 dir = point - pivot; // get point direction relative to pivot
         dir = Quaternion.Euler(angles) * dir; // rotate it
