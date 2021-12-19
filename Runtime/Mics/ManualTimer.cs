@@ -69,4 +69,8 @@ public class ManualTimer
     }
 
     public override string ToString() => $"Timer:{_currentValue:F2}/{Duration:F2}. Progress:{Progress:F2} Loop:{Loop} Completed:{Completed}";
+
+    public static implicit operator bool(ManualTimer manualTimer) => manualTimer.Completed;
+
+
 }
