@@ -181,6 +181,8 @@ public static class UnityExtensions
 
     public static void Swap(this Vector2Int value)=> (value.x, value.y) = (value.y, value.x);
 
+    public static float Round(this float value, float roundValue) => Mathf.Round(value / roundValue) * roundValue; 
+
     public static int GetRandom(this Vector2Int value, bool includeBottom = true, bool includeTop = false) 
         => Random.Range(value.x + (includeBottom?0:1), value.y + (includeTop?1:0));
 
