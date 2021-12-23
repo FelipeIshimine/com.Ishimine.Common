@@ -8,6 +8,8 @@ public class AutoTimer : ManualTimer, IDisposable
 
 	private Func<float> _getDelta;
 
+	private bool _running = true;
+
 	public AutoTimer(float duration, bool loop, DeltaTimeType deltaTimeType) : base(duration, loop)
 	{
 		DeltaTimeType = deltaTimeType;
@@ -88,5 +90,12 @@ public class AutoTimer : ManualTimer, IDisposable
 		_getDelta = null;
 	}
 
-	private void Tick() => Tick(_getDelta.Invoke());
+	private void Tick()
+	{
+		if(!_running) return;
+		Tick(_getDelta.Invoke());
+	}
+
+	public void Pause() => _running = false;
+	public void Resume() => _running = true;
 }
