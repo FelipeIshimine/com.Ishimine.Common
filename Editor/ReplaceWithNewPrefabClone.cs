@@ -8,7 +8,7 @@ public static class ReplaceWithNewPrefabClone
 {
     [MenuItem("GameObject/Replace With/New Prefab Clone", false, 10)]
     public static void Execute()
-    {
+    {   
         Debug.Log($"{Selection.activeObject.name} is PrefabVariant");
 
         var selected = Selection.activeObject as GameObject;
@@ -86,6 +86,9 @@ public static class ReplaceWithNewPrefabClone
     [MenuItem("GameObject/Replace With/New Prefab Clone", true)]
     static bool Validate()
     {
+        if (!PrefabUtility.IsPartOfAnyPrefab(Selection.activeObject))
+            return false;
+        
         var  value = PrefabUtility.GetOutermostPrefabInstanceRoot(Selection.activeObject);
         return value != null && PrefabUtility.IsPartOfAnyPrefab(value);
         
