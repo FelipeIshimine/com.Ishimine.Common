@@ -86,7 +86,7 @@ public static class ReplaceWithNewPrefabClone
     [MenuItem("GameObject/Replace With/New Prefab Clone", true)]
     static bool Validate()
     {
-        if (!PrefabUtility.IsPartOfAnyPrefab(Selection.activeObject))
+        if (Selection.activeObject == null || !PrefabUtility.IsPartOfAnyPrefab(Selection.activeObject))
             return false;
         
         var  value = PrefabUtility.GetOutermostPrefabInstanceRoot(Selection.activeObject);
