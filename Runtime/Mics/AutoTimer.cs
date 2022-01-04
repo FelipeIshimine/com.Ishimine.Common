@@ -27,6 +27,7 @@ public class AutoTimer : ManualTimer, IDisposable
 		DeltaTimeType = deltaTimeType;
 		SetDelta(deltaTimeType);
 	}
+	
 
 	private void SetDelta(DeltaTimeType deltaTimeType)
 	{

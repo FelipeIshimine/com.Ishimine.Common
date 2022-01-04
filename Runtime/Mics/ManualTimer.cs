@@ -12,19 +12,20 @@ public class ManualTimer
     
     public bool Completed { get; private set; }
     [ShowInInspector] public readonly bool Loop;
-    [ShowInInspector] public readonly float Duration;
+    
+    [ShowInInspector] public float Duration => _duration;
+    private float _duration;
     [ShowInInspector] private float _currentValue = 0;
     
-    public float ProgressUnclamped => _currentValue / Duration;
-    public float Progress => Mathf.Clamp01(_currentValue / Duration);
-
-    public float CountdownValue => Duration - _currentValue;
+    public float ProgressUnclamped => _currentValue / _duration;
+    public float Progress => Mathf.Clamp01(_currentValue / _duration);
+    public float CountdownValue => _duration - _currentValue;
     public float Current => _currentValue;
-    public float Remaining => Duration - Current;
+    public float Remaining => _duration - Current;
 
     public ManualTimer(float duration, bool loop)
     {
-        Duration = duration;
+        _duration = duration;
         Completed = duration == 0;
         Loop = loop;
     }
@@ -47,7 +48,7 @@ public class ManualTimer
             return true;
         _currentValue += delta;
 
-        if (_currentValue >= Duration)
+        if (_currentValue >= _duration)
         {
             OnTick?.Invoke(1);
             OnCompleted?.Invoke();
@@ -63,14 +64,15 @@ public class ManualTimer
 
     public void Restart()
     {
-        Completed = Duration == 0;
+        Completed = _duration == 0;
         _currentValue = 0;
         OnRestart?.Invoke();
     }
 
-    public override string ToString() => $"Timer:{_currentValue:F2}/{Duration:F2}. Progress:{Progress:F2} Loop:{Loop} Completed:{Completed}";
+    public override string ToString() => $"Timer:{_currentValue:F2}/{_duration:F2}. Progress:{Progress:F2} Loop:{Loop} Completed:{Completed}";
 
     public static implicit operator bool(ManualTimer manualTimer) => manualTimer.Completed;
 
+    public void SetDuration(float nDuration) => _duration = nDuration;
 
 }
