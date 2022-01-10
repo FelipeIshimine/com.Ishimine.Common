@@ -39,7 +39,7 @@ public class AutoTimer : ManualTimer, IDisposable
 				_getDelta = () => Time.fixedDeltaTime;
 				break;
 			case DeltaTimeType.unscaledDeltaTime:
-				_getDelta = () => Time.unscaledTime;
+				_getDelta = () => Time.unscaledDeltaTime;
 				break;
 			case DeltaTimeType.fixedUnscaledDeltaTime:
 				_getDelta = () => Time.fixedUnscaledDeltaTime;
@@ -92,7 +92,7 @@ public class AutoTimer : ManualTimer, IDisposable
 
 	private void Tick()
 	{
-		if(!_running) return;
+		if(!_running || _getDelta == null) return;
 		Tick(_getDelta.Invoke());
 	}
 
