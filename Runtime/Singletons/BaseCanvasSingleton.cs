@@ -24,6 +24,8 @@ public abstract class BaseCanvasSingleton<T> : BaseMonoSingleton<T> where T : Ba
 
             if (!mainContainer)
             {
+                if(transform.childCount == 0)
+                    new GameObject().transform.SetParent(transform);
                 Transform firstChild = transform.GetChild(0);
                 if (firstChild)
                     firstChild.gameObject.AddComponent<AnimatedContainer>();
