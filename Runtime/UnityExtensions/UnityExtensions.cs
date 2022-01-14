@@ -10,11 +10,7 @@ public static class UnityExtensions
 {
     public const float GoldenRatio = 1.61803398875f;
 
-    public static T Last<T>(this List<T> source) => source[source.Count - 1];
-    public static T First<T>(this List<T> source) => source[0];
-    
-    public static T Last<T>(this T[] source) => source[source.Length - 1];
-    public static T First<T>(this T[] source) => source[0];
+
     
     public static List<Transform> GetAllChildren(this Transform source)
     {
@@ -800,7 +796,38 @@ public static class Vector3Extensions
         return retValue;
     }
 
+}
 
+
+public static class ListExtensions
+{
+    public static T Last<T>(this List<T> source) => source[source.Count - 1];
+    public static T First<T>(this List<T> source) => source[0];
+
+    
+    public static List<T> ExtractAll<T>(this List<T> source, Func<T, bool> validation)
+    {
+        List<T> values = new List<T>();
+        for (int i = source.Count - 1; i >= 0; i--)
+        {
+            if(validation.Invoke(source[i]))
+            {
+                values.Add(source[i]);
+                source.RemoveAt(i);
+            }
+        }
+        return values;
+    }
+    
+    
+    
+   
+}
+
+public static class ArrayExtensions
+{
+    public static T Last<T>(this T[] source) => source[source.Length - 1];
+    public static T First<T>(this T[] source) => source[0];
 }
 
 
