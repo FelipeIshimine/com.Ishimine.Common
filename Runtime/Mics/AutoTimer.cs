@@ -8,24 +8,22 @@ public class AutoTimer : ManualTimer, IDisposable
 
 	private Func<float> _getDelta;
 
-	private bool _running = true;
+	private bool _running = false;
 
-	public AutoTimer(float duration, bool loop, DeltaTimeType deltaTimeType) : base(duration, loop)
+	public event Action OnAbort;
+
+	public AutoTimer(float duration, bool loop, DeltaTimeType deltaTimeType, Action callback, Action abortCallback = null) : base(duration, loop, callback)
 	{
 		DeltaTimeType = deltaTimeType;
 		SetDelta(deltaTimeType);
+		OnAbort = abortCallback;
 	}
 
-	public AutoTimer(float duration, bool loop, DeltaTimeType deltaTimeType, Action callback) : base(duration, loop, callback)
+	public AutoTimer(float duration, bool loop, DeltaTimeType deltaTimeType, Action<float> onTickProgressCallback, Action callback, Action abortCallback = null) : base(duration, loop, onTickProgressCallback, callback)
 	{
 		DeltaTimeType = deltaTimeType;
 		SetDelta(deltaTimeType);
-	}
-
-	public AutoTimer(float duration, bool loop, DeltaTimeType deltaTimeType, Action<float> onTickProgressCallback, Action callback) : base(duration, loop, onTickProgressCallback, callback)
-	{
-		DeltaTimeType = deltaTimeType;
-		SetDelta(deltaTimeType);
+		OnAbort = abortCallback;
 	}
 	
 
@@ -85,6 +83,12 @@ public class AutoTimer : ManualTimer, IDisposable
 		}
 	}
 
+	public void Abort()
+	{
+		OnAbort?.Invoke();
+		Dispose();
+	}
+	
 	public void Dispose()
 	{
 		Unregister();
@@ -93,10 +97,13 @@ public class AutoTimer : ManualTimer, IDisposable
 
 	private void Tick()
 	{
-		if(!_running || _getDelta == null) return;
-		Tick(_getDelta.Invoke());
+		if (!_running || _getDelta == null)
+			return;
+
+		if (Tick(_getDelta.Invoke()))
+			Dispose();
 	}
 
 	public void Pause() => _running = false;
-	public void Resume() => _running = true;
+	public void Play() => _running = true;
 }

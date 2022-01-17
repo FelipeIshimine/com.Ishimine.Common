@@ -37,10 +37,21 @@ public static class UnityEditorExtensions
     }
 
     public static T FindAssetByType<T>() where T : UnityEngine.Object => FindAssetsByType<T>()[0];
-    public static List<T> FindAssetsByType<T>() => FindAssetsByType<T>(typeof(T));
-    public static List<T> FindAssetsByType<T>(Type type)
+
+    public static List<T> FindAssetsByType<T>()
     {
-        List<T> assets = new List<T>();
+        var objectsFound =  FindAssetsByType(typeof(T));
+        List<T> values = new List<T>();
+
+        foreach (Object obj in objectsFound)
+            values.Add((T) Convert.ChangeType(obj, typeof(T)));
+
+        return values;
+    }
+    
+    public static List<Object> FindAssetsByType(Type type)
+    {
+        List<Object> assets = new List<Object>();
         string[] guids = AssetDatabase.FindAssets($"t:{type}");
         for (int i = 0; i < guids.Length; i++)
         {
@@ -48,8 +59,8 @@ public static class UnityEditorExtensions
             UnityEngine.Object[] found = AssetDatabase.LoadAllAssetsAtPath(assetPath);
 
             for (int index = 0; index < found.Length; index++)
-                if (found[index] is T item && !assets.Contains(item))
-                    assets.Add(item);
+                if (found[index].GetType() == type && !assets.Contains(found[index]))
+                    assets.Add(found[index]);
         }
         return assets;
     }
