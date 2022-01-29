@@ -20,4 +20,12 @@ public static class ListExtensions
         }
         return values;
     }
+    
+    
+    public static T Take<T>(this List<T> source, int index)
+    {
+        var value = source[index];
+        source.RemoveAt(index);
+        return value;
+    }
 }
