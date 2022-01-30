@@ -21,11 +21,22 @@ public static class ListExtensions
         return values;
     }
     
-    
-    public static T Take<T>(this List<T> source, int index)
+    public static T Take<T>(this List<T> source, int index, bool removePosition = true) 
     {
         var value = source[index];
-        source.RemoveAt(index);
+        if (removePosition) 
+            source.RemoveAt(index);
+        else
+            source[index] = default;
         return value;
+    }
+
+    public static void Shuffle<T>(this List<T> source)
+    {
+        for (int i = source.Count - 1; i >= 0; i--)
+        {
+            int j = UnityEngine.Random.Range(0, i);
+            (source[i], source[j]) = (source[j], source[i]);
+        }
     }
 }
