@@ -25,7 +25,7 @@ public class ConstantSquash : MonoBehaviour
         if(!_active) return;
         _t += Time.deltaTime * cycleMultiplier;
         float deformation = squashCurve.Evaluate(_t) * scale;
-        transform.localScale = new Vector3(1-deformation, 1+deformation);
+        transform.localScale = new Vector3(1-deformation, 1+deformation, transform.localScale.z);
     }
 
     [Button]
@@ -39,7 +39,7 @@ public class ConstantSquash : MonoBehaviour
     {
         _active = false;
         _t = 0;
-        transform.localScale = new Vector3(1,1);
+        transform.localScale = new Vector3(1,1, transform.localScale.z);
     }
 
 
