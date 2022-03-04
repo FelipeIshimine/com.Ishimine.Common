@@ -26,19 +26,9 @@ public class FilterComponentDrawer : PropertyDrawer
         {
             Component component = (Component)property.objectReferenceValue;
             if (component.GetComponent(targetType) == null)
-            {
                 property.objectReferenceValue = null;
-                Debug.Log("A");
-            }
             else
-            {
-                Debug.Log("B");
                 SceneView.lastActiveSceneView.Frame(new Bounds(((Component)property.objectReferenceValue).transform.position, Vector3.one*10));
-            }
-        }
-        else
-        {
-            Debug.Log("C");
         }
         
         Rect buttonPosition = new Rect(position.x + labelWidth + objectFieldWidth, position.y, dropdownButtonWidth, 16f);
