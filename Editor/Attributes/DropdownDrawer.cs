@@ -2,8 +2,8 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(MonoBehaviourDropdownAttribute))]
-public class MonoBehaviourDropdownDrawer : PropertyDrawer
+[CustomPropertyDrawer(typeof(DropdownAttribute))]
+public class DropdownDrawer : PropertyDrawer
 {
     //public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => 32;
     private int _index;
@@ -26,7 +26,7 @@ public class MonoBehaviourDropdownDrawer : PropertyDrawer
             SceneView.lastActiveSceneView.Frame(new Bounds(((MonoBehaviour)property.objectReferenceValue).transform.position, Vector3.one*10));
         
         Rect buttonPosition = new Rect(position.x + labelWidth + objectFieldWidth, position.y, dropdownButtonWidth, 16f);
-        bool splitByHierarchy = ((MonoBehaviourDropdownAttribute)attribute).SplitByHierarchy;
+        bool splitByHierarchy = ((DropdownAttribute)attribute).SplitByHierarchy;
 
         string buttonName = "NULL";
         if (property.objectReferenceValue != null)
@@ -67,8 +67,9 @@ public class MonoBehaviourDropdownDrawer : PropertyDrawer
 
         if (_monoBehaviours != null && _monoBehaviours.Count > 0)
             property.objectReferenceValue = _monoBehaviours[_index];
+        
     }
-    
 
+    
     public override bool CanCacheInspectorGUI(SerializedProperty property) => true;
 }
