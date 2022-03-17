@@ -12,4 +12,6 @@ public class ScriptableObjectDropdownStringAttribute : PropertyAttribute
     {
         this.TargetType = targetType;
     }
+    
+    
 }
