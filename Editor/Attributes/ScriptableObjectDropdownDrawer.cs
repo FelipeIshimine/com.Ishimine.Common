@@ -23,10 +23,9 @@ public class ScriptableObjectDropdownDrawer : PropertyDrawer
         else
             buttonPosition = new Rect(position.x , position.y, position.width, 16f);
        
-
         ScriptableObject current = property.objectReferenceValue as ScriptableObject;
 
-        Type targetType = ((ScriptableObjectDropdownAttribute)attribute).TargetType;
+        Type targetType = fieldInfo.FieldType;
             
         //Debug.Log($"Current:{current}");
         if (EditorGUI.DropdownButton(buttonPosition, new GUIContent(current != null?current.name:"Null"), FocusType.Keyboard))

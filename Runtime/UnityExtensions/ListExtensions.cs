@@ -39,4 +39,22 @@ public static class ListExtensions
             (source[i], source[j]) = (source[j], source[i]);
         }
     }
+
+    public static int FindMinIndex<T>(this List<T> source, Func<T, float> function)
+    {
+        float min = float.MaxValue;
+        int current = -1;
+        for (int i = 0; i < source.Count; i++)
+        {
+            float value = function.Invoke(source[i]); 
+            if (min > value)
+            {
+                min = value;
+                current = i;
+            }
+        }
+        return current;
+    }
+    
+    public static T FindMin<T>(this List<T> source, Func<T, float> function) => source[FindMinIndex(source, function)];
 }

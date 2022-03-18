@@ -1,22 +1,37 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(DropdownAttribute))]
-public class DropdownDrawer : PropertyDrawer
+[CustomPropertyDrawer(typeof(DropdownFromSceneAttribute))]
+public class DropdownFromSceneDrawer : PropertyDrawer
 {
     //public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => 32;
     private int _index;
     private List<MonoBehaviour> _monoBehaviours;
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
+        bool drawLabel = !string.IsNullOrEmpty(label.text);
+        
         float labelWidth = position.width * .25f;
+        
         float objectFieldWidth = position.width * .375f;
         float dropdownButtonWidth = position.width * .375f;
         
-        Rect labelPosition = new Rect(position.x, position.y, position.width*.25f, 16f);
-        EditorGUI.LabelField(labelPosition, label);
-
+        if(drawLabel)
+        {
+            Rect labelPosition = new Rect(position.x, position.y, position.width * .25f, 16f);
+            EditorGUI.LabelField(labelPosition, label);
+        }
+        else
+        {
+            objectFieldWidth += labelWidth/2;
+            dropdownButtonWidth += labelWidth/2;
+            labelWidth = 0;
+        }
+        
+        
+        
         Rect objectPosition = new Rect(position.x + labelWidth, position.y, objectFieldWidth, 16f);
 
         var ogValue = property.objectReferenceValue;
@@ -26,7 +41,7 @@ public class DropdownDrawer : PropertyDrawer
             SceneView.lastActiveSceneView.Frame(new Bounds(((MonoBehaviour)property.objectReferenceValue).transform.position, Vector3.one*10));
         
         Rect buttonPosition = new Rect(position.x + labelWidth + objectFieldWidth, position.y, dropdownButtonWidth, 16f);
-        bool splitByHierarchy = ((DropdownAttribute)attribute).SplitByHierarchy;
+        bool splitByHierarchy = ((DropdownFromSceneAttribute)attribute).SplitByHierarchy;
 
         string buttonName = "NULL";
         if (property.objectReferenceValue != null)
@@ -35,7 +50,19 @@ public class DropdownDrawer : PropertyDrawer
         if (EditorGUI.DropdownButton(buttonPosition, new GUIContent(buttonName), FocusType.Keyboard))
         {
             GenericMenu menu = new GenericMenu();
-            var foundObjects = Object.FindObjectsOfType(fieldInfo.FieldType, true);
+            Debug.Log(fieldInfo.FieldType);
+
+            var targetType = fieldInfo.FieldType;
+
+            Debug.Log(targetType);
+            Debug.Log(typeof(IEnumerable).IsAssignableFrom(targetType));
+            if (typeof(IEnumerable).IsAssignableFrom(targetType))
+            {
+                Debug.Log("Es una colleccion");
+                targetType = targetType.GenericTypeArguments[0];
+            }
+            
+            var foundObjects = Object.FindObjectsOfType(targetType, true);
             _monoBehaviours = new List<MonoBehaviour>();
             foreach (var foundObject in foundObjects)
             {
