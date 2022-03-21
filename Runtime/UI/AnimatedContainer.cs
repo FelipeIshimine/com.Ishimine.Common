@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Conteiner generico para animar canvas con 'coroutines'.
@@ -50,7 +51,9 @@ public class AnimatedContainer : MonoBehaviour
     }
 
     public bool deactivateOnHide = true;
-    public bool startHidden = true;
+    [FormerlySerializedAs("startHidden")] public bool hideOnStart = true;
+    private bool _isFirstEnable = true;
+    
     private bool _alreadyStarted = false;
 
     private bool _isOpen;
@@ -66,6 +69,7 @@ public class AnimatedContainer : MonoBehaviour
             else            OnClose?.Invoke();
         }
     }
+
     [ShowInInspector] public bool IsClosed => !IsOpen;
     public bool InAnimation { get; private set; }
 
@@ -95,6 +99,14 @@ public class AnimatedContainer : MonoBehaviour
         Initialize();
     }
 
+    private void Start()
+    {
+        if (hideOnStart)
+            Hide();
+        else
+            Show();
+    }
+
     private void OnValidate()
     {
         if (canvasGroup == null)
@@ -122,11 +134,7 @@ public class AnimatedContainer : MonoBehaviour
         }
 
         if (_alreadyStarted) return;
-        if (startHidden)
-            Hide();
-        else
-            Show();
-
+      
     }
 
 
@@ -175,6 +183,7 @@ public class AnimatedContainer : MonoBehaviour
     [Button, ButtonGroup("Animated")]
     public void Close()
     {
+       
         _alreadyStarted = true;
         if (IsOpen)
             Close(null);
@@ -182,7 +191,7 @@ public class AnimatedContainer : MonoBehaviour
 
     public void Close(Action postAction = null)
     {
-        if(debugPrint) Debug.Log($"{this} Close");
+        if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Close");
 
         if (IsOpen && gameObject.activeSelf && gameObject.activeInHierarchy)
         {
@@ -206,7 +215,7 @@ public class AnimatedContainer : MonoBehaviour
 
     public void Open(Action postAction)
     {
-        if(debugPrint) Debug.Log($"{this} Open");
+        if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Open");
         
         _alreadyStarted = true;
         gameObject.SetActive(true);
@@ -228,7 +237,7 @@ public class AnimatedContainer : MonoBehaviour
     [Button, ButtonGroup("Snap")]
     public void Hide()
     {
-        if(debugPrint) Debug.Log($"{this} Hide");
+        if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Hide");
 
         _alreadyStarted = true;
 
@@ -253,7 +262,7 @@ public class AnimatedContainer : MonoBehaviour
     [Button, ButtonGroup("Snap")]
     public void Show()
     {
-        if(debugPrint) Debug.Log($"{this} Show");
+        if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Show");
 
         _alreadyStarted = true;
         //Debug.Log($"{this} Show");
@@ -270,7 +279,7 @@ public class AnimatedContainer : MonoBehaviour
     private IEnumerator CloseRoutine(Action postAction = null)
     {
         InAnimation = true;
-        yield return AnimationRutine(durationOut, targetPosition, curveOut, targetScale, curveOutScale, 0, alphaCurveOut,
+        yield return AnimationRoutine(durationOut, targetPosition, curveOut, targetScale, curveOutScale, 0, alphaCurveOut,
             () =>
             {
                 InAnimation = false;
@@ -282,7 +291,7 @@ public class AnimatedContainer : MonoBehaviour
     private IEnumerator OpenRoutine(Action postAction = null)
     {
         InAnimation = true;
-        yield return AnimationRutine(durationIn, Vector3.zero, curveIn, Vector3.one, curveInScale, 1, alphaCurveIn,
+        yield return AnimationRoutine(durationIn, Vector3.zero, curveIn, Vector3.one, curveInScale, 1, alphaCurveIn,
             () =>
             {
                 InAnimation = false;
@@ -291,7 +300,7 @@ public class AnimatedContainer : MonoBehaviour
             });
     }
 
-    private IEnumerator AnimationRutine(float duration,
+    private IEnumerator AnimationRoutine(float duration,
         Vector3 targetPosition, AnimationCurve movementCurve,
         Vector3 targetScale, AnimationCurve scaleCurve,
         float targetAlpha, AnimationCurve alphaCurve,
