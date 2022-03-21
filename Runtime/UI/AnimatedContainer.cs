@@ -51,8 +51,7 @@ public class AnimatedContainer : MonoBehaviour
     }
 
     public bool deactivateOnHide = true;
-    [FormerlySerializedAs("startHidden")] public bool hideOnStart = true;
-    private bool _isFirstEnable = true;
+    [FormerlySerializedAs("startHidden")] public bool hideOnStart = false;
     
     private bool _alreadyStarted = false;
 
