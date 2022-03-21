@@ -10,6 +10,12 @@ public static class Vector3Extensions
         return point; // return it
     }
 
+    public static float GetDistanceXZ(this Vector3 a, Vector3 b)
+    {
+        float num1 = a.x - b.x;
+        float num2 = a.z - b.z;
+        return (float) System.Math.Sqrt((double) num1 * (double) num1 + (double) num2 * (double) num2);
+    }
     public static Vector3 GetDirection(this Vector3 startPos, Vector3 endPos) =>
         GetDifference(startPos, endPos).normalized;
 
