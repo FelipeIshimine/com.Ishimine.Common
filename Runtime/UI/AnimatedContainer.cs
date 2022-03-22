@@ -86,10 +86,12 @@ public class AnimatedContainer : MonoBehaviour
     [EnableIf("useScale"), TabGroup("Scale")] public AnimationCurve curveOutScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     [TabGroup("Movement")] public bool useMovement = false;
+
+    [EnableIf("useMovement"), TabGroup("Movement")] public bool useParentSizeForDisplacement = true;
     [EnableIf("useMovement"), TabGroup("Movement")] public Direction direction = Direction.Down;
     [EnableIf("useMovement"), TabGroup("Movement")] public AnimationCurve curveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [EnableIf("useMovement"), TabGroup("Movement")] public AnimationCurve curveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    private Vector3 targetPosition;
+    [ShowInInspector,ReadOnly]private Vector3 targetPosition;
 
     private bool initialized = false;
 
@@ -139,43 +141,37 @@ public class AnimatedContainer : MonoBehaviour
 
     public void SetDirection(Direction direction, bool overrideCurrentPosition = false)
     {
-        switch (direction)
-        {
-            case Direction.Right:
-                targetPosition = Vector3.right * Parent.rect.width;
-                break;
-            case Direction.Left:
-                targetPosition = Vector3.left * Parent.rect.width;
-                break;
-            case Direction.Up:
-                targetPosition = Vector3.up * Parent.rect.height;
-                break;
-            case Direction.Down:
-                targetPosition = Vector3.down * Parent.rect.height;
-                break;
-            default:
-                break;
-        }
+        UpdateTargetPosition(direction);
         if (overrideCurrentPosition)
             rectTransform.anchoredPosition = targetPosition;
     }
 
-    public Vector3 GetTargetPosition()
+    private void UpdateTargetPosition(Direction direction)
     {
         switch (direction)
         {
             case Direction.Right:
-                return targetPosition = Vector3.right * Parent.rect.width;
+                targetPosition = Vector3.right * (useParentSizeForDisplacement ? Parent.rect.width : rectTransform.rect.width);
+                break;
             case Direction.Left:
-                return targetPosition = Vector3.left * Parent.rect.width;
+                targetPosition =
+                    Vector3.left * (useParentSizeForDisplacement ? Parent.rect.width : rectTransform.rect.width);
+                break;
             case Direction.Up:
-                return targetPosition = Vector3.up * Parent.rect.height;
+                targetPosition =
+                    Vector3.up * (useParentSizeForDisplacement ? Parent.rect.height : rectTransform.rect.height);
+                break;
             case Direction.Down:
-                return targetPosition = Vector3.down * Parent.rect.height;
-            default:
+                targetPosition = Vector3.down *
+                                 (useParentSizeForDisplacement ? Parent.rect.height : rectTransform.rect.height);
                 break;
         }
-        return targetPosition = Vector3.zero;
+    }
+
+    public Vector3 GetTargetPosition()
+    {
+        UpdateTargetPosition(direction);
+        return targetPosition;
     }
 
 
