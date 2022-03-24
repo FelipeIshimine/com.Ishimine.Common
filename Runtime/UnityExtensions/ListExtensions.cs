@@ -6,7 +6,14 @@ public static class ListExtensions
     public static T Last<T>(this List<T> source) => source[source.Count - 1];
     public static T First<T>(this List<T> source) => source[0];
 
-    
+    public static int InsertSorted<T>(this List<T> source, T nElement)
+    {
+        var index = source.BinarySearch(nElement);
+        if (index < 0) index = ~index;
+        source.Insert(index, nElement);
+        return index;
+    }
+
     public static List<T> ExtractAll<T>(this List<T> source, Func<T, bool> validation)
     {
         List<T> values = new List<T>();
