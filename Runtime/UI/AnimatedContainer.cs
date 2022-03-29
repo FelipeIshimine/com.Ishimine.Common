@@ -13,7 +13,7 @@ using UnityEngine.Serialization;
 public class AnimatedContainer : MonoBehaviour
 {
     public bool debugPrint = false;
-    public Action<bool> OnOpenOrClose;
+    public event Action<bool> OnOpenOrClose;
     public event Action OnOpen;
     public event Action OnClose;
     public enum Direction { Right, Left, Up, Down }
@@ -51,10 +51,14 @@ public class AnimatedContainer : MonoBehaviour
     }
 
     public bool deactivateOnHide = true;
-    [FormerlySerializedAs("startHidden")] public bool hideOnStart = false;
-    
-    private bool _alreadyStarted = false;
 
+    public InitState initializationState = InitState.Hide; 
+    public enum InitState
+    {
+        Show,
+        Hide
+    }
+    
     private bool _isOpen;
 
     [ShowInInspector] public bool IsOpen 
@@ -100,14 +104,6 @@ public class AnimatedContainer : MonoBehaviour
         Initialize();
     }
 
-    private void Start()
-    {
-        if (hideOnStart)
-            Hide();
-        else
-            Show();
-    }
-
     private void OnValidate()
     {
         if (canvasGroup == null)
@@ -134,8 +130,10 @@ public class AnimatedContainer : MonoBehaviour
             RectTransform.localScale = Vector3.one;
         }
 
-        if (_alreadyStarted) return;
-      
+        if (initializationState == InitState.Hide)
+            Hide();
+        else
+            Show();
     }
 
 
@@ -178,14 +176,13 @@ public class AnimatedContainer : MonoBehaviour
     [Button, ButtonGroup("Animated")]
     public void Close()
     {
-       
-        _alreadyStarted = true;
         if (IsOpen)
             Close(null);
     }
 
     public void Close(Action postAction = null)
     {
+        Initialize();
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Close");
 
         if (IsOpen && gameObject.activeSelf && gameObject.activeInHierarchy)
@@ -210,9 +207,12 @@ public class AnimatedContainer : MonoBehaviour
 
     public void Open(Action postAction)
     {
-        if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Open");
-        
-        _alreadyStarted = true;
+        Initialize();
+        if (debugPrint)
+        {
+            Debug.Log($"{transform.GetHierarchyAsString(true)} Open {transform.localScale}");
+            
+        }
         gameObject.SetActive(true);
         if (!IsOpen)
         {
@@ -232,9 +232,9 @@ public class AnimatedContainer : MonoBehaviour
     [Button, ButtonGroup("Snap")]
     public void Hide()
     {
-        if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Hide");
+        Initialize();
 
-        _alreadyStarted = true;
+        if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Hide");
 
         if (useMovement)
             RectTransform.anchoredPosition = targetPosition;
@@ -257,10 +257,9 @@ public class AnimatedContainer : MonoBehaviour
     [Button, ButtonGroup("Snap")]
     public void Show()
     {
+        Initialize();
+        
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Show");
-
-        _alreadyStarted = true;
-        //Debug.Log($"{this} Show");
 
         gameObject.SetActive(true);
 
@@ -302,6 +301,10 @@ public class AnimatedContainer : MonoBehaviour
         Action postAction)
     {
         float t = 0;
+        
+        Debug.Log($"|||| transform.localScale:{transform.localScale}");
+        Debug.Log($"|||| RectTransform.localScale:{RectTransform.localScale}");
+
         Vector3 startPosition = RectTransform.anchoredPosition;
         Vector3 startScale = RectTransform.localScale;
         float startAlpha = 1 - targetAlpha;
