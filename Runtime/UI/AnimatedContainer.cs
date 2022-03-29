@@ -302,9 +302,6 @@ public class AnimatedContainer : MonoBehaviour
     {
         float t = 0;
         
-        Debug.Log($"|||| transform.localScale:{transform.localScale}");
-        Debug.Log($"|||| RectTransform.localScale:{RectTransform.localScale}");
-
         Vector3 startPosition = RectTransform.anchoredPosition;
         Vector3 startScale = RectTransform.localScale;
         float startAlpha = 1 - targetAlpha;
