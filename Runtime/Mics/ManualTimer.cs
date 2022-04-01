@@ -15,7 +15,7 @@ public class ManualTimer
     
     [ShowInInspector] public float Duration => _duration;
     private float _duration;
-    [ShowInInspector] private float _currentValue = 0;
+    [ShowInInspector] protected float _currentValue = 0;
     
     public float ProgressUnclamped => _currentValue / _duration;
     public float Progress => Mathf.Clamp01(_currentValue / _duration);
@@ -62,7 +62,7 @@ public class ManualTimer
         return Completed;
     }
 
-    public void Restart()
+    public virtual void Restart()
     {
         Completed = _duration == 0;
         _currentValue = 0;

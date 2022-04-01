@@ -12,6 +12,8 @@ public class AutoTimer : ManualTimer, IDisposable
 
 	public event Action OnAbort;
 
+	private bool _isRegistered;
+	
 	public AutoTimer(float duration, bool loop, DeltaTimeType deltaTimeType, Action callback, Action abortCallback = null) : base(duration, loop, callback)
 	{
 		DeltaTimeType = deltaTimeType;
@@ -51,6 +53,7 @@ public class AutoTimer : ManualTimer, IDisposable
     
 	private void Register()
 	{
+		_isRegistered = true;
 		switch (DeltaTimeType)
 		{
 			case DeltaTimeType.deltaTime:
@@ -68,6 +71,7 @@ public class AutoTimer : ManualTimer, IDisposable
 
 	private void Unregister()
 	{
+		_isRegistered = false;
 		switch (DeltaTimeType)
 		{
 			case DeltaTimeType.deltaTime:
@@ -87,6 +91,7 @@ public class AutoTimer : ManualTimer, IDisposable
 	{
 		OnAbort?.Invoke();
 		Dispose();
+		_currentValue = 0;
 	}
 	
 	public void Dispose()
@@ -105,5 +110,17 @@ public class AutoTimer : ManualTimer, IDisposable
 	}
 
 	public void Pause() => _running = false;
-	public void Play() => _running = true;
+
+	public void Play()
+	{
+		if(!_isRegistered)
+			SetDelta(DeltaTimeType);
+		_running = true;
+	}
+
+	public override void Restart()
+	{
+		base.Restart();
+		_running = true;
+	}
 }
