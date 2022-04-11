@@ -63,11 +63,14 @@ public class FilterComponentDrawer : PropertyDrawer
                 }
             }
             
+            _components.Insert(0,null);
+            
             for (var index = 0; index < _components.Count; index++)
             {
                 int localIndex = index;
                 Component component = _components[localIndex];
-                string path = component.transform.GetHierarchyAsString();
+                
+                string path =component?component.transform.GetHierarchyAsString():"NULL";
 
                 menu.AddItem(
                     new GUIContent(path),
@@ -76,7 +79,7 @@ public class FilterComponentDrawer : PropertyDrawer
                     {
                         property.objectReferenceValue = _components[localIndex];
                         _index = localIndex;
-                        SceneView.lastActiveSceneView.Frame(new Bounds(_components[localIndex].transform.position, Vector3.one*10));
+                        if(_components[localIndex]) SceneView.lastActiveSceneView.Frame(new Bounds(_components[localIndex].transform.position, Vector3.one*10));
                     });
                 menu.ShowAsContext();
             } 
