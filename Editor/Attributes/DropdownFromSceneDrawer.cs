@@ -70,15 +70,23 @@ public class DropdownFromSceneDrawer : PropertyDrawer
                     _monoBehaviours.Add(go);
             }
             
+            _monoBehaviours.Insert(0,null);
             for (var index = 0; index < _monoBehaviours.Count; index++)
             {
                 int localIndex = index;
                 MonoBehaviour behaviour = _monoBehaviours[localIndex];
 
-                string path = behaviour.transform.GetHierarchyAsString();
-                if (!splitByHierarchy)
-                    path = path.Replace("/", ">");
+                string path;
 
+                if (behaviour != null)
+                {
+                    path = behaviour.transform.GetHierarchyAsString();
+                    if (!splitByHierarchy)
+                        path = path.Replace("/", ">");
+                }
+                else
+                    path = "Null";
+             
                 menu.AddItem(
                     new GUIContent(path),
                     behaviour == property.objectReferenceValue, 
@@ -86,7 +94,11 @@ public class DropdownFromSceneDrawer : PropertyDrawer
                     {
                         property.objectReferenceValue = _monoBehaviours[localIndex];
                         _index = localIndex;
-                        SceneView.lastActiveSceneView.Frame(new Bounds(_monoBehaviours[localIndex].transform.position, Vector3.one*10));
+                        if(_monoBehaviours[localIndex])
+                        {
+                            SceneView.lastActiveSceneView.Frame(
+                                new Bounds(_monoBehaviours[localIndex].transform.position, Vector3.one * 10));
+                        }
                     });
                 menu.ShowAsContext();
             } 
