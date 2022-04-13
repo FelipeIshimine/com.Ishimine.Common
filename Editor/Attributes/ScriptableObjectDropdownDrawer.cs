@@ -16,8 +16,8 @@ public class ScriptableObjectDropdownDrawer : PropertyDrawer
         Rect buttonPosition;
         if (!string.IsNullOrEmpty(label.text))
         {
-            Rect labelPosition = new Rect(position.x, position.y, position.width*.25f, 16f);
-            buttonPosition= new Rect(position.x + labelPosition.width, position.y, position.width * .75f, 16f);
+            Rect labelPosition = new Rect(position.x, position.y, position.width*.50f, 16f);
+            buttonPosition= new Rect(position.x + labelPosition.width, position.y, position.width * .50f, 16f);
             EditorGUI.LabelField(labelPosition, label);
         }
         else
@@ -32,12 +32,13 @@ public class ScriptableObjectDropdownDrawer : PropertyDrawer
         {
             GenericMenu menu = new GenericMenu();
             sObjects = UnityEditorExtensions.FindAssetsByType(targetType);
+            sObjects.Insert(0, null);
             for (var index = 0; index < sObjects.Count; index++)
             {
                 int localIndex = index;
                 Object obj = sObjects[localIndex];
                 menu.AddItem(
-                    new GUIContent(obj.name),
+                    new GUIContent(obj!=null?obj.name:"Null"),
                     obj == current, 
                     ()=> 
                     {
