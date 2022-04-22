@@ -31,13 +31,13 @@ public static class ListExtensions
     
     public static T FindHighest<T>(this List<T> source, Func<T, float> testing)
     {
-        float lowest = int.MaxValue;
+        float highest = int.MinValue;
         T current = default(T);
         for (int i = source.Count - 1; i >= 0; i--)
         {
-            if (testing.Invoke(source[i]) > lowest)
+            if (testing.Invoke(source[i]) > highest)
             {
-                lowest = testing.Invoke(source[i]);
+                highest = testing.Invoke(source[i]);
                 current = source[i];
             }
         }
