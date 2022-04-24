@@ -12,8 +12,11 @@ public static class TileMapExtensions
         for (int z = boundsInt.zMin; z < boundsInt.zMax; z++)
         for (int y = boundsInt.yMin; y < boundsInt.yMax; y++)
         for (int x = boundsInt.xMin; x < boundsInt.xMax; x++)
-            coordinates.Add(new Vector3Int(x,y,z));
-
+        {
+            var coordinate = new Vector3Int(x, y, z);
+            if(baseTile == tilemap.GetTile(coordinate))
+                coordinates.Add(coordinate);
+        }
         return coordinates.ToArray();
     }
 }
