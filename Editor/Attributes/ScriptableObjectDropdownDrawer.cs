@@ -22,7 +22,11 @@ public class ScriptableObjectDropdownDrawer : PropertyDrawer
         }
         else
             buttonPosition = new Rect(position.x , position.y, position.width, 16f);
-       
+
+        string overrideAsBackslash = (attribute as ScriptableObjectDropdownAttribute).OverrideAsBackSlash;
+        
+        
+            
         ScriptableObject current = property.objectReferenceValue as ScriptableObject;
 
         Type targetType = fieldInfo.FieldType;
@@ -37,16 +41,23 @@ public class ScriptableObjectDropdownDrawer : PropertyDrawer
             {
                 int localIndex = index;
                 Object obj = sObjects[localIndex];
+
+                string path = obj != null ? obj.name : "Null";
+
+                if (!string.IsNullOrEmpty(overrideAsBackslash))
+                    path = path.Replace(overrideAsBackslash, "/");
+                
                 menu.AddItem(
-                    new GUIContent(obj!=null?obj.name:"Null"),
+                    new GUIContent(path),
                     obj == current, 
                     ()=> 
                     {
                         property.objectReferenceValue = sObjects[localIndex];
                         _index = localIndex;
                     });
-                menu.ShowAsContext();
             }
+            
+            menu.ShowAsContext();
         }
 
         if (sObjects != null && _index >= 0 && _index < sObjects.Count)
