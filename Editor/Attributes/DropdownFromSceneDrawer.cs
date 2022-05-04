@@ -54,13 +54,8 @@ public class DropdownFromSceneDrawer : PropertyDrawer
 
             var targetType = fieldInfo.FieldType;
 
-            Debug.Log(targetType);
-            Debug.Log(typeof(IEnumerable).IsAssignableFrom(targetType));
             if (typeof(IEnumerable).IsAssignableFrom(targetType))
-            {
-                Debug.Log("Es una colleccion");
                 targetType = targetType.GenericTypeArguments[0];
-            }
             
             var foundObjects = Object.FindObjectsOfType(targetType, true);
             _monoBehaviours = new List<MonoBehaviour>();
