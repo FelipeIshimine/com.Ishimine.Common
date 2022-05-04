@@ -51,6 +51,8 @@ public class AnimatedContainer : MonoBehaviour
     }
 
     public bool deactivateOnHide = true;
+    public bool setInteractivity = true;
+    public bool setBlockRaycast = true;
 
     public InitState initializationState = InitState.Hide; 
     public enum InitState
@@ -187,7 +189,7 @@ public class AnimatedContainer : MonoBehaviour
 
         if (IsOpen && gameObject.activeSelf && gameObject.activeInHierarchy)
         {
-            canvasGroup.interactable = false;
+            if(setInteractivity) canvasGroup.interactable = false;
             if (_routine != null) StopCoroutine(_routine);
             _routine = CloseRoutine(postAction);
             StartCoroutine(_routine);
@@ -223,8 +225,8 @@ public class AnimatedContainer : MonoBehaviour
         }
         else
         {
-            canvasGroup.blocksRaycasts = blockRaycasts;
-            canvasGroup.interactable = true;
+            if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycasts;
+            if(setInteractivity) canvasGroup.interactable = true;
             postAction?.Invoke();
         }
     }
@@ -247,8 +249,8 @@ public class AnimatedContainer : MonoBehaviour
 
         IsOpen = false;
 
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
+        if(setInteractivity) canvasGroup.interactable = false;
+        if(setBlockRaycast) canvasGroup.blocksRaycasts = false;
 
         if (deactivateOnHide)
             gameObject.SetActive(false);
@@ -266,8 +268,8 @@ public class AnimatedContainer : MonoBehaviour
         if (useMovement) RectTransform.anchoredPosition = Vector3.zero;
         SetValue(1, curveIn, curveInScale, alphaCurveIn);
         IsOpen = true;
-        canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = blockRaycasts;
+        if(setInteractivity) canvasGroup.interactable = true;
+        if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycasts;
     }
 
     private IEnumerator CloseRoutine(Action postAction = null)
