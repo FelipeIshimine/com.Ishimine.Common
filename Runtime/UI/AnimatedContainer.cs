@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
-using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 /// <summary>
@@ -12,98 +10,138 @@ using UnityEngine.Serialization;
 /// </summary>
 public class AnimatedContainer : MonoBehaviour
 {
+    public InitState initializationState = InitState.Hide;
+    [field:SerializeField, FormerlySerializedAs("timeType")] public TimeScale Time { get; private set; } = TimeScale.Unscaled;
+    
     public bool debugPrint = false;
-    public event Action<bool> OnOpenOrClose;
-    public event Action OnOpen;
-    public event Action OnClose;
-    public enum Direction { Right, Left, Up, Down }
-    public enum TimeType { Scaled, Unscaled }
+    public event Action OnInitialize;
+    public event Action<State> OnStateChange;
+    public event Action<bool> OnOpenOrCloseStart;
+    public event Action<bool> OnOpenOrCloseEnd;
+    public event Action OnOpeningStart;
+    public event Action OnOpeningEnd;
+    public event Action OnClosingStart;
+    public event Action OnClosingEnd;
+    
+    private RectTransform _parent;
+    private RectTransform Parent => _parent ??= transform.parent as RectTransform;
 
+    private RectTransform _rectTransform;
+    private RectTransform RectTransform => _rectTransform ??= transform as RectTransform;
+
+    public enum Direction { Right, Left, Up, Down }
+    public enum TimeScale { Scaled, Unscaled }
     public enum Order { Open, Close, Show, Hide }
 
-    public float durationIn = .3f;
+    [SerializeField] private CanvasGroup canvasGroup;
 
-    public float durationOut = .3f;
-    private IEnumerator _routine;
-    [SerializeField] private RectTransform parent;
+    
+    [FormerlySerializedAs("durationIn"), SerializeField, HorizontalGroup("Duration")] private float openDuration = .3f;
+    [FormerlySerializedAs("durationOut"), SerializeField, HorizontalGroup("Duration")] private float closeDuration = .3f;
+    
+    [SerializeField] private bool hideOnDisable = true;
+    [SerializeField] private bool openOnEnable = true;
+    [SerializeField] private bool deactivateWhenClosed = true;
+    
+    [FoldoutGroup("CanvasGroup", GroupName = "BlockRaycast & Interactivity"), HorizontalGroup("CanvasGroup/Horizontal")]
+    [VerticalGroup("CanvasGroup/Horizontal/BlockRaycast"),SerializeField] private bool setBlockRaycast = true;
+    [EnableIf(nameof(setBlockRaycast)),SerializeField, VerticalGroup("CanvasGroup/Horizontal/BlockRaycast"), LabelText("When Open")] 
+    private bool blockRaycastWhenOpened = true;
+    [EnableIf(nameof(setBlockRaycast)),SerializeField, VerticalGroup("CanvasGroup/Horizontal/BlockRaycast"), LabelText("When Close")]
+    private bool blockRaycastWhenClosed = false;
 
-    public bool blockRaycasts = true;
-    private RectTransform Parent
-    {
-        get
-        {
-            if (!parent)
-                parent = transform.parent as RectTransform;
-            return parent;
-        }
-    }
-
-    [SerializeField] private RectTransform rectTransform;
-
-    private RectTransform RectTransform
-    {
-        get
-        {
-            if (!rectTransform)
-                rectTransform = transform as RectTransform;
-            return rectTransform;
-        }
-    }
-
-    public bool deactivateOnHide = true;
-    public bool setInteractivity = true;
-    public bool setBlockRaycast = true;
-
-    public InitState initializationState = InitState.Hide; 
+    [VerticalGroup("CanvasGroup/Horizontal/Interactivity"),SerializeField] private bool setInteractivity = true;
+    [EnableIf(nameof(setInteractivity)),SerializeField, VerticalGroup("CanvasGroup/Horizontal/Interactivity"),LabelText("When Open")] 
+    private bool interactivityWhenOpened = true;
+    [EnableIf(nameof(setInteractivity)),SerializeField, VerticalGroup("CanvasGroup/Horizontal/Interactivity"),LabelText("When Close")] 
+    private bool interactivityWhenClosed = false;
+    
     public enum InitState
     {
         Show,
         Hide
     }
-    
-    private bool _isOpen;
 
-    [ShowInInspector] public bool IsOpen 
+    public enum State
     {
-        get => _isOpen; 
-        private set
-        {
-            _isOpen = value;
-            OnOpenOrClose?.Invoke(_isOpen);
-            if(_isOpen)     OnOpen?.Invoke();
-            else            OnClose?.Invoke();
-        }
+        None,
+        Open,
+        Close,
+        Opening,
+        Closing
     }
 
-    [ShowInInspector] public bool IsClosed => !IsOpen;
-    public bool InAnimation { get; private set; }
+    [ShowInInspector, ReadOnly] public State CurrentState { get; private set; } = State.None;
 
-    public TimeType timeType = TimeType.Unscaled;
+    public bool IsOpen => CurrentState == State.Open;
+    public bool IsClosed => CurrentState == State.Close;
+    public bool IsOpening => CurrentState == State.Opening;
+    public bool IsClosing => CurrentState == State.Opening;
+
+    public bool InAnimation { get; private set; }
+   
 
     [TabGroup("Alpha")] public bool useAlpha = true;
-    public CanvasGroup canvasGroup;
-
-    [EnableIf("useAlpha"), TabGroup("Alpha")] public AnimationCurve alphaCurveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    [EnableIf("useAlpha"), TabGroup("Alpha")] public AnimationCurve alphaCurveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [EnableIf("useAlpha"), TabGroup("Alpha"), LabelText("Open Curve")] public AnimationCurve alphaCurveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [EnableIf("useAlpha"), TabGroup("Alpha"), LabelText("Close Curve")] public AnimationCurve alphaCurveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     [TabGroup("Scale")] public bool useScale = false;
-    [EnableIf("useScale"), TabGroup("Scale")] public AnimationCurve curveInScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    [EnableIf("useScale"), TabGroup("Scale")] public Vector3 targetScale = new Vector3(1, 0, 1);
-    [EnableIf("useScale"), TabGroup("Scale")] public AnimationCurve curveOutScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [EnableIf("useScale"), TabGroup("Scale")] public Vector3 closeScale = new Vector3(0, 0, 0);
+    [EnableIf("useScale"), TabGroup("Scale"), LabelText("Open Curve")] public AnimationCurve curveInScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [EnableIf("useScale"), TabGroup("Scale"), LabelText("Close Curve")] public AnimationCurve curveOutScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     [TabGroup("Movement")] public bool useMovement = false;
-
     [EnableIf("useMovement"), TabGroup("Movement")] public bool useParentSizeForDisplacement = true;
     [EnableIf("useMovement"), TabGroup("Movement")] public Direction direction = Direction.Down;
-    [EnableIf("useMovement"), TabGroup("Movement")] public AnimationCurve curveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    [EnableIf("useMovement"), TabGroup("Movement")] public AnimationCurve curveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    [ShowInInspector,ReadOnly]private Vector3 targetPosition;
+    [EnableIf("useMovement"), TabGroup("Movement"), LabelText("Open Curve")] public AnimationCurve curveInMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [EnableIf("useMovement"), TabGroup("Movement"), LabelText("Close Curve")] public AnimationCurve curveOutMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    
+    private Vector3 _anchoredPositionWhenClosed;
+    public bool IsInitialized { get; private set; }= false;
 
-    private bool initialized = false;
+    private IEnumerator _currentRoutine;
 
     private void Awake()
     {
         Initialize();
+    }
+
+    private void OnEnable()
+    {
+        if(_currentRoutine != null) StartCoroutine(_currentRoutine);
+        else if (openOnEnable) Open();
+    }
+    
+    private void OnDisable()
+    {
+        if (hideOnDisable) Hide();
+    }
+
+    private void SetAnimationRoutine(IEnumerator nRoutine)
+    {
+        if(_currentRoutine != null)
+            Debug.LogWarning($"Cuidado: Se sobreescribio una rutina previa sin terminar. {transform.GetHierarchyAsString()}");
+        _currentRoutine = nRoutine;
+    }
+    
+    private void SetState(State nState)
+    {
+        CurrentState = nState;
+
+        switch (CurrentState)
+        {
+            case State.Open:
+                break;
+            case State.Close:
+                break;
+            case State.Opening:
+                break;
+            case State.Closing:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        OnStateChange?.Invoke(CurrentState);
     }
 
     private void OnValidate()
@@ -114,16 +152,18 @@ public class AnimatedContainer : MonoBehaviour
             if (canvasGroup == null)
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
+        
+        if (useMovement) SetDirection(direction);
     }
     public void Initialize()
     {
-        if (initialized) return;
-        initialized = true;
+        if (IsInitialized) return;
+        IsInitialized = true;
 
         if (RectTransform == null)
-            rectTransform = transform as RectTransform;
+            _rectTransform = transform as RectTransform;
 
-        parent = transform.parent as RectTransform;
+        _parent = transform.parent as RectTransform;
 
         if (useMovement)
         {
@@ -136,99 +176,77 @@ public class AnimatedContainer : MonoBehaviour
             Hide();
         else
             Show();
+        
+        OnInitialize?.Invoke();
     }
 
-
-    public void SetDirection(Direction direction, bool overrideCurrentPosition = false)
+    public void SetDirection(Direction nDirection, bool overrideCurrentPosition = false)
     {
-        UpdateTargetPosition(direction);
-        if (overrideCurrentPosition)
-            rectTransform.anchoredPosition = targetPosition;
+        UpdateAnchoredClosePosition(nDirection);
+        if (overrideCurrentPosition) _rectTransform.anchoredPosition = _anchoredPositionWhenClosed;
     }
 
-    private void UpdateTargetPosition(Direction direction)
+    private void UpdateAnchoredClosePosition(Direction nDirection)
     {
-        switch (direction)
+        switch (nDirection)
         {
             case Direction.Right:
-                targetPosition = Vector3.right * (useParentSizeForDisplacement ? Parent.rect.width : rectTransform.rect.width);
+                _anchoredPositionWhenClosed = Vector3.right * (useParentSizeForDisplacement ? Parent.rect.width : _rectTransform.rect.width);
                 break;
             case Direction.Left:
-                targetPosition =
-                    Vector3.left * (useParentSizeForDisplacement ? Parent.rect.width : rectTransform.rect.width);
+                _anchoredPositionWhenClosed =
+                    Vector3.left * (useParentSizeForDisplacement ? Parent.rect.width : _rectTransform.rect.width);
                 break;
             case Direction.Up:
-                targetPosition =
-                    Vector3.up * (useParentSizeForDisplacement ? Parent.rect.height : rectTransform.rect.height);
+                _anchoredPositionWhenClosed =
+                    Vector3.up * (useParentSizeForDisplacement ? Parent.rect.height : _rectTransform.rect.height);
                 break;
             case Direction.Down:
-                targetPosition = Vector3.down *
-                                 (useParentSizeForDisplacement ? Parent.rect.height : rectTransform.rect.height);
+                _anchoredPositionWhenClosed = Vector3.down *
+                                 (useParentSizeForDisplacement ? Parent.rect.height : _rectTransform.rect.height);
                 break;
         }
     }
 
-    public Vector3 GetTargetPosition()
-    {
-        UpdateTargetPosition(direction);
-        return targetPosition;
-    }
+    [Button, ButtonGroup("Animated", GroupName = "Animated")]
+    public void Close() => Close(null);
 
-
-    [Button, ButtonGroup("Animated")]
-    public void Close()
+    public void Close(Action postAction)
     {
-        if (IsOpen)
-            Close(null);
-    }
-
-    public void Close(Action postAction = null)
-    {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning("Can't play animation outside of Play State");
+            return;
+        }
+        
         Initialize();
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Close");
 
-        if (IsOpen && gameObject.activeSelf && gameObject.activeInHierarchy)
-        {
-            if(setInteractivity) canvasGroup.interactable = false;
-            if (_routine != null) StopCoroutine(_routine);
-            _routine = CloseRoutine(postAction);
-            StartCoroutine(_routine);
-            IsOpen = false;
-        }
-        else
-        {
-            postAction?.Invoke();
-        }
+        SetAnimationRoutine(CloseRoutine(postAction));
+        SetState(State.Closing);
+        if (gameObject.activeInHierarchy)
+            StartCoroutine(_currentRoutine);
     }
 
     [Button, ButtonGroup("Animated")]
-    public void Open()
-    {
-        Open(null);
-    }
+    public void Open() => Open(null);
 
     public void Open(Action postAction)
     {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning("Can't play animation outside of Play State");
+            return;
+        }
+        
         Initialize();
-        if (debugPrint)
-        {
-            Debug.Log($"{transform.GetHierarchyAsString(true)} Open {transform.localScale}");
-            
-        }
+        if (debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Open");
+
+        SetAnimationRoutine(OpenRoutine(postAction));
+        SetState(State.Opening);
+        if (gameObject.activeInHierarchy)
+            StartCoroutine(_currentRoutine);
         gameObject.SetActive(true);
-        if (!IsOpen)
-        {
-            if (_routine != null) StopCoroutine(_routine);
-            _routine = OpenRoutine(postAction);
-            StartCoroutine(_routine);
-            IsOpen = true;
-        }
-        else
-        {
-            if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycasts;
-            if(setInteractivity) canvasGroup.interactable = true;
-            postAction?.Invoke();
-        }
     }
 
     [Button, ButtonGroup("Snap")]
@@ -237,26 +255,19 @@ public class AnimatedContainer : MonoBehaviour
         Initialize();
 
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Hide");
+        
+        if(useMovement) RectTransform.anchoredPosition = _anchoredPositionWhenClosed;
+        if(useScale) RectTransform.localScale = closeScale;
+        if(useAlpha) canvasGroup.alpha = 1;
 
-        if (useMovement)
-            RectTransform.anchoredPosition = targetPosition;
+        if(setInteractivity) canvasGroup.interactable = interactivityWhenClosed;
+        if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenClosed;
+        if (deactivateWhenClosed) gameObject.SetActive(false);
 
-        if (useScale)
-            RectTransform.localScale = targetScale;
-
-        if (useAlpha)
-            canvasGroup.alpha = 0;
-
-        IsOpen = false;
-
-        if(setInteractivity) canvasGroup.interactable = false;
-        if(setBlockRaycast) canvasGroup.blocksRaycasts = false;
-
-        if (deactivateOnHide)
-            gameObject.SetActive(false);
+        _currentRoutine = null;
     }
 
-    [Button, ButtonGroup("Snap")]
+    [Button, ButtonGroup("Snap", GroupName = "Snap")]
     public void Show()
     {
         Initialize();
@@ -264,35 +275,50 @@ public class AnimatedContainer : MonoBehaviour
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Show");
 
         gameObject.SetActive(true);
-
-        if (useMovement) RectTransform.anchoredPosition = Vector3.zero;
-        SetValue(1, curveIn, curveInScale, alphaCurveIn);
-        IsOpen = true;
-        if(setInteractivity) canvasGroup.interactable = true;
-        if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycasts;
+        
+        if(useMovement) RectTransform.anchoredPosition = Vector2.zero;
+        if(useScale) RectTransform.localScale = Vector3.one;
+        if(useAlpha) canvasGroup.alpha = 1;
+        
+        if(setInteractivity) canvasGroup.interactable = interactivityWhenOpened;
+        if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenOpened;
+        
+        SetState(State.Close);
+        
+        _currentRoutine = null;
     }
 
     private IEnumerator CloseRoutine(Action postAction = null)
     {
         InAnimation = true;
-        yield return AnimationRoutine(durationOut, targetPosition, curveOut, targetScale, curveOutScale, 0, alphaCurveOut,
+        OnClosingStart?.Invoke();
+        OnOpenOrCloseStart?.Invoke(false);
+        yield return AnimationRoutine(closeDuration, _anchoredPositionWhenClosed, curveOutMovement, closeScale, curveOutScale, 0, alphaCurveOut,
             () =>
             {
                 InAnimation = false;
                 Hide();
+                _currentRoutine = null;
                 postAction?.Invoke();
+                OnClosingEnd?.Invoke();
+                OnOpenOrCloseEnd?.Invoke(false);
             });
     }
 
     private IEnumerator OpenRoutine(Action postAction = null)
     {
         InAnimation = true;
-        yield return AnimationRoutine(durationIn, Vector3.zero, curveIn, Vector3.one, curveInScale, 1, alphaCurveIn,
+        OnOpeningStart?.Invoke();
+        OnOpenOrCloseStart?.Invoke(true);
+        yield return AnimationRoutine(openDuration, Vector3.zero, curveInMovement, Vector3.one, curveInScale, 1, alphaCurveIn,
             () =>
             {
                 InAnimation = false;
                 Show();
+                _currentRoutine = null;
                 postAction?.Invoke();
+                OnOpeningEnd?.Invoke();
+                OnOpenOrCloseEnd?.Invoke(true);
             });
     }
 
@@ -302,48 +328,32 @@ public class AnimatedContainer : MonoBehaviour
         float targetAlpha, AnimationCurve alphaCurve,
         Action postAction)
     {
+        canvasGroup.interactable = false;
+        
         float t = 0;
         
         Vector3 startPosition = RectTransform.anchoredPosition;
         Vector3 startScale = RectTransform.localScale;
         float startAlpha = 1 - targetAlpha;
 
-        Action step = null;
+        Action<float> step = null;
 
-        if (useMovement) step += () => RectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(t));
-        if (useScale) step += () => RectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(t));
-        if (useAlpha) step += () => canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, targetAlpha, alphaCurve.Evaluate(t));
+        if (useMovement) step += x => RectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(x));
+        if (useScale) step += x=> RectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(x));
+        if (useAlpha) step += x => canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, targetAlpha, alphaCurve.Evaluate(x));
 
+        if (setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenClosed;
+        if (setInteractivity) canvasGroup.interactable = interactivityWhenClosed;
+        
         do
         {
-            t += ((timeType == TimeType.Scaled) ? Time.deltaTime : Time.unscaledDeltaTime) / duration;
-            step?.Invoke();
+            t += ((Time == TimeScale.Scaled) ? UnityEngine.Time.deltaTime : UnityEngine.Time.unscaledDeltaTime) / duration;
+            step?.Invoke(t);
             yield return null;
         } while (t < 1);
         postAction?.Invoke();
     }
-
-    private float lastValue = 0;
-
-    [Button]
-    internal void SetValue(float currentFill)
-    {
-        if (lastValue < currentFill)
-            SetValue(currentFill, curveIn, curveInScale, alphaCurveIn);
-        else
-            SetValue(currentFill, curveOut, curveOutScale, alphaCurveOut);
-
-        lastValue = currentFill;
-    }
-
-    public void SetValue(float currentFill, AnimationCurve movementCurve, AnimationCurve scaleCurve, AnimationCurve alphaCurveIn)
-    {
-        Vector3 startPosition = GetTargetPosition();
-        if (useMovement) RectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, Vector3.zero, movementCurve.Evaluate(currentFill));
-        if (useScale) RectTransform.localScale = Vector3.LerpUnclamped(Vector3.zero, Vector3.one, scaleCurve.Evaluate(currentFill));
-        if (useAlpha) canvasGroup.alpha = Mathf.LerpUnclamped(0, 1, alphaCurveIn.Evaluate(currentFill));
-    }
-
+    
     public void Toggle(bool animated)
     {
         if (animated)
