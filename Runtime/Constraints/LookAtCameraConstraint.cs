@@ -29,7 +29,9 @@ public class LookAtCameraConstraint : MonoBehaviour
         constraint.locked = false;
         constraint.rotationOffset = offset;
     }
-    private void OnDisable() => constraint.RemoveSource(0);
-    
+    private void OnDisable()
+    {
+        if(constraint) constraint.RemoveSource(0);
+    }
     
 }
