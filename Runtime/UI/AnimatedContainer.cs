@@ -160,11 +160,6 @@ public class AnimatedContainer : MonoBehaviour
         if (IsInitialized) return;
         IsInitialized = true;
 
-        if (RectTransform == null)
-            _rectTransform = transform as RectTransform;
-
-        _parent = transform.parent as RectTransform;
-
         if (useMovement)
         {
             SetDirection(direction);
@@ -183,7 +178,7 @@ public class AnimatedContainer : MonoBehaviour
     public void SetDirection(Direction nDirection, bool overrideCurrentPosition = false)
     {
         UpdateAnchoredClosePosition(nDirection);
-        if (overrideCurrentPosition) _rectTransform.anchoredPosition = _anchoredPositionWhenClosed;
+        if (overrideCurrentPosition) RectTransform.anchoredPosition = _anchoredPositionWhenClosed;
     }
 
     private void UpdateAnchoredClosePosition(Direction nDirection)
@@ -191,19 +186,19 @@ public class AnimatedContainer : MonoBehaviour
         switch (nDirection)
         {
             case Direction.Right:
-                _anchoredPositionWhenClosed = Vector3.right * (useParentSizeForDisplacement ? Parent.rect.width : _rectTransform.rect.width);
+                _anchoredPositionWhenClosed = Vector3.right * (useParentSizeForDisplacement ? Parent.rect.width : RectTransform.rect.width);
                 break;
             case Direction.Left:
                 _anchoredPositionWhenClosed =
-                    Vector3.left * (useParentSizeForDisplacement ? Parent.rect.width : _rectTransform.rect.width);
+                    Vector3.left * (useParentSizeForDisplacement ? Parent.rect.width : RectTransform.rect.width);
                 break;
             case Direction.Up:
                 _anchoredPositionWhenClosed =
-                    Vector3.up * (useParentSizeForDisplacement ? Parent.rect.height : _rectTransform.rect.height);
+                    Vector3.up * (useParentSizeForDisplacement ? Parent.rect.height : RectTransform.rect.height);
                 break;
             case Direction.Down:
                 _anchoredPositionWhenClosed = Vector3.down *
-                                 (useParentSizeForDisplacement ? Parent.rect.height : _rectTransform.rect.height);
+                                 (useParentSizeForDisplacement ? Parent.rect.height : RectTransform.rect.height);
                 break;
         }
     }
@@ -328,7 +323,6 @@ public class AnimatedContainer : MonoBehaviour
         float targetAlpha, AnimationCurve alphaCurve,
         Action postAction)
     {
-        canvasGroup.interactable = false;
         
         float t = 0;
         
