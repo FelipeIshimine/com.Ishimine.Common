@@ -1,7 +1,11 @@
 {
     "name": "UIEffect-Editor",
     "references": [
-        "UIEffect"
+        "UIEffect",
+        "UnityEditor.UI",
+        "UnityEngine.UI",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [
