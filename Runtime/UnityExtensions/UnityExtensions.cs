@@ -182,7 +182,16 @@ public static class UnityExtensions
         return new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
     }
   
-    
+    public static void Shuffle<T>(this IList<T> list)  
+    {  
+        int n = list.Count;  
+        while (n > 1) 
+        {  
+            n--;
+            int k = Random.Range(0, n + 1);  
+            (list[k], list[n]) = (list[n], list[k]);
+        }  
+    }
 
     public static Vector2 ClampPositionToView(this Camera camera, Vector2 value)
     {
