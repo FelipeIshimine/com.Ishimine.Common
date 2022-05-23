@@ -141,7 +141,6 @@ public class AnimatedContainer : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException();
         }
-        Debug.Log($"SetState:{nState}");
         OnStateChange?.Invoke(CurrentState);
     }
 
