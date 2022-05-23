@@ -141,6 +141,7 @@ public class AnimatedContainer : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException();
         }
+        Debug.Log($"SetState:{nState}");
         OnStateChange?.Invoke(CurrentState);
     }
 
@@ -278,7 +279,7 @@ public class AnimatedContainer : MonoBehaviour
         if(setInteractivity) canvasGroup.interactable = interactivityWhenOpened;
         if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenOpened;
         
-        SetState(State.Close);
+        SetState(State.Open);
         
         _currentRoutine = null;
     }
@@ -352,14 +353,14 @@ public class AnimatedContainer : MonoBehaviour
     {
         if (animated)
         {
-            if (IsOpen)
+            if (IsOpen || IsOpening)
                 Close();
             else
                 Open();
         }
         else
         {
-            if (IsOpen)
+            if (IsOpen || IsOpening)
                 Hide();
             else
                 Show();
