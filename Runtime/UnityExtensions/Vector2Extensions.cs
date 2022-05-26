@@ -44,16 +44,9 @@ public static class Vector2Extensions
     {
         return GetDifference(startPos, endPos).magnitude;
     }
-    
-    public static float GetPercentageFor(this Vector2 source, float value, bool clamp)
-    {
-        if (clamp)
-        {
-            if (value < source.x) return 0;
-            if (value > source.y) return 1;
-        }
-        return (value - source.x) / (source.y - source.x);
-    }
+
+    public static float GetPercentageFor(this Vector2 source, float value, bool clamp) =>
+        value.GetAsPercentageBetween(source, clamp);
     
     
     public static Vector2 GetDifference(this Vector2 startPos, Vector2 endPos) => (endPos - startPos);
