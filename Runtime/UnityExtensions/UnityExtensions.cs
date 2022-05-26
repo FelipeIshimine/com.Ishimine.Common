@@ -430,23 +430,19 @@ public static class UnityExtensions
             (value.GetHashCode() / 256f * 3) % 1);
     }
 
-    public static float GetAsMinMaxPercentageFor(this float value, Vector2 minMaxValues, bool capAtOne)
+    public static float GetAsPercentageBetween(this float value, float floor, float ceil, bool clamp)
     {
-        if (value < minMaxValues.x) return 0;
-
-        if (capAtOne)
+        if (clamp)
         {
-            return
-                Mathf.Min(
-            (value - minMaxValues.x) /
-            (minMaxValues.y - minMaxValues.x), 1);
+            if (value > ceil) return 1;
+            if (value < floor) return 0;
         }
-        else
-            return
-            (value - minMaxValues.x) /
-            (minMaxValues.y - minMaxValues.x);
+        return (value - floor) / (ceil - floor);
     }
 
+    public static float GetAsPercentageBetween(this float value, Vector2 range, bool clamp) => GetAsPercentageBetween(
+        value, range.x, range.y
+        , clamp);
 
     public static IList<T> CollectComponents<T>(this IList<GameObject> value) where T : Component
     {
