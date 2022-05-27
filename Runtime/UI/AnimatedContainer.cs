@@ -253,7 +253,7 @@ public class AnimatedContainer : MonoBehaviour
         
         if(useMovement) RectTransform.anchoredPosition = _anchoredPositionWhenClosed;
         if(useScale) RectTransform.localScale = closeScale;
-        if(useAlpha) canvasGroup.alpha = 1;
+        if(useAlpha) canvasGroup.alpha = alphaCurveOut.Evaluate(0);
 
         if(setInteractivity) canvasGroup.interactable = interactivityWhenClosed;
         if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenClosed;
