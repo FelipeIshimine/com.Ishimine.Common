@@ -172,16 +172,21 @@ public static class UnityExtensions
         return mask == (mask | (1 << layer));
     }
 
-    public static Vector2 AsVector(this float degree)
-    {
-        return RadianToVector2(degree * Mathf.Deg2Rad);
-    }
+    public static Vector2 AsVectorXY(this float degree) => RadianToVector2(degree * Mathf.Deg2Rad);
+    
+    public static Vector3 AsVectorXZ(this float degree) => RadianToVector3(degree * Mathf.Deg2Rad);
 
+    
     public static Vector2 RadianToVector2(float radian)
     {
         return new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
     }
-  
+
+    public static Vector3 RadianToVector3(float radian)
+    {
+        return new Vector3(Mathf.Cos(radian), 0,Mathf.Sin(radian));
+    }
+
     public static void Shuffle<T>(this IList<T> list)  
     {  
         int n = list.Count;  

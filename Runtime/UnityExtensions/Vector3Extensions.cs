@@ -16,24 +16,25 @@ public static class Vector3Extensions
         float num2 = a.z - b.z;
         return (float) System.Math.Sqrt((double) num1 * (double) num1 + (double) num2 * (double) num2);
     }
-    public static Vector3 GetDirection(this Vector3 startPos, Vector3 endPos) =>
-        GetDifference(startPos, endPos).normalized;
+    public static Vector3 GetDirection(this Vector3 startPos, Vector3 endPos) => GetDifference(startPos, endPos).normalized;
+
+    public static Vector3 GetDirectionXZ(this Vector3 startPos, Vector3 endPos) => GetDifferenceXZ(startPos,endPos).normalized;
+    
+    public static Vector3 GetDifferenceXZ(this Vector3 startPos, Vector3 endPos) => GetDifference(new Vector3(startPos.x,0,startPos.z), new Vector3(endPos.x,0,endPos.z));
 
     public static float GetMagnitude(this Vector3 startPos, Vector3 endPos) =>
         GetDifference(startPos, endPos).magnitude;
 
 
-    public static float GetSqrMagnitud(this Vector3 startPos, Vector3 endPos) =>
+    public static float GetSqrMagnitude(this Vector3 startPos, Vector3 endPos) =>
         GetDifference((Vector2)startPos, (Vector2)endPos).sqrMagnitude;
 
     public static Vector3 GetDifference(this Vector3 startPos, Vector3 endPos) => (endPos - startPos);
 
     public static float AsAngle2D(this Vector3 source) => Vector2Extensions.AsAngle(source);
 
-    public static float GetAngle(this Vector3 startPos, Vector3 endPos)
-    {
-        return GetAngle((Vector2)startPos, (Vector2)endPos);
-    }
+    public static float GetAngleXY(this Vector3 startPos, Vector3 endPos) => ((Vector2)startPos).GetAngle(endPos);
+    public static float GetAngleXZ(this Vector3 startPos, Vector3 endPos) => (new Vector2(startPos.x,startPos.z)).GetAngle(new Vector2(endPos.x,endPos.z));
 
     public static Vector3 SwapYZ(this Vector3 value)
     {
