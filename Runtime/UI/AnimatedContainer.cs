@@ -259,6 +259,8 @@ public class AnimatedContainer : MonoBehaviour
         if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenClosed;
         if (deactivateWhenClosed) gameObject.SetActive(false);
 
+        SetState(State.Close);
+
         _currentRoutine = null;
     }
 
