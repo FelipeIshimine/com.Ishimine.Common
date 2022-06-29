@@ -86,7 +86,7 @@ public class AnimationPlayer : MonoBehaviour
             });
     }
     
-    private void Play(AnimationClip clip, WrapMode mode)
+    public void Play(AnimationClip clip, WrapMode mode = WrapMode.None)
     {
         Play(new AnimationSettings()
         {
