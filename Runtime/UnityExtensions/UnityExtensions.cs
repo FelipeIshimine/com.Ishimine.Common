@@ -445,9 +445,8 @@ public static class UnityExtensions
         return (value - floor) / (ceil - floor);
     }
 
-    public static float GetAsPercentageBetween(this float value, Vector2 range, bool clamp) => GetAsPercentageBetween(
-        value, range.x, range.y
-        , clamp);
+    public static float GetAsPercentageBetween(this float value, Vector2 range, bool clamp) => GetAsPercentageBetween(value, range.x, range.y, clamp);
+    public static float GetAsPercentageBetween(this float value, Vector2Int range, bool clamp) => GetAsPercentageBetween(value, range.x, range.y, clamp);
 
     public static IList<T> CollectComponents<T>(this IList<GameObject> value) where T : Component
     {
