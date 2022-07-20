@@ -35,6 +35,16 @@ public static class UnityExtensions
         source.StartCoroutine(rutine);
     }
 
+    public static bool CanSee(this Camera cam, Vector3 pos, Vector3 boundSize) => CanSee(cam, new Bounds(pos, boundSize));
+    
+    public static bool CanSee(this Camera cam, Bounds bounds) 
+    {
+        var planes = GeometryUtility.CalculateFrustumPlanes(cam);
+        return GeometryUtility.TestPlanesAABB(planes, bounds);
+    }
+    
+    
+    
     public static IEnumerator CreateQuickSteppedRutine(this MonoBehaviour source, float duration, DeltaTimeType deltaTime, Action<float> step, Action callback = null)
     {
         Func<float> deltaStep;
