@@ -1,19 +1,19 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Animations;
 
-[RequireComponent(typeof(LookAtConstraint))]
-public class LookAtCameraConstraint : MonoBehaviour
+[RequireComponent(typeof(RotationConstraint))]
+public class CameraRotationConstraint : MonoBehaviour
 {
-    public LookAtConstraint constraint;
-
+    public RotationConstraint constraint;
     public Vector3 offset;
-    
-    private void Reset() => constraint = GetComponent<LookAtConstraint>();
+
+    private void Reset()
+    {
+        constraint = GetComponent<RotationConstraint>();
+        constraint.constraintActive = true;
+    }
 
     private void OnEnable()
     {
@@ -31,5 +31,4 @@ public class LookAtCameraConstraint : MonoBehaviour
     {
         if(constraint) constraint.RemoveSource(0);
     }
-    
 }
