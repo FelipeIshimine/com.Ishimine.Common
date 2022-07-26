@@ -23,4 +23,7 @@ public static class Vector3IntExtensions
         };
         return value;
     }
+
+    public static int TotalCount(this Vector3Int source) => source.x * source.y * source.z;
+
 }
