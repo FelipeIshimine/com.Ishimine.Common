@@ -24,6 +24,20 @@ public static class Vector3IntExtensions
         return value;
     }
 
+    public static Vector3Int GetIndexYZX(this Vector3Int source, int index)
+    {
+        Vector3Int value = new Vector3Int
+        {
+            y = index % source.y,
+            z = (index / source.y) % source.z,
+            x = index / (source.y * source.z)
+        };
+        return value;
+    }
+    
+    
+    
+
     public static int TotalCount(this Vector3Int source) => source.x * source.y * source.z;
 
 }
