@@ -228,6 +228,8 @@ public class AnimatedContainer : MonoBehaviour
 
     public void Open(Action postAction)
     {
+        if (CurrentState == State.Open) return;
+                
         if (!Application.isPlaying)
         {
             Debug.LogWarning("Can't play animation outside of Play State");
