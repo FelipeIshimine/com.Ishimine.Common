@@ -34,9 +34,10 @@ public static class Vector3IntExtensions
         };
         return value;
     }
-    
-    
-    
+
+    public static Vector2Int AsVector2Int(this Vector3Int @this) => new(@this.x, @this.y);
+    public static Vector2Int AsVector2IntXZ(this Vector3Int @this) => new(@this.x, @this.z);
+
 
     public static int TotalCount(this Vector3Int source) => source.x * source.y * source.z;
 

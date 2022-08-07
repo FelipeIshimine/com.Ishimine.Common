@@ -59,6 +59,44 @@ public static class Vector3Extensions
         return retValue;
     }
 
+    public static Vector2Int CubeToAxial(this Vector3Int @this) => new Vector2Int(@this.x, @this.y);
+
+    public static Vector3Int HexagonalRotationLeft(this Vector3Int @this) => HexagonalRotationLeft(@this, Vector3Int.zero);
+
+    public static Vector3Int HexagonalRotationLeft(this Vector3Int @this, Vector3Int pivot)
+    {
+        var coord = @this - pivot;
+
+        var old = coord;
+            
+        old.x -= (coord.y - (coord.y & 1)) / 2;
+
+        coord.x = -old.y;
+        coord.y = -(-old.x - old.y);
+
+        coord.x += (coord.y - (coord.y & 1)) / 2;
+
+        return coord + pivot;
+    }
+    
+    public static Vector3Int HexagonalRotationRight(this Vector3Int @this) => HexagonalRotationRight(@this, Vector3Int.zero);
+
+    public static Vector3Int HexagonalRotationRight(this Vector3Int @this, Vector3Int pivot)
+    {
+        var coord = @this - pivot;
+
+        var old = coord;
+            
+        old.x -= (coord.y - (coord.y & 1)) / 2;
+
+        coord.x = -(-old.x - old.y);
+        coord.y = -old.x;
+
+        coord.x += (coord.y - (coord.y & 1)) / 2;
+
+        return coord + pivot;
+    }
+    
 }
 
 

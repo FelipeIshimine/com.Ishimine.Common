@@ -12,4 +12,6 @@ public static class Vector2IntExtensions
 
     public static float GetPercentageFor(this Vector2Int source, float value, bool clamp) => value.GetAsPercentageBetween(source, clamp);
 
+    public static Vector3Int AxialToCube(this Vector2Int @this) => new Vector3Int(@this.x, @this.y, -@this.x-@this.y);
+
 }
