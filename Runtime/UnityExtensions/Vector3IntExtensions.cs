@@ -41,4 +41,9 @@ public static class Vector3IntExtensions
 
     public static int TotalCount(this Vector3Int source) => source.x * source.y * source.z;
 
+    public static Vector3Int SwapYZ(this Vector3Int value)
+    {
+        (value.y, value.z) = (value.z, value.y);
+        return value;
+    }
 }
