@@ -9,4 +9,6 @@ public static class ObjectExtensions
         list.Remove(source);
         return list.Find(x => x.name == source.name);
     }
+
+    
 }
