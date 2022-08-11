@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,7 +16,17 @@ public class CameraRotationConstraint : MonoBehaviour
         constraint.constraintActive = true;
     }
 
+    private void Start()
+    {
+        if(Camera.main) Initialize();
+    }
+
     private void OnEnable()
+    {
+        if(Camera.main) Initialize();
+    }
+
+    private void Initialize()
     {
         if (constraint.sourceCount > 0)
             for (int i = constraint.sourceCount - 1; i >= 0; i--)
@@ -27,6 +38,7 @@ public class CameraRotationConstraint : MonoBehaviour
         constraint.locked = false;
         constraint.rotationOffset = offset;
     }
+
     private void OnDisable()
     {
         if(constraint) constraint.RemoveSource(0);

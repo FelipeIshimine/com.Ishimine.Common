@@ -76,18 +76,14 @@ public abstract class PriorityQueue<T>
 }
 
 
-
-
-
-/*
-public abstract class IndexedPriorityQueue<T> : PriorityQueue<T>
+public abstract class PriorityQueue<T,TB> where TB : IComparable<TB>
 {
     public struct Element
     {
-        public readonly int Priority;
+        public readonly TB Priority;
         public readonly T Value;
 
-        public Element(int priority, T value)
+        public Element(TB priority, T value)
         {
             Priority = priority;
             Value = value;
@@ -96,12 +92,9 @@ public abstract class IndexedPriorityQueue<T> : PriorityQueue<T>
     
     protected Element[] Elements;
     protected int Size;
-    
-    
-    
     public int Count => Size;
 
-    protected IndexedPriorityQueue(int size)
+    protected PriorityQueue(int size)
     {
         Elements = new Element[size];
     }
@@ -114,9 +107,9 @@ public abstract class IndexedPriorityQueue<T> : PriorityQueue<T>
     protected bool HasRightChild(int elementIndex) => GetRightChildIndex(elementIndex) < Size;
     protected bool IsRoot(int elementIndex) => elementIndex == 0;
 
-    protected int GetLeftChildPriority(int elementIndex) => Elements[GetLeftChildIndex(elementIndex)].Priority;
-    protected int GetRightChildPriority(int elementIndex) => Elements[GetRightChildIndex(elementIndex)].Priority;
-    protected int GetParentPriority(int elementIndex) => Elements[GetParentIndex(elementIndex)].Priority;
+    protected TB GetLeftChildPriority(int elementIndex) => Elements[GetLeftChildIndex(elementIndex)].Priority;
+    protected TB GetRightChildPriority(int elementIndex) => Elements[GetRightChildIndex(elementIndex)].Priority;
+    protected TB GetParentPriority(int elementIndex) => Elements[GetParentIndex(elementIndex)].Priority;
 
     protected void Swap(int firstIndex, int secondIndex) => (Elements[firstIndex], Elements[secondIndex]) = (Elements[secondIndex], Elements[firstIndex]);
 
@@ -139,7 +132,7 @@ public abstract class IndexedPriorityQueue<T> : PriorityQueue<T>
         return result;
     }
     
-    public void Enqueue(int priority, T value)
+    public void Enqueue(TB priority, T value)
     {
         if (Size == Elements.Length)
         {
@@ -155,4 +148,4 @@ public abstract class IndexedPriorityQueue<T> : PriorityQueue<T>
     protected abstract void CalculateDown();
 
     protected abstract void CalculateUp();
-}*/
+}

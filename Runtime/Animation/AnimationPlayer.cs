@@ -43,6 +43,12 @@ public class AnimationPlayer : MonoBehaviour
     
     public class TransitionSettings
     {
+        public static readonly TransitionSettings Instant = new TransitionSettings()
+        {
+            Duration = 0f,
+            Callback = null
+        };
+        
         [MinValue(0)] public float Duration = .25f;
         public AnimationCurve Curve = AnimationCurve.Linear(0,0,1,1);
         public Action Callback;
