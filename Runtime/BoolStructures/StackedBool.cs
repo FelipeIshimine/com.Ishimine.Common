@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Unity.Plastic.Newtonsoft.Json.Serialization;
-using Action = Unity.Plastic.Newtonsoft.Json.Serialization.Action;
 
 public class StackedBool
 {
