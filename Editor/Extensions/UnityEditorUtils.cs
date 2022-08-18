@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 public static class UnityEditorUtils
@@ -35,5 +36,13 @@ public static class UnityEditorUtils
                     assets.Add(item);
         }
         return assets;
+    }
+    
+    public static Scene[] GetAllLoadedScenes()
+    {
+        List<Scene> scenes = new List<Scene>();
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+            scenes.Add(SceneManager.GetSceneAt(i));
+        return scenes.ToArray();
     }
 }
