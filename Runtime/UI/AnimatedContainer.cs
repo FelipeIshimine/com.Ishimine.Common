@@ -119,8 +119,7 @@ public class AnimatedContainer : MonoBehaviour
 
     private void SetAnimationRoutine(IEnumerator nRoutine)
     {
-        if(_currentRoutine != null)
-            Debug.LogWarning($"Cuidado: Se sobreescribio una rutina previa sin terminar. {transform.GetHierarchyAsString()}");
+        if(_currentRoutine != null) Debug.LogWarning($"Cuidado: Se sobreescribio una rutina previa sin terminar. {transform.GetHierarchyAsString(true)}");
         _currentRoutine = nRoutine;
     }
     

@@ -45,7 +45,7 @@ public class DropdownFromSceneDrawer : PropertyDrawer
 
         string buttonName = "NULL";
         if (property.objectReferenceValue != null)
-            buttonName = ((MonoBehaviour)property.objectReferenceValue).transform.GetHierarchyAsString();
+            buttonName = ((MonoBehaviour)property.objectReferenceValue).transform.GetHierarchyAsString(true);
         
         if (EditorGUI.DropdownButton(buttonPosition, new GUIContent(buttonName), FocusType.Keyboard))
         {
@@ -73,9 +73,9 @@ public class DropdownFromSceneDrawer : PropertyDrawer
 
                 string path;
 
-                if (behaviour != null)
+                if (behaviour)
                 {
-                    path = behaviour.transform.GetHierarchyAsString();
+                    path = behaviour.transform.GetHierarchyAsString(true);
                     if (!splitByHierarchy)
                         path = path.Replace("/", ">");
                 }

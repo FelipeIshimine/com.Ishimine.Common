@@ -37,7 +37,7 @@ public class FilterComponentDrawer : PropertyDrawer
         string buttonName = "NULL";
         if (property.objectReferenceValue != null)
         {
-            buttonName = ((Component)property.objectReferenceValue).transform.GetHierarchyAsString();
+            buttonName = ((Component)property.objectReferenceValue).transform.GetHierarchyAsString(true);
         }
         
         if (EditorGUI.DropdownButton(buttonPosition, new GUIContent(buttonName), FocusType.Keyboard))
@@ -71,7 +71,7 @@ public class FilterComponentDrawer : PropertyDrawer
                 int localIndex = index;
                 Component component = _components[localIndex];
                 
-                string path =component?component.transform.GetHierarchyAsString():"NULL";
+                string path =component?component.transform.GetHierarchyAsString(true):"NULL";
 
                 menu.AddItem(
                     new GUIContent(path),
