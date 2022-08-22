@@ -14,6 +14,21 @@ public static class ListExtensions
         return index;
     }
 
+    public static T FindLowest<T>(this IReadOnlyList<T> source, Func<T, float> testing)
+    {
+        float lowest = int.MaxValue;
+        T current = default(T);
+        for (int i = source.Count - 1; i >= 0; i--)
+        {
+            if (testing.Invoke(source[i]) < lowest)
+            {
+                lowest = testing.Invoke(source[i]);
+                current = source[i];
+            }
+        }
+        return current;
+    }
+    
     public static T FindLowest<T>(this List<T> source, Func<T, float> testing)
     {
         float lowest = int.MaxValue;
