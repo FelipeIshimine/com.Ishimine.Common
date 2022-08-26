@@ -10,9 +10,9 @@ public static class ScriptableObjectEditorUtils
     private static IEnumerable<Type> GetFilter(Type targetType)
     {
         return targetType.Assembly.GetTypes()
-            .Where(x => !x.IsAbstract)                                          // Excludes BaseClass
-            .Where(x => !x.IsGenericTypeDefinition)                             // Excludes C1<>
-            .Where(targetType.IsAssignableFrom);                 
+            .Where(x => !x.IsAbstract) // Excludes BaseClass
+            .Where(x => !x.IsGenericTypeDefinition) // Excludes C1<>
+            .Where(targetType.IsAssignableFrom);
     }
 
     [Button]
@@ -20,8 +20,8 @@ public static class ScriptableObjectEditorUtils
     {
 #if UNITY_EDITOR
         var filteredTypes = new List<Type>(GetFilter(typeof(T)));
-        
-        if(filteredTypes.Count > 1)
+
+        if (filteredTypes.Count > 1)
         {
             Sirenix.OdinInspector.Editor.TypeSelector selector =
                 new Sirenix.OdinInspector.Editor.TypeSelector(filteredTypes, false);
@@ -39,13 +39,25 @@ public static class ScriptableObjectEditorUtils
         nScriptableObject.name = nName;
         return nScriptableObject as T;
     }
-   
+
     [Button]
     public static void Destroy(ScriptableObject scriptableObject)
     {
-        UnityEngine.Object.DestroyImmediate(scriptableObject,true);
+        UnityEngine.Object.DestroyImmediate(scriptableObject, true);
 #if UNITY_EDITOR
         AssetDatabase.SaveAssets();
 #endif
+
     }
+
+    public static void CreateScriptableChildren<T>(this ScriptableObject @this, string name, List<T> list = null) where T : ScriptableObject
+    {
+        void Add(T obj)
+        {
+            AssetDatabase.AddObjectToAsset(obj, @this);
+            list?.Add(obj);
+        }
+        CreateNew<T>(name, Add);
+    }
+
 }
