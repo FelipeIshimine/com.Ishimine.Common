@@ -5,7 +5,7 @@ using UnityEngine.Tilemaps;
 
 public static class TileMapExtensions
 {
-    public static Vector3Int[] FindAllCoordinates(this Tilemap tilemap, Func<TileBase,bool> validator)
+    public static Vector3Int[] FindAllCoordinates(this Tilemap tilemap, Predicate<TileBase> predicate)
     {
         BoundsInt boundsInt = tilemap.cellBounds;
         List<Vector3Int> coordinates = new List<Vector3Int>();
@@ -15,7 +15,7 @@ public static class TileMapExtensions
         for (int x = boundsInt.xMin; x < boundsInt.xMax; x++)
         {
             var coordinate = new Vector3Int(x, y, z);
-            if(validator.Invoke(tilemap.GetTile(coordinate)))
+            if(predicate.Invoke(tilemap.GetTile(coordinate)))
                 coordinates.Add(coordinate);
         }
         return coordinates.ToArray();
