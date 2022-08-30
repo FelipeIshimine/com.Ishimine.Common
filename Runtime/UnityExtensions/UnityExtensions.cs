@@ -432,10 +432,12 @@ public static class UnityExtensions
   
     public static Color ColorFromString(this string value)
     {
+        var hashCode = value.GetHashCode();
         return new Color(
-            (value.GetHashCode() / 256f * 3) % 1,
-            (value.GetHashCode() / 256f * 6) % 1,
-            (value.GetHashCode() / 256f * 3) % 1);
+            (byte)((hashCode) & 0xFF),
+            (byte)((hashCode>>8) & 0xFF),
+            (byte)((hashCode>>16) & 0xFF),
+            (byte)((hashCode>>24) & 0xFF));
     }
 
     public static float GetAsPercentageBetween(this float value, float floor, float ceil, bool clamp)
