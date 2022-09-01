@@ -214,23 +214,16 @@ public static class UnityExtensions
         return new Vector2(Mathf.Clamp(value.x, -hSize, hSize), Mathf.Clamp(value.y, -camera.orthographicSize, camera.orthographicSize)) + (Vector2)camera.transform.position;
     }
 
-  
-  
     public static bool IsInsideCameraView(this Camera camera, Vector2 value)
     {
         value -= (Vector2)camera.transform.position;
         return Mathf.Abs(value.y) < camera.orthographicSize && Mathf.Abs(value.x) < camera.GetHorizontalSize();
     }
 
-    public static float GetHorizontalSize(this Camera camera)
-    {
-        return camera.aspect * camera.orthographicSize * 2;
-    }
+    public static float GetHorizontalSize(this Camera camera) => camera.aspect * camera.orthographicSize;
+    public static float SetHorizontalSize(this Camera camera, float size) => camera.orthographicSize = size / camera.aspect;
 
-    public static Vector2 GetOrtographicSize(this Camera camera)
-    {
-        return new Vector2(camera.GetHorizontalSize(), camera.orthographicSize * 2);
-    }
+    public static Vector2 GetOrthographicSize(this Camera camera) => new Vector2(camera.GetHorizontalSize(), camera.orthographicSize * 2);
 
     public static bool ContainsInLocalSpace(this BoxCollider2D boxCollider2D, Vector2 worldSpacePoint)
     {
@@ -449,10 +442,12 @@ public static class UnityExtensions
   
     public static Color ColorFromString(this string value)
     {
+        var hashCode = value.GetHashCode();
         return new Color(
-            (value.GetHashCode() / 256f * 3) % 1,
-            (value.GetHashCode() / 256f * 6) % 1,
-            (value.GetHashCode() / 256f * 3) % 1);
+            (byte)((hashCode) & 0xFF),
+            (byte)((hashCode>>8) & 0xFF),
+            (byte)((hashCode>>16) & 0xFF),
+            (byte)((hashCode>>24) & 0xFF));
     }
 
     public static float GetAsPercentageBetween(this float value, float floor, float ceil, bool clamp)
