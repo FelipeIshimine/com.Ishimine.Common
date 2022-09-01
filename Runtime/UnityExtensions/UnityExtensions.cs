@@ -361,6 +361,16 @@ public static class UnityExtensions
 
         return value[Random.Range(0, value.Count)];
     }
+    
+    public static T ExtractRandom<T>(this List<T> value)
+    {
+        if (value.Count == 0) throw new Exception("List is empty");
+
+        var index = Random.Range(0, value.Count);
+        var result = value[index];
+        value.RemoveAt(index);
+        return result;
+    }
 
     public static List<T> GetRandom<T>(this IReadOnlyList<T> value, int count, bool canRepeat)
     {
