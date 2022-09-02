@@ -73,7 +73,7 @@ public static class ListExtensions
         return values;
     }
     
-    public static T Take<T>(this List<T> source, int index, bool removePosition = true) 
+    public static T TakeAt<T>(this List<T> source, int index, bool removePosition = true) 
     {
         var value = source[index];
         if (removePosition) 
