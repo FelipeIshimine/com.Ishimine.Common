@@ -91,6 +91,15 @@ public static class ListExtensions
             (source[i], source[j]) = (source[j], source[i]);
         }
     }
+    
+    public static void ThreadSafeShuffle<T>(this List<T> source, Random random)
+    {
+        for (int i = source.Count - 1; i >= 0; i--)
+        {
+            int j = random.Next(0, i);
+            (source[i], source[j]) = (source[j], source[i]);
+        }
+    }
 
     public static int FindMinIndex<T>(this List<T> source, Func<T, float> function)
     {

@@ -18,7 +18,9 @@ public class IndexPriorityQueue
     public IReadOnlyList<int> PositionToIndex => _positionToIndex;
     public IReadOnlyList<int> IndexToPosition => _indexToPosition;
 
-    public IndexPriorityQueue(int capacity)
+    private Func<int, int, bool> _compare;
+
+    public IndexPriorityQueue(int capacity, bool reversePriority = false)
     {
         MaxSize = capacity;
         Size = 0;
@@ -32,6 +34,8 @@ public class IndexPriorityQueue
             _positionToIndex[index] = -1;
             _indexToPosition[index] = -1;
         }
+
+        _compare = reversePriority ? ReverseCompare : Compare;
     }
 
     public void Enqueue(int index, int priority)
@@ -92,7 +96,7 @@ public class IndexPriorityQueue
 
     private void Up(int index)
     {
-        while (HasParent(index) && Compare(index, GetParentIndex(index)))
+        while (HasParent(index) && _compare(index, GetParentIndex(index)))
         {
             int parentIndex = GetParentIndex(index);
             Swap(index,parentIndex);
@@ -108,12 +112,12 @@ public class IndexPriorityQueue
 
             bool hasRightChild = HasRightChild(iPos);
             
-            if (hasRightChild && Compare(GetRightChildIndexPos(iPos), smallestChildIPosition))
+            if (hasRightChild && _compare(GetRightChildIndexPos(iPos), smallestChildIPosition))
             {
                 smallestChildIPosition = GetRightChildIndexPos(iPos);
             }
 
-            if (Compare(iPos,smallestChildIPosition))
+            if (_compare(iPos,smallestChildIPosition))
                 break;
             
             Swap(iPos,smallestChildIPosition);
@@ -132,6 +136,21 @@ public class IndexPriorityQueue
             throw new Exception($"i:{i} j:{j} {_priority.Length} Vi:{_positionToIndex[i]} Vj:{_positionToIndex[j]}");
         }
     } 
+    
+    private bool ReverseCompare(int i, int j)
+    {
+        try
+        {
+            return _priority[_positionToIndex[i]] > _priority[_positionToIndex[j]];
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"i:{i} j:{j} {_priority.Length} Vi:{_positionToIndex[i]} Vj:{_positionToIndex[j]}");
+        }
+    } 
+
+    
+    
 
     private void Swap(int i, int j)
     {
