@@ -7,6 +7,7 @@ using UnityEngine.Animations;
 using UnityEngine.Playables;
 using UnityEngine.Serialization;
 
+[DefaultExecutionOrder(1)]
 public class AnimationPlayer : MonoBehaviour
 {
     private PlayableGraph _graph;
@@ -24,6 +25,7 @@ public class AnimationPlayer : MonoBehaviour
     [Tooltip("If TRUE, an overwritten animation may not invoke their Callback")]
     public bool canSkipAnimationCallback = false;
 
+    private bool _initialized = false;
     public enum WrapMode
     {
         None,
@@ -33,8 +35,6 @@ public class AnimationPlayer : MonoBehaviour
     
     public class AnimationSettings
     {
-     
-
         public WrapMode Mode;
         public AnimationClip Clip;
         [MinValue(0)] public float Speed = 1;
@@ -68,14 +68,22 @@ public class AnimationPlayer : MonoBehaviour
         public float Progress;
     }
 
+    
     private void Awake()
     {
+        //Initialize();
+    }
+
+    public void Initialize()
+    {
+        if (_initialized) return;
+        
+        _initialized = true;
         Animator.fireEvents = useAnimationEvents;
         _graph = PlayableGraph.Create(name);
         _output = AnimationPlayableOutput.Create(_graph, "Output", Animator);
         _graph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
         _graph.Play();
-
         PlayFallbackAnimation();
     }
 
@@ -106,6 +114,8 @@ public class AnimationPlayer : MonoBehaviour
     
     public void Play(AnimationSettings animationSettings, TransitionSettings transitionSettings)
     {
+        if(!_initialized) Initialize();
+        
         var prevAnimationPlayable = _mixerPlayable;
         _mixerPlayable = AnimationMixerPlayable.Create(_graph, 2);
 
@@ -158,6 +168,8 @@ public class AnimationPlayer : MonoBehaviour
 
     private void Update()
     {
+        if(!_initialized) return;
+        
         var keys = new List<AnimationClipPlayable>(_playableCallbacks.Keys);
         for (var index = keys.Count - 1; index >= 0; index--)
         {
@@ -212,12 +224,14 @@ public class AnimationPlayer : MonoBehaviour
 
     private void OnDisable()
     {
-        _graph.Stop();
+        if(_initialized)
+            _graph.Stop();
     }
 
     private void OnEnable()
     {
-        _graph.Play();
+        if(_initialized)
+            _graph.Play();
     }
 
 
