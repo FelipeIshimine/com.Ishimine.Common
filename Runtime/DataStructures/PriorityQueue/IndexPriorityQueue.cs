@@ -18,11 +18,12 @@ public class IndexPriorityQueue
     public IReadOnlyList<int> PositionToIndex => _positionToIndex;
     public IReadOnlyList<int> IndexToPosition => _indexToPosition;
 
-    private Func<int, int, bool> _compare;
+    public readonly bool _revertOrder;
 
-    public IndexPriorityQueue(int capacity, bool reversePriority = false)
+    public IndexPriorityQueue(int capacity, bool revertOrder = false)
     {
         MaxSize = capacity;
+        _revertOrder = revertOrder;
         Size = 0;
         _priority = new int[capacity];
         _positionToIndex = new int[capacity];
@@ -34,12 +35,12 @@ public class IndexPriorityQueue
             _positionToIndex[index] = -1;
             _indexToPosition[index] = -1;
         }
-
-        _compare = reversePriority ? ReverseCompare : Compare;
     }
 
     public void Enqueue(int index, int priority)
     {
+        if (_revertOrder) priority *= -1;
+        
         if (_contains[index])
             throw new Exception("Value already in queue");
         
@@ -54,8 +55,8 @@ public class IndexPriorityQueue
 
     public bool IsEmpty() => Size == 0;
 
-    public int PeekPriority() => _positionToIndex[0];
-    public int PeekIndex() => _priority[_positionToIndex[0]];
+    public int PeekPriority() => _priority[_positionToIndex[0]];
+    public int PeekIndex() => _positionToIndex[0];
 
     public int DequeueIndex()
     {
@@ -79,6 +80,8 @@ public class IndexPriorityQueue
 
     public void Update(int index, int priority)
     {
+        if (_revertOrder) priority *= -1;
+
         if(!_contains[index])
             throw new Exception($"Index:{index} not in queue");
 
@@ -96,7 +99,7 @@ public class IndexPriorityQueue
 
     private void Up(int index)
     {
-        while (HasParent(index) && _compare(index, GetParentIndex(index)))
+        while (HasParent(index) && Compare(index, GetParentIndex(index)))
         {
             int parentIndex = GetParentIndex(index);
             Swap(index,parentIndex);
@@ -112,12 +115,12 @@ public class IndexPriorityQueue
 
             bool hasRightChild = HasRightChild(iPos);
             
-            if (hasRightChild && _compare(GetRightChildIndexPos(iPos), smallestChildIPosition))
+            if (hasRightChild && Compare(GetRightChildIndexPos(iPos), smallestChildIPosition))
             {
                 smallestChildIPosition = GetRightChildIndexPos(iPos);
             }
 
-            if (_compare(iPos,smallestChildIPosition))
+            if (Compare(iPos,smallestChildIPosition))
                 break;
             
             Swap(iPos,smallestChildIPosition);
@@ -136,21 +139,6 @@ public class IndexPriorityQueue
             throw new Exception($"i:{i} j:{j} {_priority.Length} Vi:{_positionToIndex[i]} Vj:{_positionToIndex[j]}");
         }
     } 
-    
-    private bool ReverseCompare(int i, int j)
-    {
-        try
-        {
-            return _priority[_positionToIndex[i]] > _priority[_positionToIndex[j]];
-        }
-        catch (Exception e)
-        {
-            throw new Exception($"i:{i} j:{j} {_priority.Length} Vi:{_positionToIndex[i]} Vj:{_positionToIndex[j]}");
-        }
-    } 
-
-    
-    
 
     private void Swap(int i, int j)
     {
@@ -175,13 +163,22 @@ public class IndexPriorityQueue
     private int MaxValue() => int.MaxValue;
     private int MinValue() => int.MinValue;
 
-    public void EnqueueOrUpdate(int index, int i)
+    public void EnqueueOrUpdate(int index, int priority)
     {
+        if (_revertOrder) priority *= -1;
+
         if(_contains[index])
-            Update(index,i);
+            Update(index,priority);
         else
-            Enqueue(index,i);
+            Enqueue(index,priority);
     }
 
     public bool Contains(int index) => _contains[index];
+
+    public (int index, int priority) Dequeue()
+    {
+        var priority = PeekPriority();
+        var index = DequeueIndex();
+        return (index, priority);
+    }
 }

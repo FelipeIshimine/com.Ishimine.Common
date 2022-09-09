@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-public class MinPriorityQueue<T> : PriorityQueue<T>
+﻿public class MinPriorityQueue<T> : PriorityQueue<T>
 {
     public MinPriorityQueue(int size) : base(size)
     {
     }
-
 
     protected override void CalculateDown()
     {
@@ -33,45 +29,6 @@ public class MinPriorityQueue<T> : PriorityQueue<T>
     {
         var index = Size - 1;
         while (!IsRoot(index) && Elements[index].Priority < GetParentPriority(index))
-        {
-            var parentIndex = GetParentIndex(index);
-            Swap(parentIndex, index);
-            index = parentIndex;
-        }
-    }
-}
-
-public class MinPriorityQueue<T,TB> : PriorityQueue<T,TB> where TB : IComparable<TB>
-{
-    public MinPriorityQueue(int size) : base(size)
-    {
-    }
-
-    protected override void CalculateDown()
-    {
-        int index = 0;
-        while (HasLeftChild(index))
-        {
-            var smallerIndex = GetLeftChildIndex(index);
-            if (HasRightChild(index) && GetRightChildPriority(index).CompareTo(GetLeftChildPriority(index)) < 0)
-            {
-                smallerIndex = GetRightChildIndex(index);
-            }
-
-            if (Elements[smallerIndex].Priority.CompareTo(Elements[index].Priority) >= 0)
-            {
-                break;
-            }
-
-            Swap(smallerIndex, index);
-            index = smallerIndex;
-        }
-    }
-
-    protected override void CalculateUp()
-    {
-        var index = Size - 1;
-        while (!IsRoot(index) && Elements[index].Priority.CompareTo(GetParentPriority(index)) < 0)
         {
             var parentIndex = GetParentIndex(index);
             Swap(parentIndex, index);

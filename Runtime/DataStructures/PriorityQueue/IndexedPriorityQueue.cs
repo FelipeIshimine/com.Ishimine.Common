@@ -113,7 +113,7 @@ public sealed class IndexedPriorityQueue<T> where T : IComparable
     /// 
     /// index of the value to set
     /// new value
-    public void Set( int index, T obj )
+    public void Set(int index, T obj )
     {
         if ( obj.CompareTo( m_objects[index] ) <= 0 )
         {

@@ -10,12 +10,12 @@
         while (HasLeftChild(index))
         {
             var smallerIndex = GetLeftChildIndex(index);
-            if (HasRightChild(index) && GetRightChildPriority(index) < GetLeftChildPriority(index))
+            if (HasRightChild(index) && GetRightChildPriority(index) > GetLeftChildPriority(index))
             {
                 smallerIndex = GetRightChildIndex(index);
             }
 
-            if (Elements[smallerIndex].Priority >= Elements[index].Priority)
+            if (Elements[smallerIndex].Priority <= Elements[index].Priority)
             {
                 break;
             }
@@ -28,7 +28,7 @@
     protected override void CalculateUp()
     {
         var index = Size - 1;
-        while (!IsRoot(index) && Elements[index].Priority < GetParentPriority(index))
+        while (!IsRoot(index) && Elements[index].Priority > GetParentPriority(index))
         {
             var parentIndex = GetParentIndex(index);
             Swap(parentIndex, index);
