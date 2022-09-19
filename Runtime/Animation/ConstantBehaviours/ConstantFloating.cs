@@ -11,6 +11,8 @@ public class ConstantFloating : MonoBehaviour
 
     private float _time;
     private Vector3 _offset;
+
+    [SerializeField] private Vector3 extraOffset;
     
     private void Start()
     {
@@ -27,8 +29,8 @@ public class ConstantFloating : MonoBehaviour
         _time += Time.deltaTime * speed * Mathf.PI;
         //transform.localPosition = _offset + Mathf.Sin(_time) * height * Vector3.up;
         if (horizontal)
-            transform.localPosition = new Vector3(_offset.x + Mathf.Sin(_time) * height, transform.localPosition.y, transform.localPosition.z);
+            transform.localPosition = new Vector3(_offset.x + Mathf.Sin(_time) * height, _offset.y, _offset.z) + extraOffset;
         else
-            transform.localPosition = new Vector3(transform.localPosition.x, _offset.y + Mathf.Sin(_time) * height, transform.localPosition.z);
+            transform.localPosition = new Vector3(_offset.x, _offset.y + Mathf.Sin(_time) * height, _offset.z) + extraOffset;
     }
 }
