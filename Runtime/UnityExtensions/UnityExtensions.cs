@@ -210,20 +210,20 @@ public static class UnityExtensions
 
     public static Vector2 ClampPositionToView(this Camera camera, Vector2 value)
     {
-        float hSize = GetHorizontalSize(camera);
+        float hSize = GetHorizontalExtents(camera);
         return new Vector2(Mathf.Clamp(value.x, -hSize, hSize), Mathf.Clamp(value.y, -camera.orthographicSize, camera.orthographicSize)) + (Vector2)camera.transform.position;
     }
 
     public static bool IsInsideCameraView(this Camera camera, Vector2 value)
     {
         value -= (Vector2)camera.transform.position;
-        return Mathf.Abs(value.y) < camera.orthographicSize && Mathf.Abs(value.x) < camera.GetHorizontalSize();
+        return Mathf.Abs(value.y) < camera.orthographicSize && Mathf.Abs(value.x) < camera.GetHorizontalExtents();
     }
 
-    public static float GetHorizontalSize(this Camera camera) => camera.aspect * camera.orthographicSize;
-    public static float SetHorizontalSize(this Camera camera, float size) => camera.orthographicSize = size / camera.aspect;
+    public static float GetHorizontalExtents(this Camera camera) => camera.aspect * camera.orthographicSize;
+    public static float SetHorizontalExtent(this Camera camera, float size) => camera.orthographicSize = size / camera.aspect;
 
-    public static Vector2 GetOrthographicSize(this Camera camera) => new Vector2(camera.GetHorizontalSize(), camera.orthographicSize * 2);
+    public static Vector2 GetOrthographicSize(this Camera camera) => new Vector2(camera.GetHorizontalExtents()*2, camera.orthographicSize * 2);
 
     public static bool ContainsInLocalSpace(this BoxCollider2D boxCollider2D, Vector2 worldSpacePoint)
     {
