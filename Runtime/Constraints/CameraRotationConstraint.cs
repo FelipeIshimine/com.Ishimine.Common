@@ -18,22 +18,22 @@ public class CameraRotationConstraint : MonoBehaviour
 
     private void Start()
     {
-        if(Camera.main) Initialize();
+        if(Camera.main) Initialize(Camera.main);
     }
 
     private void OnEnable()
     {
-        if(Camera.main) Initialize();
+        if(Camera.main) Initialize(Camera.main);
     }
 
-    private void Initialize()
+    public void Initialize(Camera cam)
     {
         if (constraint.sourceCount > 0)
             for (int i = constraint.sourceCount - 1; i >= 0; i--)
                 constraint.RemoveSource(i);
 
         constraint.AddSource(new ConstraintSource()
-            { sourceTransform = Camera.main.transform, weight = 1 });
+            { sourceTransform = cam.transform, weight = 1 });
 
         constraint.locked = false;
         constraint.rotationOffset = offset;
