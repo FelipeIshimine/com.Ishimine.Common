@@ -227,7 +227,11 @@ public class AnimatedContainer : MonoBehaviour
 
     public void Open(Action postAction)
     {
-        if (CurrentState == State.Open) return;
+        if (CurrentState == State.Open)
+        {
+            postAction?.Invoke();
+            return;
+        }
                 
         if (!Application.isPlaying)
         {
