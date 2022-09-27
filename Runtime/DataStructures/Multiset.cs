@@ -26,4 +26,21 @@ public class Multiset<T>
 
     public int GetValue(T value) => _values[value];
 
+    public T GetMax()
+    {
+        T value = default;
+        int maxValue = -1;
+
+        var keys = new List<T>(Keys);
+        for (int i = 0; i < keys.Count; i++)
+        {
+            if (_values[keys[i]] > maxValue)
+            {
+                value = keys[i];
+                maxValue = _values[keys[i]];
+            }
+        }
+
+        return value;
+    }
 }
