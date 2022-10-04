@@ -35,7 +35,7 @@ public class ScriptableObjectDropdownDrawer : PropertyDrawer
         if (EditorGUI.DropdownButton(buttonPosition, new GUIContent(current != null?current.name:"Null"), FocusType.Keyboard))
         {
             GenericMenu menu = new GenericMenu();
-            sObjects = UnityEditorExtensions.FindAssetsByType(targetType);
+            sObjects = UnityEditorUtils.FindAssetsByType(targetType);
             sObjects.Insert(0, null);
             for (var index = 0; index < sObjects.Count; index++)
             {
@@ -64,7 +64,7 @@ public class ScriptableObjectDropdownDrawer : PropertyDrawer
             property.objectReferenceValue = sObjects[_index];
         else
         {
-            sObjects = UnityEditorExtensions.FindAssetsByType(targetType);
+            sObjects = UnityEditorUtils.FindAssetsByType(targetType);
             if(current != null) _index = sObjects.FindIndex(x => x.name == current.name);
             if (_index == -1)
                 _index = 0;
