@@ -10,8 +10,8 @@ public class BaseMonoSingleton<T> : MonoBehaviour where T : BaseMonoSingleton<T>
 
     private static T _instance = null;
 
-    public static T Instance => _instance;
-
+    public static T Instance => _instance ??= FindObjectOfType<T>();
+    
     protected virtual void Awake()
     {
         if (Instance != null)
