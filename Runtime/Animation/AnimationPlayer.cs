@@ -158,7 +158,7 @@ public class AnimationPlayer : MonoBehaviour
 
     private void OnDestroy()
     {
-        _graph.Destroy();
+        if(_graph.IsValid()) _graph.Destroy();
     }
 
     private void Reset()
