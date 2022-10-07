@@ -10,11 +10,12 @@ public class BaseMonoSingleton<T> : MonoBehaviour where T : BaseMonoSingleton<T>
 
     private static T _instance = null;
 
-    public static T Instance => _instance;
-
+    public static T Instance => _instance ??= FindObjectOfType<T>();
+    
     protected virtual void Awake()
     {
-        if (Instance != null)
+        if(_instance == this) return;
+        if (_instance != null)
         {
             Destroy(gameObject);
             throw new Exception($"Mono Singleton Instance Error {this}");

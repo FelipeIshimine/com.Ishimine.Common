@@ -37,6 +37,8 @@ public class IndexPriorityQueue
         }
     }
 
+    public int GetPriority(int index) => _priority[index];
+
     public void Enqueue(int index, int priority)
     {
         if (_revertOrder) priority *= -1;

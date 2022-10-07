@@ -128,13 +128,10 @@ public static class Vector2Extensions
         return dif;
     }
     
-    public static Vector2 PerpendicularClockwise(this Vector2 vector2)
-    {
-        return new Vector2(vector2.y, -vector2.x);
-    }
+    public static Vector2 PerpendicularClockwise(this Vector2 vector2) => new Vector2(vector2.y, -vector2.x);
 
-    public static Vector2 PerpendicularCounterClockwise(this Vector2 vector2)
-    {
-        return new Vector2(-vector2.y, vector2.x);
-    }
+    public static Vector2 PerpendicularCounterClockwise(this Vector2 vector2) => new Vector2(-vector2.y, vector2.x);
+    
+    public static Vector3 AsVector3XY(this Vector2 value)=> new Vector3(value.x,value.y);
+    public static Vector3 AsVector3XZ(this Vector2 value)=> new Vector3(value.x,0,value.y);
 }
