@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 /// <summary>
 /// Conteiner generico para animar canvas con 'coroutines'.
@@ -95,6 +96,9 @@ public class AnimatedContainer : MonoBehaviour
     [EnableIf("useMovement"), TabGroup("Movement")] public Direction direction = Direction.Down;
     [EnableIf("useMovement"), TabGroup("Movement"), LabelText("Open Curve")] public AnimationCurve curveInMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [EnableIf("useMovement"), TabGroup("Movement"), LabelText("Close Curve")] public AnimationCurve curveOutMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    
+    
+    
     
     private Vector3 _anchoredPositionWhenClosed;
     public bool IsInitialized { get; private set; }= false;
@@ -350,6 +354,9 @@ public class AnimatedContainer : MonoBehaviour
         {
             t += ((Time == TimeScale.Scaled) ? UnityEngine.Time.deltaTime : UnityEngine.Time.unscaledDeltaTime) / duration;
             step?.Invoke(t);
+            
+            LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform);
+            LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform.parent);
             yield return null;
         } while (t < 1);
         postAction?.Invoke();
