@@ -26,6 +26,8 @@ public class AnimationPlayer : MonoBehaviour
     public bool canSkipAnimationCallback = false;
 
     private bool _initialized = false;
+
+    private bool _firstAnimation = true;
     public enum WrapMode
     {
         None,
@@ -115,6 +117,10 @@ public class AnimationPlayer : MonoBehaviour
     public void Play(AnimationSettings animationSettings, TransitionSettings transitionSettings)
     {
         if(!_initialized) Initialize();
+
+
+        if (_firstAnimation)
+            transitionSettings.Duration = 0;
         
         var prevAnimationPlayable = _mixerPlayable;
         _mixerPlayable = AnimationMixerPlayable.Create(_graph, 2);
@@ -158,7 +164,7 @@ public class AnimationPlayer : MonoBehaviour
 
     private void OnDestroy()
     {
-        _graph.Destroy();
+        if(_graph.IsValid()) _graph.Destroy();
     }
 
     private void Reset()
