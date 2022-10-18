@@ -2,7 +2,7 @@
 
 public static class TransformExtensions
 {
-    public static string GetHierarchyAsString(this Transform source, bool includeSceneName)
+    public static string GetHierarchyAsString(this Transform source, bool includeSceneName = true)
     {
         if(includeSceneName!) return source.parent ? $"{source.parent.GetHierarchyAsString(true)}/{source.name}" : $"{source.gameObject.scene.name}/{source.name}";
         return source.parent ? $"{source.parent.GetHierarchyAsString(false)}/{source.name}" : source.name;

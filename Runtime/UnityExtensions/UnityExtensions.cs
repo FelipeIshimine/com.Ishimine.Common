@@ -106,7 +106,7 @@ public static class UnityExtensions
     public static void WaitAndExecute(this MonoBehaviour source, ref IEnumerator rutine, float waitTime, bool isRealTime, Action callback)
     {
         if (callback == null)
-            Debug.LogError("Callback is null");
+            Debug.LogWarning("Callback is null");
         source.PlayCoroutine(ref rutine, () => WaitAndExecuteRutine(waitTime, isRealTime, callback));
     }
 
