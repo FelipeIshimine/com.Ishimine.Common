@@ -50,6 +50,8 @@ public static class Vector3Extensions
         return value;
     }
 
+    public static Vector2 AsVector2XZ(this Vector3 value) => new Vector3(value.x, value.z);
+
     public static Vector3 SnapTo(this Vector3 value, float snap)
     {
         Vector3 retValue = value;
