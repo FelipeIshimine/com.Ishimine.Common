@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
+using Random = System.Random;
 
 public static class ListExtensions
 {
@@ -63,7 +65,7 @@ public static class ListExtensions
     
     public static T FindHighest<T>(this List<T> source, Func<T, float> testing)
     {
-        float highest = int.MinValue;
+        float highest = float.MinValue;
         T current = default(T);
         for (int i = source.Count - 1; i >= 0; i--)
         {

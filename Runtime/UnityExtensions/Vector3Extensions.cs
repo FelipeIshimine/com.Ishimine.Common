@@ -39,7 +39,7 @@ public static class Vector3Extensions
 
     public static Vector3 GetDifference(this Vector3 startPos, Vector3 endPos) => (endPos - startPos);
 
-    public static float AsAngle2D(this Vector3 source) => Vector2Extensions.AsAngle(source);
+    public static float AsAngleXY(this Vector3 source) => Vector2Extensions.AsAngle(source);
 
     public static float GetAngleXY(this Vector3 startPos, Vector3 endPos) => ((Vector2)startPos).GetAngle(endPos);
     public static float GetAngleXZ(this Vector3 startPos, Vector3 endPos) => (new Vector2(startPos.x,startPos.z)).GetAngle(new Vector2(endPos.x,endPos.z));
