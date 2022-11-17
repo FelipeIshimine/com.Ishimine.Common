@@ -524,6 +524,4 @@ public static class UnityExtensions
         c.a = useAlpha ? ((aux >> 24) & 0xFF) / 255f : 1;
         return c;
     }
-
-    public static float Apothem(float radius) => Mathf.Sqrt(Mathf.Pow(radius, 2f) - Mathf.Pow(radius * .5f, 2));
 }
