@@ -8,7 +8,6 @@ using UnityEngine;
 
 public static class ScreenShot
 {
-    private static string DirectoryName = "Screenshots";
     private static string FileName => $"Screenshots_{DateTime.Now.ToString(CultureInfo.InvariantCulture).Replace("/","_").Replace(":","-")}.png";
     
     [MenuItem("Tools/Take Screenshot")]
