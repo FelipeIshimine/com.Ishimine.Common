@@ -8,6 +8,8 @@ using UnityEngine;
 
 public static class AudioPreviewer
 {
+    private static int? lastPlayedAudioClip = null;
+    
     [OnOpenAsset]
     public static bool OnOpenAsset(int instanceId, int line)
     {
@@ -15,9 +17,18 @@ public static class AudioPreviewer
 
         if (obj is AudioClip clip)
         {
-            PlayPreviewClip(clip);
+            if (IsPreviewClipPlaying())
+            {
+                StopAllPreviewClips();
+                if(lastPlayedAudioClip.HasValue && lastPlayedAudioClip.Value != clip.GetInstanceID())
+                    PlayPreviewClip(clip);
+            }
+            else PlayPreviewClip(clip);
+            
+            lastPlayedAudioClip = clip.GetInstanceID();
             return true;
         }
+
         return false;
     }
 
@@ -44,5 +55,24 @@ public static class AudioPreviewer
             audioClip, 0, false
         });
     }
-    
+
+    public static bool IsPreviewClipPlaying()
+    {
+        Assembly unityAssembly = typeof(AudioImporter).Assembly;
+        Type audioUtil = unityAssembly.GetType("UnityEditor.AudioUtil");
+        MethodInfo methodInfo = audioUtil.GetMethod(
+            "IsPreviewClipPlaying",
+            BindingFlags.Static | BindingFlags.Public);
+        return (bool)methodInfo.Invoke(null, null);
+    }
+    public static void StopAllPreviewClips()
+    {
+        Assembly unityAssembly = typeof(AudioImporter).Assembly;
+        Type audioUtil = unityAssembly.GetType("UnityEditor.AudioUtil");
+        MethodInfo methodInfo = audioUtil.GetMethod(
+            "StopAllPreviewClips",
+            BindingFlags.Static | BindingFlags.Public);
+        methodInfo.Invoke(null, null);
+    }
+
 }
