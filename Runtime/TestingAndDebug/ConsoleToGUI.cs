@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
  
 public class ConsoleToGUI : MonoBehaviour
 {
@@ -20,16 +21,21 @@ public class ConsoleToGUI : MonoBehaviour
         myLog = myLog + "\n" + logString;
         if (myLog.Length > kChars) { myLog = myLog.Substring(myLog.Length - kChars); }
  
+        if(!doShow) return;
+        
         // for the file ...
         if (filename == "")
         {
-            string d = System.Environment.GetFolderPath(
-                System.Environment.SpecialFolder.Desktop) + "/YOUR_LOGS";
+            string d = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop) + $"/{Application.productName} Logs";
             System.IO.Directory.CreateDirectory(d);
-            string r = Random.Range(1000, 9999).ToString();
-            filename = d + "/log-" + r + ".txt";
+            //string r = Random.Range(1000, 9999).ToString();
+            filename = d + $"/log-{DateTime.Now.Day}-{DateTime.Now.Hour}-{DateTime.Now.Minute}.txt";
         }
-        try { System.IO.File.AppendAllText(filename, logString + "\n"); }
+        
+        try
+        {
+            System.IO.File.AppendAllText(filename, logString + "\n");
+        }
         catch { }
     }
  
