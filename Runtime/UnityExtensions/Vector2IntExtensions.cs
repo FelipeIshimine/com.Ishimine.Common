@@ -11,6 +11,11 @@ public static class Vector2IntExtensions
     public static int LerpCeil(this Vector2Int value, float t) => Mathf.CeilToInt(Mathf.Lerp(value.x, value.y, t));
     public static int LerpFloor(this Vector2Int value, float t) => Mathf.FloorToInt(Mathf.Lerp(value.x, value.y, t));
     
+    
+    public static int LerpUnclampedRound(this Vector2Int value, float t) => Mathf.RoundToInt(Mathf.LerpUnclamped(value.x, value.y, t));
+    public static int LerpUnclampedCeil(this Vector2Int value, float t) => Mathf.CeilToInt(Mathf.LerpUnclamped(value.x, value.y, t));
+    public static int LerpUnclampedFloor(this Vector2Int value, float t) => Mathf.FloorToInt(Mathf.LerpUnclamped(value.x, value.y, t));
+    
     public static Vector3Int AsVector3IntXY(this Vector2Int value)=> new Vector3Int(value.x,value.y);
     public static Vector3Int AsVector3IntXZ(this Vector2Int value)=> new Vector3Int(value.x,0,value.y);
 
