@@ -40,15 +40,13 @@ namespace DataStructures.RandomSelector {
             weightsList = new List<float>(expectedNumberOfItems);
             CDL         = new List<float>(expectedNumberOfItems);
         }
-        
+
         /// <summary>
         /// Constructor, where you can preload collection with items/weights array. 
         /// </summary>
         /// <param name="items">Items that will get returned on random selections</param>
         /// <param name="weights">Un-normalized weights/chances of items, should be same length as items array</param>
-        /// <param name="seed">Leave it -1 if you want seed to be randomly picked</param>
-        /// <param name="expectedNumberOfItems">Set this if you know how much items the collection will hold, to minimize Garbage Collection</param>
-        public DynamicRandomSelector(T[] items, float[] weights, int seed = -1, int expectedNumberOfItems = 32) : this() {
+        public DynamicRandomSelector(T[] items, float[] weights) : this() {
         
             for(int i = 0; i < items.Length; i++)
                 Add(items[i], weights[i]);
@@ -61,9 +59,7 @@ namespace DataStructures.RandomSelector {
         /// </summary>
         /// <param name="items">Items that will get returned on random selections</param>
         /// <param name="weights">Un-normalized weights/chances of items, should be same length as items array</param>
-        /// <param name="seed">Leave it -1 if you want seed to be randomly picked</param>
-        /// <param name="expectedNumberOfItems">Set this if you know how much items the collection will hold, to minimize Garbage Collection</param>
-        public DynamicRandomSelector(List<T> items, List<float> weights, int seed = -1, int expectedNumberOfItems = 32) : this() {
+        public DynamicRandomSelector(List<T> items, List<float> weights) : this() {
 
             for (int i = 0; i < items.Count; i++)
                 Add(items[i], weights[i]);
@@ -71,6 +67,22 @@ namespace DataStructures.RandomSelector {
             Build();
         }
         
+        public DynamicRandomSelector((T item, float weight)[] elements) : this() {
+        
+            for(int i = 0; i < elements.Length; i++)
+                Add(elements[i].item, elements[i].weight);
+            
+            Build();
+        }
+        
+        public DynamicRandomSelector(List<(T item, float weight)> elements) : this() {
+        
+            for(int i = 0; i < elements.Count; i++)
+                Add(elements[i].item, elements[i].weight);
+            
+            Build();
+        }
+
         /// <summary>
         /// Clears internal buffers, should make no garbage (unless internal lists hold objects that aren't referenced anywhere else)
         /// </summary>
