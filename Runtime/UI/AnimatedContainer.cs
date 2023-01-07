@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using UnityEngine.Serialization;
@@ -28,7 +29,7 @@ public class AnimatedContainer : MonoBehaviour
     private RectTransform Parent => _parent ??= transform.parent as RectTransform;
 
     private RectTransform _rectTransform;
-    private RectTransform RectTransform => _rectTransform ??= transform as RectTransform;
+    public RectTransform RectTransform => _rectTransform ??= (RectTransform)transform;
 
     public enum Direction { Right, Left, Up, Down }
     public enum TimeScale { Scaled, Unscaled }
@@ -96,10 +97,10 @@ public class AnimatedContainer : MonoBehaviour
     [EnableIf("useMovement"), TabGroup("Movement")] public Direction direction = Direction.Down;
     [EnableIf("useMovement"), TabGroup("Movement"), LabelText("Open Curve")] public AnimationCurve curveInMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [EnableIf("useMovement"), TabGroup("Movement"), LabelText("Close Curve")] public AnimationCurve curveOutMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    
-    
-    
-    
+
+
+
+    private bool _asyncRunning;
     private Vector3 _anchoredPositionWhenClosed;
     public bool IsInitialized { get; private set; }= false;
 
@@ -123,7 +124,15 @@ public class AnimatedContainer : MonoBehaviour
 
     private void SetAnimationRoutine(IEnumerator nRoutine)
     {
-        if(_currentRoutine != null) Debug.LogWarning($"Cuidado: Se sobreescribio una rutina previa sin terminar. {transform.GetHierarchyAsString(true)}");
+        if (_currentRoutine != null)
+        {
+            Debug.LogWarning($"Cuidado: Se sobreescribio una rutina previa sin terminar. {transform.GetHierarchyAsString(true)}");
+            if (_asyncRunning)
+            {
+                _asyncRunning = false;
+                Debug.Log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            }
+        }
         _currentRoutine = nRoutine;
     }
     
@@ -206,9 +215,27 @@ public class AnimatedContainer : MonoBehaviour
         }
     }
 
-    [Button, ButtonGroup("Animated", GroupName = "Animated")]
     public void Close() => Close(null);
 
+    public async Task CloseAsync()
+    {
+        var _asyncRunning = true;
+        void Done() => _asyncRunning = false;
+        Close(Done);
+        while (_asyncRunning)
+            await Task.Yield();
+    }
+    
+    public async Task OpenAsync()
+    { 
+        var _asyncRunning = true;
+        void Done() => _asyncRunning = false;
+        Open(Done);
+        while (_asyncRunning)
+            await Task.Yield();
+    }
+    
+    [Button, ButtonGroup("Animated", GroupName = "Animated")]
     public void Close(Action postAction)
     {
         if (!Application.isPlaying)
@@ -236,21 +263,20 @@ public class AnimatedContainer : MonoBehaviour
             postAction?.Invoke();
             return;
         }
-                
         if (!Application.isPlaying)
         {
             Debug.LogWarning("Can't play animation outside of Play State");
             return;
         }
-        
+        gameObject.SetActive(true);
+
         Initialize();
         if (debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Open");
-
+        
         SetAnimationRoutine(OpenRoutine(postAction));
         SetState(State.Opening);
         if (gameObject.activeInHierarchy)
             StartCoroutine(_currentRoutine);
-        gameObject.SetActive(true);
     }
 
     [Button, ButtonGroup("Snap")]
@@ -355,10 +381,11 @@ public class AnimatedContainer : MonoBehaviour
             t += ((Time == TimeScale.Scaled) ? UnityEngine.Time.deltaTime : UnityEngine.Time.unscaledDeltaTime) / duration;
             step?.Invoke(t);
             
+            yield return null;
             LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform);
             LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform.parent);
-            yield return null;
         } while (t < 1);
+        yield return null;
         postAction?.Invoke();
     }
     
