@@ -221,8 +221,13 @@ public class AnimatedContainer : MonoBehaviour
     {
         var _asyncRunning = true;
         void Done() => _asyncRunning = false;
-        Close(Done);
-        while (_asyncRunning)
+        if (IsOpen)
+        {
+            Close(Done);
+            while (_asyncRunning)
+                await Task.Yield();
+        }
+        else
             await Task.Yield();
     }
     
@@ -230,8 +235,14 @@ public class AnimatedContainer : MonoBehaviour
     { 
         var _asyncRunning = true;
         void Done() => _asyncRunning = false;
-        Open(Done);
-        while (_asyncRunning)
+        
+        if(!IsOpen)
+        {
+            Open(Done);
+            while (_asyncRunning)
+                await Task.Yield();
+        }    
+        else
             await Task.Yield();
     }
     
