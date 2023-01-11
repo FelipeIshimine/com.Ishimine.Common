@@ -86,10 +86,8 @@ public static class Vector2Extensions
         return GetDifference(startPos, endPos).sqrMagnitude;
     }
 
-    public static float GetLerp(this Vector2 startPos, float t)
-    {
-        return Mathf.Lerp(startPos.x, startPos.y, t);
-    }
+    public static float GetLerp(this Vector2 startPos, float t) => Mathf.Lerp(startPos.x, startPos.y, t);
+    public static float GetInverseLerp(this Vector2 startPos, float t) => Mathf.InverseLerp(startPos.x, startPos.y, t);
     
     public static float GetLerpUnclamped(this Vector2 startPos, float t)
     {
