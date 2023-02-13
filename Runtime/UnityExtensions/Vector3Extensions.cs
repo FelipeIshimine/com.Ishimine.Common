@@ -60,7 +60,9 @@ public static class Vector3Extensions
         retValue.z = retValue.z.SnapTo(snap);
         return retValue;
     }
-    
+
+    public static  Vector3 RotateByAxis(this Vector3 dir, Vector3 axis, float f) => Quaternion.AngleAxis(f,axis) * dir;
+
     public static Vector3 Clamp(this Vector3 value, Vector3 min, Vector3 max) => new Vector3(Mathf.Clamp(value.x, min.x, max.x), Mathf.Clamp(value.y, min.y, max.y), Mathf.Clamp(value.z, min.z, max.z));
 
     public static Vector2Int CubeToAxial(this Vector3Int @this) => new Vector2Int(@this.x, @this.y);
