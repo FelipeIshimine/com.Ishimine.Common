@@ -41,6 +41,6 @@ public class CameraRotationConstraint : MonoBehaviour
 
     private void OnDisable()
     {
-        if(constraint) constraint.RemoveSource(0);
+        if(constraint && constraint.sourceCount > 0) constraint.RemoveSource(0);
     }
 }

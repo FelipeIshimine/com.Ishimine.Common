@@ -65,8 +65,6 @@ public static class Vector3Extensions
 
     public static Vector3 Clamp(this Vector3 value, Vector3 min, Vector3 max) => new Vector3(Mathf.Clamp(value.x, min.x, max.x), Mathf.Clamp(value.y, min.y, max.y), Mathf.Clamp(value.z, min.z, max.z));
 
-    public static Vector2Int CubeToAxial(this Vector3Int @this) => new Vector2Int(@this.x, @this.y);
-
     public static Vector3Int HexagonalRotationLeft(this Vector3Int @this) => HexagonalRotationLeft(@this, Vector3Int.zero);
 
     public static Vector3Int HexagonalRotationLeft(this Vector3Int @this, Vector3Int pivot)

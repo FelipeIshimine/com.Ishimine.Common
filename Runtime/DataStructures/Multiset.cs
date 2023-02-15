@@ -2,14 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Multiset<T>
+public class Multiset<T> : IEnumerable<KeyValuePair<T,int>>
 {
     private Dictionary<T, int> _values = new Dictionary<T, int>();
 
     public Dictionary<T, int>.KeyCollection Keys => _values.Keys;
     public Dictionary<T, int>.ValueCollection Values => _values.Values;
 
-    public int this[T value] => GetValue(value);
+    public int this[T key]
+    {
+        get => GetValue(key);
+        set => SetValue(key, value);
+    }
 
     public int Add(T value)
     {
@@ -26,6 +30,9 @@ public class Multiset<T>
 
     public int GetValue(T value) => _values[value];
 
+    private void SetValue(T key, int value) => _values[key] = value;
+
+    
     public T GetMax()
     {
         T value = default;
@@ -43,4 +50,7 @@ public class Multiset<T>
 
         return value;
     }
+
+    IEnumerator<KeyValuePair<T, int>> IEnumerable<KeyValuePair<T, int>>.GetEnumerator() =>_values.GetEnumerator();
+    public IEnumerator GetEnumerator() =>_values.GetEnumerator();
 }
