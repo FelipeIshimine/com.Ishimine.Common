@@ -31,7 +31,17 @@ public class AnimatedContainer : MonoBehaviour
     private RectTransform _rectTransform;
     public RectTransform RectTransform => _rectTransform ??= (RectTransform)transform;
 
-    public enum Direction { Right, Left, Up, Down }
+    public enum Direction
+    {
+        Up = 0,
+        UpRight = 1,
+        UpLeft = 2,
+        Right = 3,
+        Left = 4,
+        Down = 5, 
+        DownRight = 6,
+        DownLef = 7
+    }
     public enum TimeScale { Scaled, Unscaled }
     public enum Order { Open, Close, Show, Hide }
 
@@ -99,9 +109,20 @@ public class AnimatedContainer : MonoBehaviour
     [EnableIf("useMovement"), TabGroup("Movement"), LabelText("Close Curve")] public AnimationCurve curveOutMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
 
+    private static readonly Vector3[] DirectionVectors = new Vector3[]
+    {
+        new Vector3(0,1,0),
+        new Vector3(1,1,0),
+        new Vector3(-1,1,0),
+        new Vector3(1,0,0),
+        new Vector3(-1,0,0),
+        new Vector3(0,-1,0),
+        new Vector3(1,-1,0),
+        new Vector3(-1,-1,0),
+    };
+
 
     private bool _asyncRunning;
-    private Vector3 _anchoredPositionWhenClosed;
     public bool IsInitialized { get; private set; }= false;
 
     private IEnumerator _currentRoutine;
@@ -165,19 +186,12 @@ public class AnimatedContainer : MonoBehaviour
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
         
-        if (useMovement) SetDirection(direction);
+        //if (useMovement) SetDirection(direction);
     }
     public void Initialize()
     {
         if (IsInitialized) return;
         IsInitialized = true;
-
-        if (useMovement)
-        {
-            SetDirection(direction);
-            RectTransform.anchoredPosition = Vector3.zero;
-            RectTransform.localScale = Vector3.one;
-        }
 
         if (initializationState == InitState.Hide)
             Hide();
@@ -185,34 +199,6 @@ public class AnimatedContainer : MonoBehaviour
             Show();
         
         OnInitialize?.Invoke();
-    }
-
-    public void SetDirection(Direction nDirection, bool overrideCurrentPosition = false)
-    {
-        UpdateAnchoredClosePosition(nDirection);
-        if (overrideCurrentPosition) RectTransform.anchoredPosition = _anchoredPositionWhenClosed;
-    }
-
-    private void UpdateAnchoredClosePosition(Direction nDirection)
-    {
-        switch (nDirection)
-        {
-            case Direction.Right:
-                _anchoredPositionWhenClosed = Vector3.right * (useParentSizeForDisplacement ? Parent.rect.width : RectTransform.rect.width);
-                break;
-            case Direction.Left:
-                _anchoredPositionWhenClosed =
-                    Vector3.left * (useParentSizeForDisplacement ? Parent.rect.width : RectTransform.rect.width);
-                break;
-            case Direction.Up:
-                _anchoredPositionWhenClosed =
-                    Vector3.up * (useParentSizeForDisplacement ? Parent.rect.height : RectTransform.rect.height);
-                break;
-            case Direction.Down:
-                _anchoredPositionWhenClosed = Vector3.down *
-                                 (useParentSizeForDisplacement ? Parent.rect.height : RectTransform.rect.height);
-                break;
-        }
     }
 
     public void Close() => Close(null);
@@ -249,6 +235,12 @@ public class AnimatedContainer : MonoBehaviour
     [Button, ButtonGroup("Animated", GroupName = "Animated")]
     public void Close(Action postAction)
     {
+        if (CurrentState == State.Close)
+        {
+            postAction?.Invoke();
+            return;
+        }
+        
         if (!Application.isPlaying)
         {
             Debug.LogWarning("Can't play animation outside of Play State");
@@ -296,8 +288,8 @@ public class AnimatedContainer : MonoBehaviour
         Initialize();
 
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Hide");
-        
-        if(useMovement) RectTransform.anchoredPosition = _anchoredPositionWhenClosed;
+
+        if (useMovement) RectTransform.transform.localPosition = GetCloseLocalPosition();
         if(useScale) RectTransform.localScale = closeScale;
         if(useAlpha) canvasGroup.alpha = alphaCurveOut.Evaluate(0);
 
@@ -310,6 +302,11 @@ public class AnimatedContainer : MonoBehaviour
         _currentRoutine = null;
     }
 
+    private Vector3 GetCloseLocalPosition() => Vector3.Scale(GetDirection(), RectTransform.rect.size);
+
+    private Vector3 GetDirection() => DirectionVectors[(int)direction];
+     
+
     [Button, ButtonGroup("Snap", GroupName = "Snap")]
     public void Show()
     {
@@ -319,7 +316,7 @@ public class AnimatedContainer : MonoBehaviour
 
         gameObject.SetActive(true);
         
-        if(useMovement) RectTransform.anchoredPosition = Vector2.zero;
+        if(useMovement) RectTransform.localPosition = Vector3.zero;
         if(useScale) RectTransform.localScale = Vector3.one;
         if(useAlpha) canvasGroup.alpha = 1;
         
@@ -336,7 +333,7 @@ public class AnimatedContainer : MonoBehaviour
         InAnimation = true;
         OnClosingStart?.Invoke();
         OnOpenOrCloseStart?.Invoke(false);
-        yield return AnimationRoutine(closeDuration, _anchoredPositionWhenClosed, curveOutMovement, closeScale, curveOutScale, 0, alphaCurveOut,
+        yield return AnimationRoutine(closeDuration, GetCloseLocalPosition(), curveOutMovement, closeScale, curveOutScale, 0, alphaCurveOut,
             () =>
             {
                 InAnimation = false;
@@ -374,13 +371,13 @@ public class AnimatedContainer : MonoBehaviour
         
         float t = 0;
         
-        Vector3 startPosition = RectTransform.anchoredPosition;
+        Vector3 startPosition = RectTransform.localPosition;
         Vector3 startScale = RectTransform.localScale;
         float startAlpha = 1 - targetAlpha;
 
         Action<float> step = null;
 
-        if (useMovement) step += x => RectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(x));
+        if (useMovement) step += x => RectTransform.localPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(x));
         if (useScale) step += x=> RectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(x));
         if (useAlpha) step += x => canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, targetAlpha, alphaCurve.Evaluate(x));
 
