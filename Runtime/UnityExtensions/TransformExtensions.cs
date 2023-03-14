@@ -8,6 +8,21 @@ public static class TransformExtensions
         return source.parent ? $"{source.parent.GetHierarchyAsString(false)}/{source.name}" : source.name;
     }
     
+    public static Transform FindInHierarchy(this Transform @this, string name)
+    {
+        if (@this.name == name)
+            return @this;
+
+        for (int i = 0; i < @this.childCount; i++)
+        {
+            Transform result = FindInHierarchy(@this.GetChild(i), name);
+            if (result != null)
+                return result;
+        }
+        return null;
+    }
+
+    
     
     public static void SetGlobalScale (this Transform transform, Vector3 globalScale)
     {

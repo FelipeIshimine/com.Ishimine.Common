@@ -260,7 +260,7 @@ public class AnimatedContainer : MonoBehaviour
 
         SetAnimationRoutine(CloseRoutine(postAction));
         SetState(State.Closing);
-        if (gameObject.activeInHierarchy)
+        if (gameObject && gameObject.activeInHierarchy)
             StartCoroutine(_currentRoutine);
     }
 
