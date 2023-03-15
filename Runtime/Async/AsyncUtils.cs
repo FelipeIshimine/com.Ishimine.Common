@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -19,4 +20,11 @@ public static class AsyncUtils
 	}
 	
 	public static async Task WaitRealtimeAsync(float duration) => await Task.Delay((int)(duration * 1000));
+
+    public static async Task PlayCoroutine(IEnumerator routine)
+    {
+        var coroutine = GlobalUpdate.Instance.StartCoroutine(routine);
+        while (coroutine != null)
+            await Task.Yield();
+    }
 }
