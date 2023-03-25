@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Nrjwolf.Tools.AttachAttributes;
+using Redcode.Awaiting;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using UnityEngine.Serialization;
@@ -10,7 +13,7 @@ using UnityEngine.UI;
 /// Conteiner generico para animar canvas con 'coroutines'.
 /// Si la animacion por movimiento no encaja bien, revisar que el Root del container este bien posicionados
 /// </summary>
-public class AnimatedContainer : MonoBehaviour
+public class AnimatedContainer : MonoBehaviour, ISelfValidator
 {
     public InitState initializationState = InitState.Hide;
     [field:SerializeField, FormerlySerializedAs("timeType")] public TimeScale Time { get; private set; } = TimeScale.Unscaled;
@@ -28,9 +31,8 @@ public class AnimatedContainer : MonoBehaviour
     private RectTransform _parent;
     private RectTransform Parent => _parent ??= transform.parent as RectTransform;
 
-    private RectTransform _rectTransform;
-    public RectTransform RectTransform => _rectTransform ??= (RectTransform)transform;
-
+    [GetComponent,SerializeField] private RectTransform rectTransform;
+    
     public enum Direction
     {
         Up = 0,
@@ -46,7 +48,6 @@ public class AnimatedContainer : MonoBehaviour
     public enum Order { Open, Close, Show, Hide }
 
     [SerializeField] private CanvasGroup canvasGroup;
-
     
     [FormerlySerializedAs("durationIn"), SerializeField, HorizontalGroup("Duration")] private float openDuration = .3f;
     [FormerlySerializedAs("durationOut"), SerializeField, HorizontalGroup("Duration")] private float closeDuration = .3f;
@@ -67,7 +68,9 @@ public class AnimatedContainer : MonoBehaviour
     private bool interactivityWhenOpened = true;
     [EnableIf(nameof(setInteractivity)),SerializeField, VerticalGroup("CanvasGroup/Horizontal/Interactivity"),LabelText("When Close")] 
     private bool interactivityWhenClosed = false;
-    
+
+    [SerializeField, FoldoutGroup("SubContainers")] private List<AnimatedContainer> subContainers = new List<AnimatedContainer>();
+
     public enum InitState
     {
         Show,
@@ -201,50 +204,24 @@ public class AnimatedContainer : MonoBehaviour
         OnInitialize?.Invoke();
     }
 
-    public void Close() => Close(null);
+    public YieldInstruction Close() => Close(null);
 
-    public async Task CloseAsync()
-    {
-        var _asyncRunning = true;
-        void Done() => _asyncRunning = false;
-        if (IsOpen)
-        {
-            Close(Done);
-            while (_asyncRunning)
-                await Task.Yield();
-        }
-        else
-            await Task.Yield();
-    }
-    
-    public async Task OpenAsync()
-    { 
-        var _asyncRunning = true;
-        void Done() => _asyncRunning = false;
-        
-        if(!IsOpen)
-        {
-            Open(Done);
-            while (_asyncRunning)
-                await Task.Yield();
-        }    
-        else
-            await Task.Yield();
-    }
+    //public async Task CloseAsync() => await Close();
+    //public async Task OpenAsync() => await Open();
     
     [Button, ButtonGroup("Animated", GroupName = "Animated")]
-    public void Close(Action postAction)
+    public YieldInstruction Close(Action postAction)
     {
         if (CurrentState == State.Close)
         {
             postAction?.Invoke();
-            return;
+            return null;
         }
         
         if (!Application.isPlaying)
         {
             Debug.LogWarning("Can't play animation outside of Play State");
-            return;
+            return null;
         }
         
         Initialize();
@@ -252,24 +229,23 @@ public class AnimatedContainer : MonoBehaviour
 
         SetAnimationRoutine(CloseRoutine(postAction));
         SetState(State.Closing);
-        if (gameObject.activeInHierarchy)
-            StartCoroutine(_currentRoutine);
+        return gameObject.activeInHierarchy ? StartCoroutine(_currentRoutine) : null;
     }
 
     [Button, ButtonGroup("Animated")]
-    public void Open() => Open(null);
+    public YieldInstruction Open() => Open(null);
 
-    public void Open(Action postAction)
+    public YieldInstruction Open(Action postAction)
     {
         if (CurrentState == State.Open)
         {
             postAction?.Invoke();
-            return;
+            return null;
         }
         if (!Application.isPlaying)
         {
             Debug.LogWarning("Can't play animation outside of Play State");
-            return;
+            return null;
         }
         gameObject.SetActive(true);
 
@@ -278,19 +254,22 @@ public class AnimatedContainer : MonoBehaviour
         
         SetAnimationRoutine(OpenRoutine(postAction));
         SetState(State.Opening);
-        if (gameObject.activeInHierarchy)
-            StartCoroutine(_currentRoutine);
+        
+        return gameObject.activeInHierarchy ? StartCoroutine(_currentRoutine) : null;
     }
 
     [Button, ButtonGroup("Snap")]
     public void Hide()
     {
+        foreach (AnimatedContainer subContainer in subContainers)
+            subContainer.Hide();
+        
         Initialize();
 
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Hide");
 
-        if (useMovement) RectTransform.transform.localPosition = GetCloseLocalPosition();
-        if(useScale) RectTransform.localScale = closeScale;
+        if (useMovement) rectTransform.transform.localPosition = GetCloseLocalPosition();
+        if(useScale) rectTransform.localScale = closeScale;
         if(useAlpha) canvasGroup.alpha = alphaCurveOut.Evaluate(0);
 
         if(setInteractivity) canvasGroup.interactable = interactivityWhenClosed;
@@ -300,9 +279,10 @@ public class AnimatedContainer : MonoBehaviour
         SetState(State.Close);
 
         _currentRoutine = null;
+
     }
 
-    private Vector3 GetCloseLocalPosition() => Vector3.Scale(GetDirection(), RectTransform.rect.size);
+    private Vector3 GetCloseLocalPosition() => Vector3.Scale(GetDirection(), rectTransform.rect.size);
 
     private Vector3 GetDirection() => DirectionVectors[(int)direction];
      
@@ -310,14 +290,17 @@ public class AnimatedContainer : MonoBehaviour
     [Button, ButtonGroup("Snap", GroupName = "Snap")]
     public void Show()
     {
+        foreach (AnimatedContainer subContainer in subContainers)
+            subContainer.Show();
+        
         Initialize();
         
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Show");
 
         gameObject.SetActive(true);
         
-        if(useMovement) RectTransform.localPosition = Vector3.zero;
-        if(useScale) RectTransform.localScale = Vector3.one;
+        if(useMovement) rectTransform.localPosition = Vector3.zero;
+        if(useScale) rectTransform.localScale = Vector3.one;
         if(useAlpha) canvasGroup.alpha = 1;
         
         if(setInteractivity) canvasGroup.interactable = interactivityWhenOpened;
@@ -333,7 +316,7 @@ public class AnimatedContainer : MonoBehaviour
         InAnimation = true;
         OnClosingStart?.Invoke();
         OnOpenOrCloseStart?.Invoke(false);
-        yield return AnimationRoutine(closeDuration, GetCloseLocalPosition(), curveOutMovement, closeScale, curveOutScale, 0, alphaCurveOut,
+        yield return AnimationRoutine(closeDuration, GetCloseLocalPosition(), curveOutMovement, closeScale, curveOutScale, 0, alphaCurveOut, false,
             () =>
             {
                 InAnimation = false;
@@ -350,7 +333,7 @@ public class AnimatedContainer : MonoBehaviour
         InAnimation = true;
         OnOpeningStart?.Invoke();
         OnOpenOrCloseStart?.Invoke(true);
-        yield return AnimationRoutine(openDuration, Vector3.zero, curveInMovement, Vector3.one, curveInScale, 1, alphaCurveIn,
+        yield return AnimationRoutine(openDuration, Vector3.zero, curveInMovement, Vector3.one, curveInScale, 1, alphaCurveIn, true,
             () =>
             {
                 InAnimation = false;
@@ -366,19 +349,20 @@ public class AnimatedContainer : MonoBehaviour
         Vector3 targetPosition, AnimationCurve movementCurve,
         Vector3 targetScale, AnimationCurve scaleCurve,
         float targetAlpha, AnimationCurve alphaCurve,
+        bool isOpen,
         Action postAction)
     {
         
         float t = 0;
         
-        Vector3 startPosition = RectTransform.localPosition;
-        Vector3 startScale = RectTransform.localScale;
+        Vector3 startPosition = rectTransform.localPosition;
+        Vector3 startScale = rectTransform.localScale;
         float startAlpha = 1 - targetAlpha;
 
         Action<float> step = null;
 
-        if (useMovement) step += x => RectTransform.localPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(x));
-        if (useScale) step += x=> RectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(x));
+        if (useMovement) step += x => rectTransform.localPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(x));
+        if (useScale) step += x=> rectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(x));
         if (useAlpha) step += x => canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, targetAlpha, alphaCurve.Evaluate(x));
 
         if (setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenClosed;
@@ -390,10 +374,22 @@ public class AnimatedContainer : MonoBehaviour
             step?.Invoke(t);
             
             yield return null;
-            LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform);
+            LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
             LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform.parent);
         } while (t < 1);
         yield return null;
+
+        List<YieldInstruction> coroutines = new List<YieldInstruction>();
+
+        foreach (AnimatedContainer subContainer in subContainers)
+            coroutines.Add((isOpen ? subContainer.Open() : subContainer.Close()));
+
+        for (var index = 0; index < coroutines.Count; index++)
+        {
+            var yieldInstruction = coroutines[index];
+            yield return yieldInstruction;
+        }
+
         postAction?.Invoke();
     }
     
@@ -444,6 +440,23 @@ public class AnimatedContainer : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException(nameof(order), order, null);
         }
+    }
+
+    [Button, FoldoutGroup("SubContainers")]
+    public void CollectSubContainers()
+    {
+        foreach (Transform child in transform)
+        {
+            AnimatedContainer container = child.GetComponent<AnimatedContainer>();
+            if(container && !subContainers.Contains(container))
+                subContainers.Add(container);
+        }
+    }
+
+    public void Validate(SelfValidationResult result)
+    {
+        if (rectTransform == null)
+            result.AddError("RectTransform not set");
     }
 }
     
