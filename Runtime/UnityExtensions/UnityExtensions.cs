@@ -23,7 +23,7 @@ public static class UnityExtensions
         foreach (var item in source.transform.GetComponentsInChildren<Transform>(true))
             item.gameObject.layer = layer;
     }
-    public static void PlayCoroutine(this MonoBehaviour source, ref IEnumerator rutine, Func<IEnumerator> rutineMethod)
+    public static Coroutine PlayCoroutine(this MonoBehaviour source, ref IEnumerator rutine, Func<IEnumerator> rutineMethod)
     {
         if (!source.isActiveAndEnabled)
             throw new Exception("El objeto está desactivado o el componente disabled.");
@@ -32,7 +32,7 @@ public static class UnityExtensions
             source.StopCoroutine(rutine);
 
         rutine = rutineMethod();
-        source.StartCoroutine(rutine);
+        return source.StartCoroutine(rutine);
     }
 
     public static bool CanSee(this Camera cam, Vector3 pos, Vector3 boundSize) => CanSee(cam, new Bounds(pos, boundSize));
