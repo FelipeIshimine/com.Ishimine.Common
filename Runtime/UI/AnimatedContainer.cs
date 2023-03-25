@@ -52,10 +52,6 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator
     [FormerlySerializedAs("durationIn"), SerializeField, HorizontalGroup("Duration")] private float openDuration = .3f;
     [FormerlySerializedAs("durationOut"), SerializeField, HorizontalGroup("Duration")] private float closeDuration = .3f;
     
-    [SerializeField] private bool hideOnDisable = true;
-    [SerializeField] private bool openOnEnable = true;
-    [SerializeField] private bool deactivateWhenClosed = true;
-    
     [FoldoutGroup("CanvasGroup", GroupName = "BlockRaycast & Interactivity"), HorizontalGroup("CanvasGroup/Horizontal")]
     [VerticalGroup("CanvasGroup/Horizontal/BlockRaycast"),SerializeField] private bool setBlockRaycast = true;
     [EnableIf(nameof(setBlockRaycast)),SerializeField, VerticalGroup("CanvasGroup/Horizontal/BlockRaycast"), LabelText("When Open")] 
@@ -138,12 +134,10 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator
     private void OnEnable()
     {
         if(_currentRoutine != null) StartCoroutine(_currentRoutine);
-        else if (openOnEnable) Open();
     }
     
     private void OnDisable()
     {
-        if (hideOnDisable) Hide();
     }
 
     private void SetAnimationRoutine(IEnumerator nRoutine)
@@ -274,7 +268,6 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator
 
         if(setInteractivity) canvasGroup.interactable = interactivityWhenClosed;
         if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenClosed;
-        if (deactivateWhenClosed) gameObject.SetActive(false);
 
         SetState(State.Close);
 
