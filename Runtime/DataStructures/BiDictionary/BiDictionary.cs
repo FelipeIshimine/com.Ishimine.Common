@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace DataStructures.BiDictionary
 {
@@ -84,5 +85,8 @@ namespace DataStructures.BiDictionary
             _forward.Clear();
             _reverse.Clear();
         }
+
+        public bool TryGetValue(TKey key, out TValue value) => _forward.TryGetValue(key, out value);
+        public bool TryGetValue(TValue key, out TKey value) => _reverse.TryGetValue(key, out value);
     }
 }
