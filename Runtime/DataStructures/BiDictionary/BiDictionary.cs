@@ -1,12 +1,15 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
-using UnityEngine;
 
 namespace DataStructures.BiDictionary
 {
     public class BiDictionary<TKey, TValue> : IBiDictionary<TKey, TValue>
     {
+        public event Action<TKey, TValue> OnAdd; 
+        public event Action<TKey, TValue> OnRemove;
+        
         [ShowInInspector] private readonly Dictionary<TKey, TValue> _forward = new Dictionary<TKey, TValue>();
         [ShowInInspector] private readonly Dictionary<TValue, TKey> _backward = new Dictionary<TValue, TKey>();
 
@@ -31,26 +34,17 @@ namespace DataStructures.BiDictionary
         {
             _forward.Add(key, value);
             _backward.Add(value, key);
+            
+            OnAdd?.Invoke(key,value);
         }
 
         public bool ContainsKey(TKey key) => _forward.ContainsKey(key);
 
         public bool ContainsValue(TValue value) => _backward.ContainsKey(value);
 
-        public bool RemoveKey(TKey key) => _backward.Remove(_forward[key]) && _forward.Remove(key);
+        public bool RemoveKey(TKey key) => Remove(key,_forward[key]);
 
-        public bool RemoveValue(TValue value)
-        {
-            var key = _backward[value];
-
-            bool a = _forward.Remove(key);
-            bool b = _backward.Remove(value);
-
-            Debug.Log($"A:{a} B:{b}");
-
-            return a && b;
-            //return key != null && _forward.Remove(key) && _reverse.Remove(value);
-        }
+        public bool RemoveValue(TValue value) => Remove(_backward[value], value);
 
         public IEnumerator<KeyValuePair<TValue, TKey>> GetValueEnumerator() => _backward.GetEnumerator();
 
@@ -58,6 +52,13 @@ namespace DataStructures.BiDictionary
 
         IEnumerator IEnumerable.GetEnumerator() => _forward.GetEnumerator();
 
+        private bool Remove(TKey key, TValue value)
+        {
+            var result = _backward.Remove(_forward[key]) && _forward.Remove(key);
+            if(result) OnRemove?.Invoke(key,value);
+            return result;
+        }
+        
         public void Clear()
         {
             _forward.Clear();
@@ -66,5 +67,14 @@ namespace DataStructures.BiDictionary
 
         public bool TryGetValue(TKey key, out TValue value) => _forward.TryGetValue(key, out value);
         public bool TryGetValue(TValue key, out TKey value) => _backward.TryGetValue(key, out value);
+
+        public (TKey key, TValue value)[] ToArray()
+        {
+            int count = 0;
+            (TKey key, TValue value)[] results = new (TKey key, TValue value)[_forward.Count];
+            foreach (var pair in _forward)
+                results[count++] = (pair.Key, pair.Value);
+            return results;
+        }
     }
 }
