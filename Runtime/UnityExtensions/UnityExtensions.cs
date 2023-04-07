@@ -45,7 +45,7 @@ public static class UnityExtensions
     
     
     
-    public static IEnumerator CreateQuickSteppedRutine(this MonoBehaviour source, float duration, DeltaTimeType deltaTime, Action<float> step, Action callback = null)
+    public static IEnumerator CreateQuickSteppedRoutine(this MonoBehaviour source, float duration, DeltaTimeType deltaTime, Action<float> step, Action callback = null)
     {
         Func<float> deltaStep;
         switch (deltaTime)

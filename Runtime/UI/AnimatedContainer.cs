@@ -144,12 +144,8 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator
     {
         if (_currentRoutine != null)
         {
-            Debug.LogWarning($"Cuidado: Se sobreescribio una rutina previa sin terminar. {transform.GetHierarchyAsString(true)}");
             if (_asyncRunning)
-            {
                 _asyncRunning = false;
-                Debug.Log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-            }
         }
         _currentRoutine = nRoutine;
     }
