@@ -9,7 +9,7 @@ public class JoystickDrawer : PropertyDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         JoystickAttribute joystick = attribute as JoystickAttribute;
-        return EditorGUIUtility.singleLineHeight + joystick.size;
+        return EditorGUIUtility.singleLineHeight*2.5f + joystick.size;
     }
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -21,29 +21,37 @@ public class JoystickDrawer : PropertyDrawer
         position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
 
         // Calculate the position of the joystick
-        Rect joystickRect = new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight, size, size);
-        
-        Rect labelRect = new Rect(position.x + joystickRect.width + 10, position.y, LABEL_WIDTH * 2, position.height);
+        Rect joystickRect = new Rect(position.x + size/2, position.y + EditorGUIUtility.singleLineHeight, size, size);
 
-        Rect toggleRect = new Rect(position.x + joystickRect.width + 10, position.y + EditorGUIUtility.singleLineHeight, 100, position.height);
+        // Calculate the position of the vertical slider
+        Rect sliderRectY = new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight, EditorGUIUtility.singleLineHeight, size);
 
-        
+        // Calculate the position of the horizontal slider
+        Rect sliderRectX = new Rect(position.x + joystickRect.width/2, position.y + size + EditorGUIUtility.singleLineHeight * 1.5f, size, EditorGUIUtility.singleLineHeight);
+
+        Rect labelRect = new Rect(position.x + joystickRect.width + 60, position.y+EditorGUIUtility.singleLineHeight, LABEL_WIDTH * 2, position.height);
+
         // Get the current value of the vector property
         Vector2 value = property.vector2Value;
 
         // Draw the labels
-        DrawLabels(labelRect, value);
-        
+        DrawLabels(labelRect, ref value);
+
+        // Draw the vertical slider
+        value.y = GUI.VerticalSlider(sliderRectY, value.y, 1f, -1f);
+
+        value.x = GUI.HorizontalSlider(sliderRectX, value.x, -1f, 1f);
+
         // Draw the joystick
         value = DrawJoystick(joystickRect, value, size);
-        
-        
+
         // Set the vector property to the new value
         property.vector2Value = value;
     }
 
     private Vector2 DrawJoystick(Rect position, Vector2 value, float size)
     {
+        value.y *= -1;
         // Calculate the center position of the joystick
         Vector2 center = new Vector2(position.x + size / 2f, position.y + position.height / 2f);
 
@@ -81,16 +89,25 @@ public class JoystickDrawer : PropertyDrawer
             value = direction * (clampedDistance / maxDistance);
         }
 
+        value.y *= -1;
         return value;
     }
     
-    private void DrawLabels(Rect position, Vector2 value)
+    private void DrawLabels(Rect position, ref Vector2 value)
     {
-        Rect yLabelRect = new Rect(position.x, position.y, 100, position.height);
-        EditorGUI.LabelField(yLabelRect, $"Y:{value.y:F2}");
+        Rect yLabelRect = new Rect(position.x, position.y, 100, EditorGUIUtility.singleLineHeight);
+        EditorGUI.LabelField(yLabelRect, "Y:");
+
+        Rect yFieldRect = new Rect(position.x + 20, position.y, 60, EditorGUIUtility.singleLineHeight);
+        value.y = EditorGUI.FloatField(yFieldRect, value.y);
+
         position.y += EditorGUIUtility.singleLineHeight;
-        
-        Rect xLabelRect = new Rect(position.x, position.y, 100, position.height);
-        EditorGUI.LabelField(xLabelRect, $"X:{value.x:F2}");
+
+        Rect xLabelRect = new Rect(position.x, position.y, 100, EditorGUIUtility.singleLineHeight);
+        EditorGUI.LabelField(xLabelRect, "X:");
+
+        Rect xFieldRect = new Rect(position.x + 20, position.y, 60, EditorGUIUtility.singleLineHeight);
+        value.x = EditorGUI.FloatField(xFieldRect, value.x);
     }
+    
 }
