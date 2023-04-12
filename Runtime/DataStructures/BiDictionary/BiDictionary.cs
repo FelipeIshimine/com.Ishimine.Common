@@ -17,7 +17,8 @@ namespace DataStructures.BiDictionary
         public Dictionary<TValue, TKey> ValueMap => _backward;
 
         public int Count() => _forward.Count;
-
+        public bool IsEmpty => _forward.Count == 0;
+        
         public TValue this[TKey key]
         {
             get => KeyMap[key];
