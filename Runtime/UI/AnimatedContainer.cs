@@ -31,7 +31,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator
     private RectTransform _parent;
     private RectTransform Parent => _parent ??= transform.parent as RectTransform;
 
-    [GetComponent,SerializeField] private RectTransform rectTransform;
+    [GetComponent,SerializeField, FormerlySerializedAs("_rectTransform")] private RectTransform rectTransform;
     
     public enum Direction
     {
@@ -445,7 +445,9 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator
     public void Validate(SelfValidationResult result)
     {
         if (rectTransform == null)
-            result.AddError("RectTransform not set");
+            result.AddError("RectTransform not set").WithFix("Fix",()=> SetRectTransform(transform as RectTransform));
     }
+
+    private void SetRectTransform(RectTransform nRectTransform) => this.rectTransform = nRectTransform;
 }
     
