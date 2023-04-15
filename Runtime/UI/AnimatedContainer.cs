@@ -13,7 +13,7 @@ using UnityEngine.UI;
 /// Conteiner generico para animar canvas con 'coroutines'.
 /// Si la animacion por movimiento no encaja bien, revisar que el Root del container este bien posicionados
 /// </summary>
-public class AnimatedContainer : MonoBehaviour, ISelfValidator
+public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCallbackReceiver
 {
     public InitState initializationState = InitState.Hide;
     [field:SerializeField, FormerlySerializedAs("timeType")] public TimeScale Time { get; private set; } = TimeScale.Unscaled;
@@ -31,7 +31,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator
     private RectTransform _parent;
     private RectTransform Parent => _parent ??= transform.parent as RectTransform;
 
-    [GetComponent,SerializeField] private RectTransform rectTransform;
+    [SerializeField, FormerlySerializedAs("_rectTransform")] private RectTransform rectTransform;
     
     public enum Direction
     {
@@ -445,7 +445,17 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator
     public void Validate(SelfValidationResult result)
     {
         if (rectTransform == null)
-            result.AddError("RectTransform not set");
+            result.AddError("RectTransform not set").WithFix("Fix",()=> SetRectTransform(transform as RectTransform));
+    }
+
+    private void SetRectTransform(RectTransform nRectTransform) => this.rectTransform = nRectTransform;
+    public void OnBeforeSerialize()
+    {
+        if(rectTransform == null) SetRectTransform(transform as RectTransform);
+    }
+
+    public void OnAfterDeserialize()
+    {
     }
 }
     
