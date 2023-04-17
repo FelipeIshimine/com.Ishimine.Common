@@ -35,6 +35,13 @@ public static class UnityExtensions
         return source.StartCoroutine(rutine);
     }
 
+    public static Coroutine PlayCoroutine(this MonoBehaviour source, ref Coroutine coroutine, IEnumerator enumerator)
+    {
+        if (!source.isActiveAndEnabled) throw new Exception("El objeto está desactivado o el componente disabled.");
+        if (coroutine != null) source.StopCoroutine(coroutine);
+        return coroutine = source.StartCoroutine(enumerator);
+    }
+
     public static bool CanSee(this Camera cam, Vector3 pos, Vector3 boundSize) => CanSee(cam, new Bounds(pos, boundSize));
     
     public static bool CanSee(this Camera cam, Bounds bounds) 
