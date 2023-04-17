@@ -8,21 +8,40 @@ public static class TransformExtensions
         return source.parent ? $"{source.parent.GetHierarchyAsString(false)}/{source.name}" : source.name;
     }
     
-    public static Transform FindInHierarchy(this Transform @this, string name)
+    public static Transform FindInHierarchy(this Transform @this, string name, bool includeInactive = false)
     {
         if (@this.name == name)
             return @this;
 
         for (int i = 0; i < @this.childCount; i++)
         {
-            Transform result = FindInHierarchy(@this.GetChild(i), name);
-            if (result != null)
+            var child = @this.GetChild(i);
+            if(!includeInactive && !child.gameObject.activeInHierarchy) continue;
+            
+            Transform result = FindInHierarchy(child, name);
+            if (result)
                 return result;
         }
         return null;
     }
-
     
+    public static Transform FindInHierarchyByTag(this Transform @this, string tag, bool includeInactive = false)
+    {
+        if (@this.CompareTag(tag))
+            return @this;
+
+        for (int i = 0; i < @this.childCount; i++)
+        {
+            var child = @this.GetChild(i);
+            if(!includeInactive && !child.gameObject.activeInHierarchy) continue;
+            
+            Transform result = FindInHierarchyByTag(@this.GetChild(i), tag);
+            if (result)
+                return result;
+        }
+        return null;
+    }
+   
     
     public static void SetGlobalScale (this Transform transform, Vector3 globalScale)
     {
