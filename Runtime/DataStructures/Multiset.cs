@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Multiset<T> : IEnumerable<KeyValuePair<T,int>>
 {
-    private Dictionary<T, int> _values = new Dictionary<T, int>();
+    private readonly Dictionary<T, int> _values = new Dictionary<T, int>();
 
     public Dictionary<T, int>.KeyCollection Keys => _values.Keys;
     public Dictionary<T, int>.ValueCollection Values => _values.Values;
@@ -28,7 +28,11 @@ public class Multiset<T> : IEnumerable<KeyValuePair<T,int>>
         return --_values[value];
     }
 
-    public int GetValue(T value) => _values[value];
+    public int GetValue(T value)
+    {
+        if (_values.TryGetValue(value, out var count)) return count;
+        return 0;
+    }
 
     private void SetValue(T key, int value) => _values[key] = value;
 
