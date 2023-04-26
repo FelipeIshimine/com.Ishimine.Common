@@ -77,5 +77,17 @@ namespace DataStructures.BiDictionary
                 results[count++] = (pair.Key, pair.Value);
             return results;
         }
+
+        public IEnumerable<TValue> GetValues()
+        {
+            foreach (KeyValuePair<TKey,TValue> pair in _forward)
+                yield return pair.Value;
+        }
+        
+        public IEnumerable<TKey> GetKeys()
+        {
+            foreach (KeyValuePair<TKey,TValue> pair in _forward)
+                yield return pair.Key;
+        }
     }
 }
