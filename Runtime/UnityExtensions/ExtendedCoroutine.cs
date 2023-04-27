@@ -20,7 +20,6 @@ public class ExtendedCoroutine : IEnumerator
         if(_target.MoveNext()) 
         {
             Result = _target.Current;
-            Debug.Log($"Result:{Result}");
             return true;
         }
         _callback?.Invoke();
@@ -49,7 +48,6 @@ public class ExtendedCoroutine<T> : IEnumerator
         if(_target.MoveNext()) 
         {
             Result = _target.Current;
-            Debug.Log($"Result:{Result}");
             return true;
         }
         _callback?.Invoke();
