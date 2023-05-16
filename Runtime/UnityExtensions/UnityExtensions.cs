@@ -110,20 +110,24 @@ public static class UnityExtensions
         } while (true);
     }
 
-    public static void WaitAndExecute(this MonoBehaviour source, ref IEnumerator rutine, float waitTime, bool isRealTime, Action callback)
+    public static void PlayWaitAndExecute(this MonoBehaviour source, ref IEnumerator rutine, float waitTime, bool isRealTime, Action callback)
     {
         if (callback == null)
             Debug.LogWarning("Callback is null");
-        source.PlayCoroutine(ref rutine, () => WaitAndExecuteRutine(waitTime, isRealTime, callback));
+        source.PlayCoroutine(ref rutine, () => WaitAndExecute(waitTime, isRealTime, callback));
+    }
+    public static YieldInstruction StartWaitAndExecute(this MonoBehaviour source, float waitTime, bool isRealTime, Action callback = null)
+    {
+        if (callback == null) Debug.LogWarning("Callback is null");
+        return source.StartCoroutine(WaitAndExecute(waitTime, isRealTime, callback));
     }
 
-    public static IEnumerator WaitAndExecuteRutine(float waitTime, bool isRealTime, Action callback)
+    public static IEnumerator WaitAndExecute(float waitTime, bool isRealTime, Action callback)
     {
         if (isRealTime)
             yield return new WaitForSecondsRealtime(waitTime);
         else
             yield return new WaitForSeconds(waitTime);
-
         callback.Invoke();
     }
     
