@@ -48,5 +48,20 @@ public static class TransformExtensions
         transform.localScale = Vector3.one;
         transform.localScale = new Vector3 (globalScale.x/transform.lossyScale.x, globalScale.y/transform.lossyScale.y, globalScale.z/transform.lossyScale.z);
     }
+    
+    public static void LookAt2D(this Transform source, Vector2 target)
+    {
+        Vector2 direction = target - (Vector2)source.transform.position;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        source.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+    }
+    
+    public static void LookAt2D(this Transform source, Vector2 target, bool aimWithUp)
+    {
+        Vector2 direction = target - (Vector2)source.position;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        if (aimWithUp) angle -= 90f;
+        source.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+    }
 }
 
