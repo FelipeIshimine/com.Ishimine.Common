@@ -42,7 +42,6 @@ public static class TransformExtensions
         return null;
     }
    
-    
     public static void SetGlobalScale (this Transform transform, Vector3 globalScale)
     {
         transform.localScale = Vector3.one;
@@ -64,4 +63,3 @@ public static class TransformExtensions
         source.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 }
-
