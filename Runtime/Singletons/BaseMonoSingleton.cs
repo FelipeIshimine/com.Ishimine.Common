@@ -17,8 +17,9 @@ public class BaseMonoSingleton<T> : MonoBehaviour where T : BaseMonoSingleton<T>
         if(_instance == this) return;
         if (_instance != null)
         {
-            //Destroy(gameObject);
-            Debug.LogError($"Mono Singleton Already exists at {_instance.transform.GetHierarchyAsString()}",this);
+            Destroy(gameObject);
+            Debug.LogWarning($"Mono Singleton Already exists at {_instance.transform.GetHierarchyAsString()}",this);
+            return;
         }
         _instance = this as T;
     }
