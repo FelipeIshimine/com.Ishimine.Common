@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class Multiset<T> : IEnumerable<KeyValuePair<T,int>>
+public class Multiset<T> : IEnumerable<KeyValuePair<T,int>>, IEnumerable<(T,int)>
 {
     [ShowInInspector] private readonly Dictionary<T, int> _values = new Dictionary<T, int>();
 
@@ -56,6 +56,12 @@ public class Multiset<T> : IEnumerable<KeyValuePair<T,int>>
         return value;
     }
 
+    IEnumerator<(T, int)> IEnumerable<(T, int)>.GetEnumerator()
+    {
+        foreach (var pair in _values)
+            yield return (pair.Key,pair.Value);
+    }
+    
     IEnumerator<KeyValuePair<T, int>> IEnumerable<KeyValuePair<T, int>>.GetEnumerator() =>_values.GetEnumerator();
     public IEnumerator GetEnumerator() =>_values.GetEnumerator();
 }
