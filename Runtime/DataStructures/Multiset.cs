@@ -26,7 +26,9 @@ public class Multiset<T> : IEnumerable<KeyValuePair<T,int>>, IEnumerable<(T,int)
     public int Remove(T value)
     {
         if (!_values.TryGetValue(value, out int count) || count == 0) return 0;
-        return --_values[value];
+        int result = --_values[value];
+        if (result == 0) _values.Remove(value);
+        return result;
     }
 
     public int GetValue(T value)

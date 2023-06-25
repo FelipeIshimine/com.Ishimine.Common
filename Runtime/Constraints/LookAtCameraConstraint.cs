@@ -21,6 +21,8 @@ public class LookAtCameraConstraint : MonoBehaviour
             for (int i = constraint.sourceCount - 1; i >= 0; i--)
                 constraint.RemoveSource(i);
 
+        if(!Camera.main) return;
+        
         constraint.AddSource(new ConstraintSource()
             { sourceTransform = Camera.main.transform, weight = 1 });
 
@@ -31,5 +33,8 @@ public class LookAtCameraConstraint : MonoBehaviour
     {
         if(constraint) constraint.RemoveSource(0);
     }
+    
+    
+    
     
 }
