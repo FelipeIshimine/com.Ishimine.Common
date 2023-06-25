@@ -9,6 +9,7 @@ namespace DataStructures.BiDictionary
     {
         public event Action<TKey, TValue> OnAdd; 
         public event Action<TKey, TValue> OnRemove;
+        public event Action OnClear;
         
         [ShowInInspector] private readonly Dictionary<TKey, TValue> _forward = new Dictionary<TKey, TValue>();
         [ShowInInspector] private readonly Dictionary<TValue, TKey> _backward = new Dictionary<TValue, TKey>();
@@ -64,6 +65,7 @@ namespace DataStructures.BiDictionary
         {
             _forward.Clear();
             _backward.Clear();
+            OnClear?.Invoke();
         }
 
         public bool TryGetValue(TKey key, out TValue value) => _forward.TryGetValue(key, out value);
