@@ -16,14 +16,15 @@ public class CameraRotationConstraint : MonoBehaviour
         constraint.constraintActive = true;
     }
 
-    private void Start()
+    private IEnumerator GetCamera()
     {
-        if(Camera.main) Initialize(Camera.main);
+        yield return new WaitUntil(()=> Camera.main);
+        Initialize(Camera.main);
     }
 
     private void OnEnable()
     {
-        if(Camera.main) Initialize(Camera.main);
+        StartCoroutine(GetCamera());
     }
 
     public void Initialize(Camera cam)
