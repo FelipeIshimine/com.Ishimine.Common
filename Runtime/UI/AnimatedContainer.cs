@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nrjwolf.Tools.AttachAttributes;
-using Redcode.Awaiting;
 using UnityEngine;
 using Sirenix.OdinInspector;
+using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -15,10 +13,7 @@ using UnityEngine.UI;
 /// </summary>
 public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCallbackReceiver
 {
-    public InitState initializationState = InitState.Hide;
-    [field:SerializeField, FormerlySerializedAs("timeType")] public TimeScale Time { get; private set; } = TimeScale.Unscaled;
-    
-    public bool debugPrint = false;
+    #region Events
     public event Action OnInitialize;
     public event Action<State> OnStateChange;
     public event Action<bool> OnOpenOrCloseStart;
@@ -27,48 +22,28 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
     public event Action OnOpeningEnd;
     public event Action OnClosingStart;
     public event Action OnClosingEnd;
-    
+    #endregion
+
     private RectTransform _parent;
-    private RectTransform Parent => _parent ??= transform.parent as RectTransform;
-
-    [SerializeField, FormerlySerializedAs("_rectTransform")] private RectTransform rectTransform;
     
-    public enum Direction
-    {
-        Up = 0,
-        UpRight = 1,
-        UpLeft = 2,
-        Right = 3,
-        Left = 4,
-        Down = 5, 
-        DownRight = 6,
-        DownLef = 7
-    }
-    public enum TimeScale { Scaled, Unscaled }
-    public enum Order { Open, Close, Show, Hide }
+    [FoldoutGroup("Dependencies"),SerializeField, FormerlySerializedAs("_rectTransform")] private RectTransform rectTransform;
+    [FoldoutGroup("Dependencies"),SerializeField] private CanvasGroup canvasGroup;
+    [FoldoutGroup("Dependencies"),SerializeField] private Optional<EventSystem> optEventSystem;
 
-    [SerializeField] private CanvasGroup canvasGroup;
-    
-    [FormerlySerializedAs("durationIn"), SerializeField, HorizontalGroup("Duration")] private float openDuration = .3f;
-    [FormerlySerializedAs("durationOut"), SerializeField, HorizontalGroup("Duration")] private float closeDuration = .3f;
-    
-    [FoldoutGroup("CanvasGroup", GroupName = "BlockRaycast & Interactivity"), HorizontalGroup("CanvasGroup/Horizontal")]
-    [VerticalGroup("CanvasGroup/Horizontal/BlockRaycast"),SerializeField] private bool setBlockRaycast = true;
-    [EnableIf(nameof(setBlockRaycast)),SerializeField, VerticalGroup("CanvasGroup/Horizontal/BlockRaycast"), LabelText("When Open")] 
-    private bool blockRaycastWhenOpened = true;
-    [EnableIf(nameof(setBlockRaycast)),SerializeField, VerticalGroup("CanvasGroup/Horizontal/BlockRaycast"), LabelText("When Close")]
-    private bool blockRaycastWhenClosed = false;
+    public InitState awakeBehaviour = InitState.None;
+    [field:SerializeField, FormerlySerializedAs("timeType")] public TimeScale Time { get; private set; } = TimeScale.Unscaled;
+    public bool deactivateGameObjectOnHide = true;
+    public bool debugPrint = false;
 
-    [VerticalGroup("CanvasGroup/Horizontal/Interactivity"),SerializeField] private bool setInteractivity = true;
-    [EnableIf(nameof(setInteractivity)),SerializeField, VerticalGroup("CanvasGroup/Horizontal/Interactivity"),LabelText("When Open")] 
-    private bool interactivityWhenOpened = true;
-    [EnableIf(nameof(setInteractivity)),SerializeField, VerticalGroup("CanvasGroup/Horizontal/Interactivity"),LabelText("When Close")] 
-    private bool interactivityWhenClosed = false;
+    [HorizontalGroup("Horizontal")]
+    [VerticalGroup("Horizontal/BlockRaycast"), SerializeField] private bool setBlockRaycast = true;
+    [VerticalGroup("Horizontal/Interactivity"),SerializeField] private bool setInteractivity = true;
+
 
     [SerializeField, FoldoutGroup("SubContainers")] private List<AnimatedContainer> subContainers = new List<AnimatedContainer>();
-
     public enum InitState
     {
+        None,
         Show,
         Hide
     }
@@ -91,22 +66,20 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 
     public bool InAnimation { get; private set; }
    
-
+    [FormerlySerializedAs("durationIn"), SerializeField,  BoxGroup("Animation"),HorizontalGroup("Animation/Duration")] private float openDuration = .3f;
+    [FormerlySerializedAs("durationOut"), SerializeField, BoxGroup("Animation"),HorizontalGroup("Animation/Duration")] private float closeDuration = .3f;
     [TabGroup("Alpha")] public bool useAlpha = true;
-    [EnableIf("useAlpha"), TabGroup("Alpha"), LabelText("Open Curve")] public AnimationCurve alphaCurveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    [EnableIf("useAlpha"), TabGroup("Alpha"), LabelText("Close Curve")] public AnimationCurve alphaCurveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
-
+    [TabGroup("Alpha"),EnableIf("useAlpha"),  LabelText("Open Curve")] public AnimationCurve alphaCurveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [TabGroup("Alpha"),EnableIf("useAlpha"),  LabelText("Close Curve")] public AnimationCurve alphaCurveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [TabGroup("Scale")] public bool useScale = false;
-    [EnableIf("useScale"), TabGroup("Scale")] public Vector3 closeScale = new Vector3(0, 0, 0);
-    [EnableIf("useScale"), TabGroup("Scale"), LabelText("Open Curve")] public AnimationCurve curveInScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    [EnableIf("useScale"), TabGroup("Scale"), LabelText("Close Curve")] public AnimationCurve curveOutScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
-
+    [TabGroup("Scale"), EnableIf("useScale") ] public Vector3 closeScale = new Vector3(0, 0, 0);
+    [TabGroup("Scale"), EnableIf("useScale") , LabelText("Open Curve")] public AnimationCurve curveInScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [TabGroup("Scale"), EnableIf("useScale") , LabelText("Close Curve")] public AnimationCurve curveOutScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [TabGroup("Movement")] public bool useMovement = false;
-    [EnableIf("useMovement"), TabGroup("Movement")] public bool useParentSizeForDisplacement = true;
-    [EnableIf("useMovement"), TabGroup("Movement")] public Direction direction = Direction.Down;
-    [EnableIf("useMovement"), TabGroup("Movement"), LabelText("Open Curve")] public AnimationCurve curveInMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    [EnableIf("useMovement"), TabGroup("Movement"), LabelText("Close Curve")] public AnimationCurve curveOutMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
-
+    [TabGroup("Movement"), EnableIf("useMovement")] public bool useParentSizeForDisplacement = true;
+    [TabGroup("Movement"), EnableIf("useMovement")] public Direction direction = Direction.Down;
+    [TabGroup("Movement"), EnableIf("useMovement"), LabelText("Close Curve")] public AnimationCurve curveOutMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [TabGroup("Movement"), EnableIf("useMovement"), LabelText("Open Curve")] public AnimationCurve curveInMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     private static readonly Vector3[] DirectionVectors = new Vector3[]
     {
@@ -186,10 +159,17 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         if (IsInitialized) return;
         IsInitialized = true;
 
-        if (initializationState == InitState.Hide)
-            Hide();
-        else
-            Show();
+        switch (awakeBehaviour)
+        {
+            case InitState.Hide:
+                Hide();
+                break;
+            case InitState.Show:
+                Show();
+                break;
+            case InitState.None:
+                break;
+        }
         
         OnInitialize?.Invoke();
     }
@@ -202,6 +182,8 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
     [Button, ButtonGroup("Animated", GroupName = "Animated")]
     public YieldInstruction Close(Action postAction)
     {
+        if (optEventSystem) optEventSystem.Value.enabled = false;
+
         if (CurrentState == State.Close)
         {
             postAction?.Invoke();
@@ -251,9 +233,13 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
     [Button, ButtonGroup("Snap")]
     public void Hide()
     {
+        if (optEventSystem) optEventSystem.Value.enabled = false;
+
         foreach (AnimatedContainer subContainer in subContainers)
             subContainer.Hide();
-        
+
+        if(deactivateGameObjectOnHide) gameObject.SetActive(false);
+
         Initialize();
 
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Hide");
@@ -262,13 +248,12 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         if(useScale) rectTransform.localScale = closeScale;
         if(useAlpha) canvasGroup.alpha = alphaCurveOut.Evaluate(0);
 
-        if(setInteractivity) canvasGroup.interactable = interactivityWhenClosed;
-        if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenClosed;
+        if(setInteractivity) canvasGroup.interactable = false;
+        if(setBlockRaycast) canvasGroup.blocksRaycasts = false;
 
         SetState(State.Close);
 
         _currentRoutine = null;
-
     }
 
     private Vector3 GetCloseLocalPosition() => Vector3.Scale(GetDirection(), rectTransform.rect.size);
@@ -279,21 +264,22 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
     [Button, ButtonGroup("Snap", GroupName = "Snap")]
     public void Show()
     {
+        gameObject.SetActive(true);
+        if (optEventSystem) optEventSystem.Value.enabled = true;
+            
         foreach (AnimatedContainer subContainer in subContainers)
             subContainer.Show();
         
         Initialize();
         
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Show");
-
-        gameObject.SetActive(true);
         
         if(useMovement) rectTransform.localPosition = Vector3.zero;
         if(useScale) rectTransform.localScale = Vector3.one;
         if(useAlpha) canvasGroup.alpha = 1;
         
-        if(setInteractivity) canvasGroup.interactable = interactivityWhenOpened;
-        if(setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenOpened;
+        if(setInteractivity) canvasGroup.interactable = true;
+        if(setBlockRaycast) canvasGroup.blocksRaycasts = true;
         
         SetState(State.Open);
         
@@ -354,8 +340,8 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         if (useScale) step += x=> rectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(x));
         if (useAlpha) step += x => canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, targetAlpha, alphaCurve.Evaluate(x));
 
-        if (setBlockRaycast) canvasGroup.blocksRaycasts = blockRaycastWhenClosed;
-        if (setInteractivity) canvasGroup.interactable = interactivityWhenClosed;
+        //if (setBlockRaycast) canvasGroup.blocksRaycasts = false;
+        //if (setInteractivity) canvasGroup.interactable = false;
         
         do
         {
@@ -457,5 +443,20 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
     public void OnAfterDeserialize()
     {
     }
+    
+    
+    public enum Direction
+    {
+        Up = 0,
+        UpRight = 1,
+        UpLeft = 2,
+        Right = 3,
+        Left = 4,
+        Down = 5, 
+        DownRight = 6,
+        DownLef = 7
+    }
+    public enum TimeScale { Scaled, Unscaled }
+    public enum Order { Open, Close, Show, Hide }
 }
     
