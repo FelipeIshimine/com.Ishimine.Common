@@ -102,6 +102,13 @@ public static class ListExtensions
         return value;
     }
 
+    public static T PopLast<T>(this List<T> source)
+    {
+	    T element = source[^1];
+	    source.RemoveAt(source.Count-1);
+	    return element;
+    }
+
     public static void Shuffle<T>(this List<T> source)
     {
         for (int i = source.Count - 1; i >= 0; i--)
