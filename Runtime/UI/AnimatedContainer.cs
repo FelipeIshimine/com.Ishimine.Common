@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Redcode.Awaiting;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using UnityEngine.EventSystems;
@@ -93,8 +95,6 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         new Vector3(-1,-1,0),
     };
 
-
-    private bool _asyncRunning;
     public bool IsInitialized { get; private set; }= false;
 
     private IEnumerator _currentRoutine;
@@ -113,16 +113,6 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
     {
     }
 
-    private void SetAnimationRoutine(IEnumerator nRoutine)
-    {
-        if (_currentRoutine != null)
-        {
-            if (_asyncRunning)
-                _asyncRunning = false;
-        }
-        _currentRoutine = nRoutine;
-    }
-    
     private void SetState(State nState)
     {
         CurrentState = nState;
@@ -174,10 +164,16 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         OnInitialize?.Invoke();
     }
 
-    public YieldInstruction Close() => Close(null);
+    public async Task CloseAsync()
+    {
+	    bool deactivateGo = deactivateGameObjectOnHide;
+	    deactivateGameObjectOnHide = false;
+	    await Close(null);
+	    deactivateGameObjectOnHide = deactivateGo;
+	    if(deactivateGameObjectOnHide) gameObject.SetActive(false);
+    }
 
-    //public async Task CloseAsync() => await Close();
-    //public async Task OpenAsync() => await Open();
+    public YieldInstruction Close() => Close(null);
     
     [Button, ButtonGroup("Animated", GroupName = "Animated")]
     public YieldInstruction Close(Action postAction)
@@ -187,21 +183,27 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         if (CurrentState == State.Close)
         {
             postAction?.Invoke();
-            return null;
+            return new YieldInstruction();
         }
         
         if (!Application.isPlaying)
         {
             Debug.LogWarning("Can't play animation outside of Play State");
-            return null;
+            return new YieldInstruction();
         }
         
         Initialize();
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Close");
 
-        SetAnimationRoutine(CloseRoutine(postAction));
         SetState(State.Closing);
-        return gameObject.activeInHierarchy ? StartCoroutine(_currentRoutine) : null;
+        return gameObject.activeInHierarchy ? Play(CloseRoutine(postAction)) : new YieldInstruction();
+    }
+
+    private YieldInstruction Play(IEnumerator routine)
+    {
+	    if(_currentRoutine != null)
+		    StopCoroutine(_currentRoutine);
+	    return StartCoroutine(routine);
     }
 
     [Button, ButtonGroup("Animated")]
@@ -212,22 +214,20 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         if (CurrentState == State.Open)
         {
             postAction?.Invoke();
-            return null;
+            return new YieldInstruction();
         }
         if (!Application.isPlaying)
         {
             Debug.LogWarning("Can't play animation outside of Play State");
-            return null;
+            return new YieldInstruction();
         }
         gameObject.SetActive(true);
 
         Initialize();
         if (debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Open");
         
-        SetAnimationRoutine(OpenRoutine(postAction));
         SetState(State.Opening);
-        
-        return gameObject.activeInHierarchy ? StartCoroutine(_currentRoutine) : null;
+        return gameObject.activeInHierarchy ? Play(OpenRoutine(postAction)) :  new YieldInstruction();
     }
 
     [Button, ButtonGroup("Snap")]
@@ -342,10 +342,10 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 
         //if (setBlockRaycast) canvasGroup.blocksRaycasts = false;
         //if (setInteractivity) canvasGroup.interactable = false;
-        
+  
         do
         {
-            t += ((Time == TimeScale.Scaled) ? UnityEngine.Time.deltaTime : UnityEngine.Time.unscaledDeltaTime) / duration;
+            t += (Time == TimeScale.Scaled ? UnityEngine.Time.deltaTime : UnityEngine.Time.unscaledDeltaTime) / duration;
             step?.Invoke(t);
             
             yield return null;
