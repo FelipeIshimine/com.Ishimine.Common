@@ -7,6 +7,7 @@ public abstract class ConstantBehaviour : MonoBehaviour
 {
     [OnValueChanged("OnDurationChange"), MinValue(.001f)] public float duration = 1;
     [OnValueChanged("OnSpeedChange"), MinValue(.001f)] public float speed = 1;
+    [SerializeField] private bool modifyInEditMode = true;
 
     public bool resetOnEnable = false;
 
@@ -61,7 +62,8 @@ public abstract class ConstantBehaviour : MonoBehaviour
 
     protected virtual void OnValidate()
     {
-        Process(timeOffset);
+        if(modifyInEditMode)
+            Process(timeOffset);
     }
     protected abstract void Process(float nTime);
 
