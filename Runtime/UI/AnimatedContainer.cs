@@ -40,21 +40,17 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 	[FoldoutGroup("Dependencies"),SerializeField] private CanvasGroup canvasGroup;
 	[FoldoutGroup("Dependencies"),SerializeField] private Optional<EventSystem> optEventSystem;
 
-	[HorizontalGroup("Horizontal")]
-    [VerticalGroup("Horizontal/BlockRaycast"), SerializeField] private bool setBlockRaycast = true;
+	[SerializeField, BoxGroup("General")] private InitState awakeBehaviour = InitState.None;
+	[SerializeField, BoxGroup("General")] private bool deactivateGameObjectOnHide = true;
+	[SerializeField, BoxGroup("General")] private bool setBlockRaycast = true;
+	[SerializeField, BoxGroup("General")] private bool setInteractivity = true;
+	[SerializeField, BoxGroup("General")] private bool debugPrint = false;
+	[SerializeField, BoxGroup("General")] private List<AnimatedContainer> subContainers = new List<AnimatedContainer>();
 
-	[VerticalGroup("Horizontal/Interactivity"),SerializeField] private bool setInteractivity = true;
+	[FormerlySerializedAs("durationIn"), SerializeField,  BoxGroup("Animation")] private float openDuration = .3f;
+	[FormerlySerializedAs("durationOut"), SerializeField, BoxGroup("Animation")] private float closeDuration = .3f;
+	[field:SerializeField, BoxGroup("General")] public TimeScale Time { get; private set; } = TimeScale.Unscaled;
 
-
-	[SerializeField, FoldoutGroup("SubContainers")] private List<AnimatedContainer> subContainers = new List<AnimatedContainer>();
-
-	[FormerlySerializedAs("durationIn"), SerializeField,  BoxGroup("Animation"),HorizontalGroup("Animation/Duration")] private float openDuration = .3f;
-	[FormerlySerializedAs("durationOut"), SerializeField, BoxGroup("Animation"),HorizontalGroup("Animation/Duration")] private float closeDuration = .3f;
-	[field:SerializeField, FormerlySerializedAs("timeType")] public TimeScale Time { get; private set; } = TimeScale.Unscaled;
-
-	public InitState awakeBehaviour = InitState.None;
-	public bool deactivateGameObjectOnHide = true;
-	public bool debugPrint = false;
 	[TabGroup("Alpha")] public bool useAlpha = true;
 	[TabGroup("Alpha"),EnableIf("useAlpha"),  LabelText("Open Curve")] public AnimationCurve alphaCurveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
 	[TabGroup("Alpha"),EnableIf("useAlpha"),  LabelText("Close Curve")] public AnimationCurve alphaCurveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
@@ -122,46 +118,47 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 	    if(deactivateGameObjectOnHide) gameObject.SetActive(false);
     }
 
-	public YieldInstruction Close() => Close(null);
+	public Coroutine Close() => Close(null);
 
 	[Button, ButtonGroup("Animated", GroupName = "Animated")]
-    public YieldInstruction Close(Action postAction)
+    public Coroutine Close(Action postAction)
     {
+	    Debug.Log($">>>Close() {transform.GetHierarchyAsString()}");
         if (optEventSystem) optEventSystem.Value.enabled = false;
 
         if (CurrentState == State.Close)
         {
             postAction?.Invoke();
-            return new YieldInstruction();
+            return null;
         }
         
         if (!Application.isPlaying)
         {
             Debug.LogWarning("Can't play animation outside of Play State");
-            return new YieldInstruction();
+            return null;
         }
         
         Initialize();
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Close");
 
         SetState(State.Closing);
-        return gameObject.activeInHierarchy ? Play(CloseRoutine(postAction)) : new YieldInstruction();
+        return gameObject.activeInHierarchy ? Play(CloseRoutine(postAction)) : null;
     }
 
     [Button, ButtonGroup("Animated")]
-    public YieldInstruction Open() => Open(null);
+    public Coroutine Open() => Open(null);
 
-    public YieldInstruction Open(Action postAction)
+    public Coroutine Open(Action postAction)
     {
         if (CurrentState == State.Open)
         {
             postAction?.Invoke();
-            return new YieldInstruction();
+            return null;
         }
         if (!Application.isPlaying)
         {
             Debug.LogWarning("Can't play animation outside of Play State");
-            return new YieldInstruction();
+            return null;
         }
         gameObject.SetActive(true);
 
@@ -169,7 +166,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         if (debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Open");
         
         SetState(State.Opening);
-        return gameObject.activeInHierarchy ? Play(OpenRoutine(postAction)) :  new YieldInstruction();
+        return gameObject.activeInHierarchy ? Play(OpenRoutine(postAction)) :  null;
     }
 
     [Button, ButtonGroup("Snap")]
@@ -186,7 +183,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Hide");
 
-        if (useMovement) rectTransform.transform.localPosition = GetCloseLocalPosition();
+        if (useMovement) rectTransform.anchoredPosition = GetCloseLocalPosition();
         if(useScale) rectTransform.localScale = closeScale;
         if(useAlpha) canvasGroup.alpha = alphaCurveOut.Evaluate(0);
 
@@ -212,7 +209,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Show");
         
-        if(useMovement) rectTransform.localPosition = Vector3.zero;
+        if(useMovement) rectTransform.anchoredPosition = Vector3.zero;
         if(useScale) rectTransform.localScale = Vector3.one;
         if(useAlpha) canvasGroup.alpha = 1;
         
@@ -273,7 +270,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         }
     }
 
-    [Button, FoldoutGroup("SubContainers")]
+    [Button]
     public void CollectSubContainers()
     {
         foreach (Transform child in transform)
@@ -336,7 +333,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
     /// </summary>
     /// <param name="routine"></param>
     /// <returns></returns>
-    private YieldInstruction Play(IEnumerator routine)
+    private Coroutine Play(IEnumerator routine)
     {
 	    if(_currentRoutine != null)
 		    GlobalUpdate.Instance.StopCoroutine(_currentRoutine);
@@ -349,6 +346,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 
     private IEnumerator CloseRoutine(Action postAction = null)
     {
+	    Debug.LogWarning($">>> CloseRoutine: {transform.GetHierarchyAsString()}");
         InAnimation = true;
         OnClosingStart?.Invoke();
         OnOpenOrCloseStart?.Invoke(false);
@@ -397,7 +395,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 
         Action<float> step = null;
 
-        if (useMovement) step += x => rectTransform.localPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(x));
+        if (useMovement) step += x => rectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(x));
         if (useScale) step += x=> rectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(x));
         if (useAlpha) step += x => canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, targetAlpha, alphaCurve.Evaluate(x));
 
@@ -408,7 +406,6 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         {
             t += (Time == TimeScale.Scaled ? UnityEngine.Time.deltaTime : UnityEngine.Time.unscaledDeltaTime) / duration;
             step?.Invoke(t);
-            
             yield return null;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
             LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform.parent);
