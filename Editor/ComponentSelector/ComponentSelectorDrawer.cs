@@ -13,6 +13,9 @@ public class ComponentSelectorDrawer : PropertyDrawer
 {
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
+	    if(property.serializedObject.isEditingMultipleObjects)
+		    return;
+	    
         EditorGUI.BeginProperty(position, label, property);
 
         if (property.propertyType == SerializedPropertyType.ObjectReference && fieldInfo.FieldType.IsSubclassOf(typeof(Component)))
