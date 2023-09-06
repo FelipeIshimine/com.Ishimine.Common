@@ -66,7 +66,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 
 	private RectTransform _parent;
 
-	private IEnumerator _currentRoutine;
+	private Coroutine _currentRoutine;
 
 	[ShowInInspector, ReadOnly] public State CurrentState { get; private set; } = State.None;
 
@@ -337,7 +337,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
     {
 	    if(_currentRoutine != null)
 		    GlobalUpdate.Instance.StopCoroutine(_currentRoutine);
-	    return GlobalUpdate.Instance.StartCoroutine(routine);
+	    return _currentRoutine = GlobalUpdate.Instance.StartCoroutine(routine);
     }
 
     private Vector3 GetCloseLocalPosition() => Vector3.Scale(GetDirection(), rectTransform.rect.size);
