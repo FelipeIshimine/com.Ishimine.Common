@@ -123,7 +123,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 	[Button, ButtonGroup("Animated", GroupName = "Animated")]
     public Coroutine Close(Action postAction)
     {
-	    Debug.Log($">>>Close() {transform.GetHierarchyAsString()}");
+	    //Debug.Log($">>>Close() {transform.GetHierarchyAsString()}");
         if (optEventSystem) optEventSystem.Value.enabled = false;
 
         if (CurrentState == State.Close)
