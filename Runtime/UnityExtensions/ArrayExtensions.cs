@@ -6,9 +6,9 @@ public static class ArrayExtensions
     public static T Last<T>(this T[] source) => source[^1];
     public static T First<T>(this T[] source) => source[0];
 
-    public static object[] Collect<T>(this T[] @this, Func<T,object> func)
+    public static TB[] Collect<T,TB>(this T[] @this, Func<T,TB> func)
     {
-        var value = new object[@this.Length];
+        var value = new TB[@this.Length];
         for (int i = 0; i < @this.Length; i++)
             value[i] = func.Invoke(@this[i]);
         return value;
