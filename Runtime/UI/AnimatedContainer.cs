@@ -346,7 +346,6 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 
     private IEnumerator CloseRoutine(Action postAction = null)
     {
-	    Debug.LogWarning($">>> CloseRoutine: {transform.GetHierarchyAsString()}");
         InAnimation = true;
         OnClosingStart?.Invoke();
         OnOpenOrCloseStart?.Invoke(false);
