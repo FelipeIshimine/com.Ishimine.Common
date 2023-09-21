@@ -17,8 +17,8 @@ public class EnumIndexLabelDrawer : PropertyDrawer
             int pos = int.Parse(match.Groups[1].Value);
  
             // Make names nicer to read (but won't exactly match enum definition).
-            var enum_label = ObjectNames.NicifyVariableName(enum_names[pos].ToLower());
-            label = new GUIContent(enum_label);
+            //var enum_label = ObjectNames.NicifyVariableName(enum_names[pos].ToLower());
+            label = new GUIContent(enum_names[pos]);
         }
         catch
         {
