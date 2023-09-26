@@ -2,6 +2,14 @@
 
 public static class Vector3IntExtensions
 {
+
+	public static Vector2Int XY(this Vector3Int @this) => new Vector2Int(@this.x, @this.y);
+	public static Vector2Int XZ(this Vector3Int @this) => new Vector2Int(@this.x, @this.z);
+	public static Vector2Int YZ(this Vector3Int @this) => new Vector2Int(@this.y, @this.z);
+	public static Vector2Int YX(this Vector3Int @this) => new Vector2Int(@this.y, @this.x);
+	public static Vector2Int ZX(this Vector3Int @this) => new Vector2Int(@this.z, @this.x);
+	public static Vector2Int ZY(this Vector3Int @this) => new Vector2Int(@this.z, @this.y);
+    
     public static Vector3Int GetIndexXYZ(this Vector3Int source, int index)
     {
         Vector3Int value = new Vector3Int
