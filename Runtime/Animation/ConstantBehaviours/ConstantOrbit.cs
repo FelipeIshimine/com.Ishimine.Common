@@ -39,6 +39,10 @@ public class ConstantOrbit : MonoBehaviour
     
     public void Update()
     {
+	    if (!showOnScene && !Application.isPlaying)
+	    {
+		    return;
+	    }
         Step();
     }
 
