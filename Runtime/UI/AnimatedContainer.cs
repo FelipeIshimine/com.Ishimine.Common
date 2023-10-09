@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Redcode.Awaiting;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using UnityEngine.EventSystems;
@@ -13,7 +13,7 @@ using UnityEngine.UI;
 /// Conteiner generico para animar canvas con 'coroutines'.
 /// Si la animacion por movimiento no encaja bien, revisar que el Root del container este bien posicionados
 /// </summary>
-public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCallbackReceiver
+public class AnimatedContainer : MonoBehaviour
 {
 	private static readonly Vector3[] DirectionVectors = new Vector3[]
     {
@@ -36,7 +36,9 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 	public event Action<bool> OnOpenOrCloseStart;
 	public event Action<State> OnStateChange;
 
-	[FoldoutGroup("Dependencies"),SerializeField, FormerlySerializedAs("_rectTransform")] private RectTransform rectTransform;
+	private RectTransform rectTransform;
+	private RectTransform RectTransform => rectTransform ??= (RectTransform)transform; 
+	
 	[FoldoutGroup("Dependencies"),SerializeField] private CanvasGroup canvasGroup;
 	[FoldoutGroup("Dependencies"),SerializeField] private Optional<EventSystem> optEventSystem;
 
@@ -109,14 +111,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 	    if (_currentRoutine != null) GlobalUpdate.Instance.StopCoroutine(_currentRoutine);
     }
 
-	public async Task CloseAsync()
-    {
-	    bool deactivateGo = deactivateGameObjectOnHide;
-	    deactivateGameObjectOnHide = false;
-	    await Close(null);
-	    deactivateGameObjectOnHide = deactivateGo;
-	    if(deactivateGameObjectOnHide) gameObject.SetActive(false);
-    }
+
 
 	public Coroutine Close() => Close(null);
 
@@ -147,7 +142,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 
     [Button, ButtonGroup("Animated")]
     public Coroutine Open() => Open(null);
-
+    
     public Coroutine Open(Action postAction)
     {
         if (CurrentState == State.Open)
@@ -169,6 +164,98 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         return gameObject.activeInHierarchy ? Play(OpenRoutine(postAction)) :  null;
     }
 
+    [ResponsiveButtonGroup]
+	public async UniTask OpenAsync(CancellationToken token)
+	{
+		if (CurrentState == State.Open)
+		{
+			return;
+		}
+		if (!Application.isPlaying)
+		{
+			Debug.LogWarning("Can't play animation outside of Play State");
+			return;
+		}
+		gameObject.SetActive(true);
+
+		Initialize();
+		if (debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Open");
+        
+		SetState(State.Opening);
+
+		if (gameObject.activeInHierarchy)
+		{
+			
+			InAnimation = true;
+			OnOpeningStart?.Invoke();
+			OnOpenOrCloseStart?.Invoke(true);
+		
+			
+			await AnimationAsync(
+				openDuration, 
+				Vector3.zero, 
+				curveInMovement, 
+				Vector3.one, 
+				curveInScale, 
+				1, 
+				alphaCurveIn, 
+				token);
+
+			Show();
+			
+			await UniTask.WhenAll(subContainers.ConvertAll(x => x.OpenAsync(token)));
+
+			InAnimation = false;
+
+			OnOpeningEnd?.Invoke();
+			OnOpenOrCloseEnd?.Invoke(true);
+		}
+	}
+
+	[ResponsiveButtonGroup]
+	public async UniTask CloseAsync(CancellationToken token)
+	{
+		if (optEventSystem) optEventSystem.Value.enabled = false;
+
+		if (CurrentState == State.Close)
+		{
+			return;
+		}
+        
+		if (!Application.isPlaying)
+		{
+			Debug.LogWarning("Can't play animation outside of Play State");
+			return;
+		}
+        
+		Initialize();
+		if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Close");
+
+		SetState(State.Closing);
+		
+		
+		InAnimation = true;
+		OnClosingStart?.Invoke();
+		OnOpenOrCloseStart?.Invoke(false);
+		
+		await UniTask.WhenAll(subContainers.ConvertAll(x => x.CloseAsync(token)));
+
+		await AnimationAsync(
+			closeDuration,
+			GetCloseLocalPosition(), 
+			curveOutMovement,
+			closeScale,
+			curveOutScale,
+			0,
+			alphaCurveOut,
+			token);
+		
+		InAnimation = false;
+		Hide();
+		OnClosingEnd?.Invoke();
+		OnOpenOrCloseEnd?.Invoke(false);
+	}
+	
     [Button, ButtonGroup("Snap")]
     public void Hide()
     {
@@ -183,8 +270,8 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Hide");
 
-        if (useMovement) rectTransform.anchoredPosition = GetCloseLocalPosition();
-        if(useScale) rectTransform.localScale = closeScale;
+        if (useMovement) RectTransform.anchoredPosition = GetCloseLocalPosition();
+        if(useScale) RectTransform.localScale = closeScale;
         if(useAlpha) canvasGroup.alpha = alphaCurveOut.Evaluate(0);
 
         if(setInteractivity) canvasGroup.interactable = false;
@@ -209,8 +296,8 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         
         if(debugPrint) Debug.Log($"{transform.GetHierarchyAsString(true)} Show");
         
-        if(useMovement) rectTransform.anchoredPosition = Vector3.zero;
-        if(useScale) rectTransform.localScale = Vector3.one;
+        if(useMovement) RectTransform.anchoredPosition = Vector3.zero;
+        if(useScale) RectTransform.localScale = Vector3.one;
         if(useAlpha) canvasGroup.alpha = 1;
         
         if(setInteractivity) canvasGroup.interactable = true;
@@ -281,21 +368,6 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         }
     }
 
-    public void Validate(SelfValidationResult result)
-    {
-        if (rectTransform == null)
-            result.AddError("RectTransform not set").WithFix("Fix",()=> SetRectTransform(transform as RectTransform));
-    }
-
-    public void OnBeforeSerialize()
-    {
-        if(rectTransform == null) SetRectTransform(transform as RectTransform);
-    }
-
-    public void OnAfterDeserialize()
-    {
-    }
-
     private void SetState(State nState)
     {
         CurrentState = nState;
@@ -340,7 +412,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
 	    return _currentRoutine = GlobalUpdate.Instance.StartCoroutine(routine);
     }
 
-    private Vector3 GetCloseLocalPosition() => Vector3.Scale(GetDirection(), rectTransform.rect.size);
+    private Vector3 GetCloseLocalPosition() => Vector3.Scale(GetDirection(), RectTransform.rect.size);
 
     private Vector3 GetDirection() => DirectionVectors[(int)direction];
 
@@ -361,6 +433,8 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
             });
     }
 
+	
+    
     private IEnumerator OpenRoutine(Action postAction = null)
     {
         InAnimation = true;
@@ -377,6 +451,7 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
                 OnOpenOrCloseEnd?.Invoke(true);
             });
     }
+  
 
     private IEnumerator AnimationRoutine(float duration,
                                          Vector3 targetPosition, AnimationCurve movementCurve,
@@ -388,25 +463,21 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
         
         float t = 0;
         
-        Vector3 startPosition = rectTransform.localPosition;
-        Vector3 startScale = rectTransform.localScale;
+        Vector3 startPosition = RectTransform.localPosition;
+        Vector3 startScale = RectTransform.localScale;
         float startAlpha = 1 - targetAlpha;
 
         Action<float> step = null;
 
-        if (useMovement) step += x => rectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(x));
-        if (useScale) step += x=> rectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(x));
+        if (useMovement) step += x => RectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(x));
+        if (useScale) step += x=> RectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(x));
         if (useAlpha) step += x => canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, targetAlpha, alphaCurve.Evaluate(x));
-
-        //if (setBlockRaycast) canvasGroup.blocksRaycasts = false;
-        //if (setInteractivity) canvasGroup.interactable = false;
-  
         do
         {
             t += (Time == TimeScale.Scaled ? UnityEngine.Time.deltaTime : UnityEngine.Time.unscaledDeltaTime) / duration;
             step?.Invoke(t);
             yield return null;
-            LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
+            LayoutRebuilder.MarkLayoutForRebuild(RectTransform);
             LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform.parent);
         } while (t < 1);
         yield return null;
@@ -421,11 +492,42 @@ public class AnimatedContainer : MonoBehaviour, ISelfValidator, ISerializationCa
             var yieldInstruction = coroutines[index];
             yield return yieldInstruction;
         }
-
         postAction?.Invoke();
     }
+    
+	
+	
+    private async UniTask AnimationAsync(float duration,
+                                         Vector3 targetPosition, AnimationCurve movementCurve,
+                                         Vector3 targetScale, AnimationCurve scaleCurve,
+                                         float targetAlpha, AnimationCurve alphaCurve,
+                                         CancellationToken token)
+    {
+	    token = CancellationTokenSource.CreateLinkedTokenSource(token, destroyCancellationToken).Token;
+        float t = 0;
+        
+        Vector3 startPosition = RectTransform.localPosition;
+        Vector3 startScale = RectTransform.localScale;
+        float startAlpha = 1 - targetAlpha;
 
-    private void SetRectTransform(RectTransform nRectTransform) => this.rectTransform = nRectTransform;
+        Action<float> step = null;
+
+        if (useMovement) step += x => RectTransform.anchoredPosition = Vector3.LerpUnclamped(startPosition, targetPosition, movementCurve.Evaluate(x));
+        if (useScale) step += x=> RectTransform.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleCurve.Evaluate(x));
+        if (useAlpha) step += x => canvasGroup.alpha = Mathf.LerpUnclamped(startAlpha, targetAlpha, alphaCurve.Evaluate(x));
+        do
+        {
+            t += (Time == TimeScale.Scaled ? UnityEngine.Time.deltaTime : UnityEngine.Time.unscaledDeltaTime) / duration;
+            step?.Invoke(t);
+            await UniTask.NextFrame(token);
+            LayoutRebuilder.MarkLayoutForRebuild(RectTransform);
+            LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform.parent);
+        } while (t < 1);
+	    await UniTask.NextFrame(token);
+
+      
+    }
+
 
     public enum InitState
     {
