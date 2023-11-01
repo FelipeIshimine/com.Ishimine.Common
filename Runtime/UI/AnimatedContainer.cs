@@ -165,7 +165,7 @@ public class AnimatedContainer : MonoBehaviour
     }
 
     [ResponsiveButtonGroup]
-	public async UniTask OpenAsync(CancellationToken token)
+	public async UniTask OpenAsync(CancellationToken token = default)
 	{
 		if (CurrentState == State.Open)
 		{
@@ -213,7 +213,7 @@ public class AnimatedContainer : MonoBehaviour
 	}
 
 	[ResponsiveButtonGroup]
-	public async UniTask CloseAsync(CancellationToken token)
+	public async UniTask CloseAsync(CancellationToken token = default)
 	{
 		if (optEventSystem) optEventSystem.Value.enabled = false;
 
