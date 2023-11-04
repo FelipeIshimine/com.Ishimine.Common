@@ -34,4 +34,19 @@ public static class TaskEventExtensions
 		}
 		return Task.CompletedTask;
 	}
+	
+	public static Task InvokeAsync(this Func<Task> handlers)
+	{
+		if (handlers != null)
+		{
+			var delegates = handlers.GetInvocationList();
+			Task[] tasks = new Task[delegates.Length];
+			for (var index = 0; index < delegates.Length; index++)
+			{
+				tasks[index] = ((Func<Task>)delegates[index]).Invoke();
+			}
+			return Task.WhenAll(tasks);
+		}
+		return Task.CompletedTask;
+	}
 }
