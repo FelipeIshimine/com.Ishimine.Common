@@ -463,7 +463,7 @@ public class AnimatedContainer : MonoBehaviour
         
         float t = 0;
         
-        Vector3 startPosition = RectTransform.localPosition;
+        Vector3 startPosition = RectTransform.anchoredPosition;
         Vector3 startScale = RectTransform.localScale;
         float startAlpha = 1 - targetAlpha;
 
@@ -506,7 +506,7 @@ public class AnimatedContainer : MonoBehaviour
 	    token = CancellationTokenSource.CreateLinkedTokenSource(token, destroyCancellationToken).Token;
         float t = 0;
         
-        Vector3 startPosition = RectTransform.localPosition;
+        Vector3 startPosition = RectTransform.anchoredPosition;
         Vector3 startScale = RectTransform.localScale;
         float startAlpha = 1 - targetAlpha;
 
