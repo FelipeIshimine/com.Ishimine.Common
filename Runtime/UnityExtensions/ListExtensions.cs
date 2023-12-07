@@ -144,4 +144,37 @@ public static class ListExtensions
     }
     
     public static T FindMin<T>(this List<T> source, Func<T, float> function) => source[FindMinIndex(source, function)];
+
+
+    public static int ReplaceWhen<T>(this List<T> source, Predicate<T> validation, T value)
+    {
+	    int count = 0;
+	    for (int i = source.Count - 1; i >= 0; i--)
+	    {
+		    if (validation.Invoke(source[i]))
+		    {
+			    count++;
+			    source[i] = value;
+		    }
+	    }
+	    return count;
+    }
+    
+    public static int SwapValues<T>(this List<T> source, T valueA, T valueB) where T : IEquatable<T>
+    {
+	    int count = 0;
+	    for (int i = source.Count - 1; i >= 0; i--)
+	    {
+		    var value = source[i];
+		    if (value.Equals(valueA))
+		    {
+			    source[i] = valueB;
+		    }
+		    else if (value.Equals(valueB))
+		    {
+			    source[i] = valueA;
+		    }
+	    }
+	    return count;
+    }
 }
