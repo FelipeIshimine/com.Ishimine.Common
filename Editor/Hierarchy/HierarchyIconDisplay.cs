@@ -43,6 +43,10 @@ public static class HierarchyIconDisplay
 
 		Component component = components.Length > 1 ? components[1] : components[0];
 
+        if(component == null)
+        {
+	        return;
+        }
 		Type type = component.GetType();
 
 		GUIContent content = EditorGUIUtility.ObjectContent(component, type);
