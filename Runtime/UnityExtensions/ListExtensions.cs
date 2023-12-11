@@ -169,10 +169,12 @@ public static class ListExtensions
 		    if (value.Equals(valueA))
 		    {
 			    source[i] = valueB;
+			    count++;
 		    }
 		    else if (value.Equals(valueB))
 		    {
 			    source[i] = valueA;
+			    count++;
 		    }
 	    }
 	    return count;
