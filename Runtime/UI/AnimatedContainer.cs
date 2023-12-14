@@ -108,7 +108,7 @@ public class AnimatedContainer : MonoBehaviour
 
 	private void OnDestroy()
     {
-	    if (_currentRoutine != null) GlobalUpdate.Instance.StopCoroutine(_currentRoutine);
+	    if (_currentRoutine != null && GlobalUpdate.Instance) GlobalUpdate.Instance.StopCoroutine(_currentRoutine);
     }
 
 
