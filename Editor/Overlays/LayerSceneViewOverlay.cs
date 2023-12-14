@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace Legion.Editor
 {
-    [Overlay(typeof(SceneView), "Layers", true)]
+    [Overlay(typeof(SceneView), "Layers", true, defaultDockPosition = DockPosition.Top, defaultDockZone = DockZone.RightToolbar)]
     public class LayerSceneViewOverlay : Overlay
     {
         public override VisualElement CreatePanelContent()
@@ -87,6 +87,8 @@ namespace Legion.Editor
 
             return root;
         }
+        
+        
         
     }
 }
