@@ -21,6 +21,13 @@ public static class ListExtensions
         source.Insert(index, nElement);
         return index;
     }
+    public static int InsertSorted<T>(this List<T> source, T nElement, IComparer<T> comparer)
+    {
+        var index = source.BinarySearch(nElement,comparer);
+        if (index < 0) index = ~index;
+        source.Insert(index, nElement);
+        return index;
+    }
 
     public static int IndexOf<T>(this IReadOnlyList<T> source, T target)
     {
