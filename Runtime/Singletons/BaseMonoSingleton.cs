@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class BaseMonoSingleton<T> : MonoBehaviour where T : BaseMonoSingleton<T>
+public class BaseMonoSingleton<T> : BaseMonoSingleton where T : BaseMonoSingleton<T>
 {
     public static event Action<T> OnInitialized;
     public bool setInactiveOnStart = false;
@@ -24,7 +24,7 @@ public class BaseMonoSingleton<T> : MonoBehaviour where T : BaseMonoSingleton<T>
         _instance = this as T;
     }
 
-    protected virtual void Start()
+    protected override void Start()
     {
         if (setInactiveOnStart)
             gameObject.SetActive(false);
@@ -33,12 +33,14 @@ public class BaseMonoSingleton<T> : MonoBehaviour where T : BaseMonoSingleton<T>
             DontDestroyOnLoad(gameObject);
 
         OnInitialized?.Invoke(Instance);
+        base.Start();
     }
 
-    protected virtual void OnDestroy()
+    protected override void OnDestroy()
     {
         if (_instance == this)
             _instance = null;
+        base.OnDestroy();
     }
 
 
@@ -53,5 +55,20 @@ public class BaseMonoSingleton<T> : MonoBehaviour where T : BaseMonoSingleton<T>
     public static void SetEnable(bool value) => Instance.enabled = value;
     
     protected virtual void SetActiveInstance(bool value) => Instance.gameObject.SetActive(value);
+}
 
+public abstract class BaseMonoSingleton : MonoBehaviour
+{
+	public static event Action<BaseMonoSingleton> OnAnyInitialized;
+	public static event Action<BaseMonoSingleton> OnAnyTerminated;
+
+	protected virtual void Start()
+	{
+		OnAnyInitialized?.Invoke(this);
+	}
+	
+	protected virtual void OnDestroy()
+	{
+		OnAnyTerminated?.Invoke(this);
+	}
 }
