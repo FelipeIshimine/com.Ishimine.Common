@@ -39,18 +39,14 @@ namespace Legion.Editor
 		    private void ShowSceneMenu()
 		    {
 			    GenericMenu menu = new GenericMenu();
-
 			    string[] sceneGuids = AssetDatabase.FindAssets("t:scene", new []{"Assets/"});
-
 			    var currentScene = EditorSceneManager.GetActiveScene();
-
 			    for (int i = 0; i < sceneGuids.Length; i++)
 			    {
 				    var path = AssetDatabase.GUIDToAssetPath(sceneGuids[i]);
 				    string name = Path.GetFileNameWithoutExtension(path);
 				    menu.AddItem(new GUIContent(name),String.CompareOrdinal(currentScene.name, name)==0,()=>OpenScene(currentScene,path));
 			    }
-			    
 			    menu.ShowAsContext();
 		    }
 
