@@ -1,13 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Overlays;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Legion.Editor
+namespace Common.Editor.Overlays
 {
-    [Overlay(typeof(SceneView), "Layers", true, defaultDockPosition = DockPosition.Top, defaultDockZone = DockZone.RightToolbar)]
+    [Overlay(typeof(SceneView), "Layers", true, defaultDockPosition = DockPosition.Top, defaultDockZone = DockZone.Floating)]
     public class LayerSceneViewOverlay : Overlay
     {
         public override VisualElement CreatePanelContent()
