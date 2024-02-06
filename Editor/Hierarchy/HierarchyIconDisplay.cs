@@ -14,8 +14,11 @@ using UnityEngine;
 
 		static HierarchyIconDisplay()
 		{
-			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
-			EditorApplication.update += OnEditorUpdate;
+			if(!EditorApplication.isPlayingOrWillChangePlaymode)
+			{
+				EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
+				EditorApplication.update += OnEditorUpdate;
+			}
 		}
 		
 		
