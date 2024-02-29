@@ -450,15 +450,29 @@ public static class UnityExtensions
     {
         return Mathf.Round(value / snap) * snap;
     }
-  
+
+    public static Color ColorFromStringBrights(this string value)
+    {
+	    var hashCode = value.GetHashCode();
+	    float r = (byte)((hashCode) & 0xFF) / 256f;
+	    float g = (byte)((hashCode>>8) & 0xFF)/256f;
+	    float b = (byte)((hashCode>>16) & 0xFF)/256f;
+	    float total = (r + g + b);
+	    return new Color(
+		    r/total*1.5f,
+		    g/total*1.5f,
+		    b/total*1.5f,
+		    1);
+    }
+    
     public static Color ColorFromString(this string value)
     {
         var hashCode = value.GetHashCode();
         return new Color(
-            (byte)((hashCode) & 0xFF),
-            (byte)((hashCode>>8) & 0xFF),
-            (byte)((hashCode>>16) & 0xFF),
-            (byte)((hashCode>>24) & 0xFF));
+            (byte)((hashCode) & 0xFF)/256f,
+            (byte)((hashCode>>8) & 0xFF)/256f,
+            (byte)((hashCode>>16) & 0xFF)/256f,
+            (byte)((hashCode>>24) & 0xFF)/256f);
     }
 
     public static float GetAsPercentageBetween(this float value, float floor, float ceil, bool clamp)
