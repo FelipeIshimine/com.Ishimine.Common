@@ -409,7 +409,11 @@ public class AnimatedContainer : MonoBehaviour
     {
 	    if(_currentRoutine != null)
 		    GlobalUpdate.Instance.StopCoroutine(_currentRoutine);
-	    return _currentRoutine = GlobalUpdate.Instance.StartCoroutine(routine);
+	    if (GlobalUpdate.Instance)
+	    {
+		    return _currentRoutine = GlobalUpdate.Instance.StartCoroutine(routine);
+	    }
+	    return null;
     }
 
     private Vector3 GetCloseLocalPosition() => Vector3.Scale(GetDirection(), RectTransform.rect.size);
