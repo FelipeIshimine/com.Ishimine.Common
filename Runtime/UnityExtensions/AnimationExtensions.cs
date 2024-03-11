@@ -13,7 +13,7 @@ public static class AnimationExtensions
 	                                       AnimationCurve curve = null)
 	{
 		var startScale = source.localScale;
-		yield return EnumerableUtils.Create(
+		yield return EnumeratorUtils.Create(
 			x => source.transform.localScale = Vector3.LerpUnclamped(startScale, endScale, x),
 			deltaMode,
 			duration,
@@ -27,7 +27,7 @@ public static class AnimationExtensions
 	                                       AnimationCurve curve = null)
 	{
 		var startScale = source.lossyScale;
-		yield return EnumerableUtils.Create(
+		yield return EnumeratorUtils.Create(
 			x => source.transform.SetGlobalScale(Vector3.LerpUnclamped(startScale, endScale, x)),
 			deltaMode,
 			duration,
@@ -41,7 +41,7 @@ public static class AnimationExtensions
 	                                        AnimationCurve curve = null)
 	{
 		var startValue = source.localRotation;
-		yield return EnumerableUtils.Create(
+		yield return EnumeratorUtils.Create(
 			x => source.transform.localRotation = Quaternion.LerpUnclamped(startValue, endValue, x),
 			deltaMode,
 			duration,
@@ -55,7 +55,7 @@ public static class AnimationExtensions
 	                                        AnimationCurve curve = null)
 	{
 		var startValue = source.rotation;
-		yield return EnumerableUtils.Create(
+		yield return EnumeratorUtils.Create(
 			x => source.transform.rotation = Quaternion.LerpUnclamped(startValue, endValue, x),
 			deltaMode,
 			duration,
@@ -67,7 +67,7 @@ public static class AnimationExtensions
 										float duration, AnimationCurve curve = null)
 	{
 		var startValue = source.alpha;
-		yield return EnumerableUtils.Create(
+		yield return EnumeratorUtils.Create(
 			x => source.alpha = Mathf.LerpUnclamped(startValue, endValue, x),
 			deltaMode,
 			duration,
@@ -81,7 +81,7 @@ public static class AnimationExtensions
 	                                   AnimationCurve curve = null)
 	{
 		var startScale = source.anchoredPosition;
-		yield return EnumerableUtils.Create(
+		yield return EnumeratorUtils.Create(
 			x => source.anchoredPosition = Vector3.LerpUnclamped(startScale, endScale, x),
 			deltaMode,
 			duration,
