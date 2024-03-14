@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Utils
 {
-	public static class EnumerableUtils
+	public static class EnumeratorUtils
 	{
 		public static IEnumerator Create(Action<float> step, DeltaMode deltaMode, float duration, AnimationCurve curve = null)
 		{
@@ -36,6 +36,11 @@ namespace Utils
 				yield return null;
 			} while (t<1);
 		}
-		
+
+		public static IEnumerator WithCallback(this IEnumerator source,Action callback)
+		{
+			yield return source;
+			callback.Invoke();
+		}
 	}
 }
