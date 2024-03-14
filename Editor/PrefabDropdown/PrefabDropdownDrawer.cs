@@ -1,140 +1,144 @@
-using UnityEngine;
-using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO; // Added for path manipulation
+using UnityEditor;
+using UnityEngine;
 
-[CustomPropertyDrawer(typeof(PrefabDropdownAttribute))]
-public class PrefabDropdownDrawer : PropertyDrawer
+namespace PrefabDropdown
 {
-    private struct Result
-    {
-        public GameObject Prefab;
-        public string Path;
-    }
+	// Added for path manipulation
 
-    private List<Result> prefabList;
-    private int selectedPrefabIndex = -1;
+	[CustomPropertyDrawer(typeof(PrefabDropdownAttribute))]
+	public class PrefabDropdownDrawer : PropertyDrawer
+	{
+		private struct Result
+		{
+			public GameObject Prefab;
+			public string Path;
+		}
 
-  public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-{
-    if (prefabList == null)
-        LoadPrefabs();
+		private List<Result> prefabList;
+		private int selectedPrefabIndex = -1;
 
-    if (prefabList.Count == 0)
-    {
-        EditorGUI.PropertyField(position, property, label);
-        return;
-    }
+		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+		{
+			if (prefabList == null)
+				LoadPrefabs();
 
-    EditorGUI.BeginProperty(position, label, property);
+			if (prefabList.Count == 0)
+			{
+				EditorGUI.PropertyField(position, property, label);
+				return;
+			}
 
-    // Calculate the label and dropdown widths
-    float labelWidth = EditorGUIUtility.labelWidth;
-    float dropdownWidth = 20; // Subtract a button's width
+			EditorGUI.BeginProperty(position, label, property);
 
-    // Calculate the width of the property field
-    float propertyFieldWidth = position.width - labelWidth - dropdownWidth - EditorGUIUtility.singleLineHeight;
+			// Calculate the label and dropdown widths
+			float labelWidth = EditorGUIUtility.labelWidth;
+			float dropdownWidth = 20; // Subtract a button's width
 
-    // Split the position into label, dropdown, property field, and button portions
-    Rect labelRect = new Rect(position.x, position.y, labelWidth, position.height);
-    Rect dropdownRect = new Rect(position.x + labelWidth, position.y, dropdownWidth, position.height);
-    Rect propertyFieldRect = new Rect(position.x + labelWidth + dropdownWidth, position.y, propertyFieldWidth, position.height);
-    Rect buttonRect = new Rect(position.x + labelWidth + dropdownWidth + propertyFieldWidth, position.y, EditorGUIUtility.singleLineHeight, position.height);
+			// Calculate the width of the property field
+			float propertyFieldWidth = position.width - labelWidth - dropdownWidth - EditorGUIUtility.singleLineHeight;
 
-    // Draw the label using EditorGUI.PrefixLabel
-    EditorGUI.PrefixLabel(labelRect, label);
+			// Split the position into label, dropdown, property field, and button portions
+			Rect labelRect = new Rect(position.x, position.y, labelWidth, position.height);
+			Rect dropdownRect = new Rect(position.x + labelWidth, position.y, dropdownWidth, position.height);
+			Rect propertyFieldRect = new Rect(position.x + labelWidth + dropdownWidth, position.y, propertyFieldWidth, position.height);
+			Rect buttonRect = new Rect(position.x + labelWidth + dropdownWidth + propertyFieldWidth, position.y, EditorGUIUtility.singleLineHeight, position.height);
 
-    // Get the index of the currently selected prefab
-    string currentPrefabPath = property.objectReferenceValue != null
-        ? AssetDatabase.GetAssetPath(property.objectReferenceValue)
-        : null;
+			// Draw the label using EditorGUI.PrefixLabel
+			EditorGUI.PrefixLabel(labelRect, label);
 
-    selectedPrefabIndex = prefabList.FindIndex(x => x.Path == currentPrefabPath);
+			// Get the index of the currently selected prefab
+			string currentPrefabPath = property.objectReferenceValue != null
+				? AssetDatabase.GetAssetPath(property.objectReferenceValue)
+				: null;
 
-    // Show the dropdown for selecting a prefab
-    EditorGUI.BeginChangeCheck();
-    bool useFullPath = ((PrefabDropdownAttribute)attribute).showFullPath;
-    selectedPrefabIndex = EditorGUI.Popup(
-        dropdownRect,
-        selectedPrefabIndex,
-        prefabList.Select(x => useFullPath ? RemoveCommonPath(x.Path) : x.Prefab.name).ToArray()
-    );
+			selectedPrefabIndex = prefabList.FindIndex(x => x.Path == currentPrefabPath);
 
-    // Draw the property field
-    EditorGUI.PropertyField(propertyFieldRect, property, GUIContent.none);
+			// Show the dropdown for selecting a prefab
+			EditorGUI.BeginChangeCheck();
+			bool useFullPath = ((PrefabDropdownAttribute)attribute).showFullPath;
+			selectedPrefabIndex = EditorGUI.Popup(
+				dropdownRect,
+				selectedPrefabIndex,
+				prefabList.Select(x => useFullPath ? RemoveCommonPath(x.Path) : x.Prefab.name).ToArray()
+			);
 
-    if (EditorGUI.EndChangeCheck())
-    {
-        property.objectReferenceValue = selectedPrefabIndex >= 0 ? prefabList[selectedPrefabIndex].Prefab : null;
-    }
+			// Draw the property field
+			EditorGUI.PropertyField(propertyFieldRect, property, GUIContent.none);
 
-    // Add a button to clear the field
-    if (GUI.Button(buttonRect, "X", EditorStyles.miniButton))
-    {
-        property.objectReferenceValue = null;
-    }
-    EditorGUI.EndProperty();
-}
+			if (EditorGUI.EndChangeCheck())
+			{
+				property.objectReferenceValue = selectedPrefabIndex >= 0 ? prefabList[selectedPrefabIndex].Prefab : null;
+			}
+
+			// Add a button to clear the field
+			if (GUI.Button(buttonRect, "X", EditorStyles.miniButton))
+			{
+				property.objectReferenceValue = null;
+			}
+			EditorGUI.EndProperty();
+		}
 
 
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    {
-        return EditorGUIUtility.singleLineHeight;
-    }
+		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+		{
+			return EditorGUIUtility.singleLineHeight;
+		}
 
-    private void LoadPrefabs()
-    {
-        prefabList = new List<Result>();
-        // Find all prefabs in the project that have any of the specified component types
-        string[] allPrefabPaths = AssetDatabase.GetAllAssetPaths().Where(path => path.EndsWith(".prefab")).ToArray();
+		private void LoadPrefabs()
+		{
+			prefabList = new List<Result>();
+			// Find all prefabs in the project that have any of the specified component types
+			string[] allPrefabPaths = AssetDatabase.GetAllAssetPaths().Where(path => path.EndsWith(".prefab")).ToArray();
 
-        foreach (string prefabPath in allPrefabPaths)
-        {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            if (prefab != null && prefab.TryGetComponent(fieldInfo.FieldType, out var value))
-            {
-                prefabList.Add(new Result()
-                {
-                    Prefab = prefab,
-                    Path = prefabPath
-                });
-            }
-        }
-    }
+			foreach (string prefabPath in allPrefabPaths)
+			{
+				GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+				if (prefab != null && prefab.TryGetComponent(fieldInfo.FieldType, out var value))
+				{
+					prefabList.Add(new Result()
+					{
+						Prefab = prefab,
+						Path = prefabPath
+					});
+				}
+			}
+		}
 
-    private string RemoveCommonPath(string fullPath)
-    {
-        string commonPrefix = prefabList.Select(x => x.Path).GetCommonPrefix();
-        if (fullPath.StartsWith(commonPrefix))
-        {
-            return fullPath.Substring(commonPrefix.Length);
-        }
-        return fullPath;
-    }
-}
+		private string RemoveCommonPath(string fullPath)
+		{
+			string commonPrefix = prefabList.Select(x => x.Path).GetCommonPrefix();
+			if (fullPath.StartsWith(commonPrefix))
+			{
+				return fullPath.Substring(commonPrefix.Length);
+			}
+			return fullPath;
+		}
+	}
 
-public static class EnumerableExtensions
-{
-    public static string GetCommonPrefix(this IEnumerable<string> strings)
-    {
-        if (strings == null || !strings.Any())
-        {
-            return string.Empty;
-        }
+	public static class EnumerableExtensions
+	{
+		public static string GetCommonPrefix(this IEnumerable<string> strings)
+		{
+			if (strings == null || !strings.Any())
+			{
+				return string.Empty;
+			}
 
-        string shortest = strings.OrderBy(s => s.Length).First();
-        int length = shortest.Length;
+			string shortest = strings.OrderBy(s => s.Length).First();
+			int length = shortest.Length;
 
-        for (int i = 0; i < length; i++)
-        {
-            char c = shortest[i];
-            if (!strings.All(s => s[i] == c))
-            {
-                return shortest.Substring(0, i);
-            }
-        }
+			for (int i = 0; i < length; i++)
+			{
+				char c = shortest[i];
+				if (!strings.All(s => s[i] == c))
+				{
+					return shortest.Substring(0, i);
+				}
+			}
 
-        return shortest;
-    }
+			return shortest;
+		}
+	}
 }

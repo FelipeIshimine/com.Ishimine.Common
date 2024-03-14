@@ -3,7 +3,7 @@ using UnityEditor.Overlays;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Common.Editor.Overlays
+namespace Overlays
 {
     [Overlay(typeof(SceneView), "Layers", true, defaultDockPosition = DockPosition.Top, defaultDockZone = DockZone.Floating)]
     public class LayerSceneViewOverlay : Overlay

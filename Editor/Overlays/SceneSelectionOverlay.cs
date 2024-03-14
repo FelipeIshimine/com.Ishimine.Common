@@ -8,7 +8,7 @@ using UnityEngine;
 using Scene = UnityEngine.SceneManagement.Scene;
 
 
-namespace Legion.Editor
+namespace Overlays
 {
 	[Overlay(typeof(SceneView), "Scene Selection")]
     public class SceneSelectionOverlay : ToolbarOverlay

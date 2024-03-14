@@ -5,7 +5,7 @@ using Nrjwolf.Tools.AttachAttributes;
 using UnityEditor;
 using UnityEngine;
 
-namespace Nrjwolf.Tools.Editor.AttachAttributes
+namespace AttachSAttributes.Editor
 {
     public static class AttachAttributesUtils
     {

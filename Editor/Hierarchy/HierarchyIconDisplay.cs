@@ -1,10 +1,10 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
+namespace Hierarchy
+{
 	[InitializeOnLoad]
 	public static class HierarchyIconDisplay
 	{
@@ -123,4 +123,4 @@ using UnityEngine;
 				return isProSkin ? k_defaultProColor : k_defaultColor;
 		}
 	}
-
+}
