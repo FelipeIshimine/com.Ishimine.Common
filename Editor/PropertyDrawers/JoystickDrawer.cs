@@ -24,7 +24,7 @@ namespace PropertyDrawers
 
 			int dimensions = property.propertyType == SerializedPropertyType.Vector2 ? 2 : 3;
 
-			Debug.Log(dimensions);
+			//Debug.Log(dimensions);
 			// Calculate the position of the joystick
 			Rect joystickRect = new Rect(position.x + HEIGHT / 2, position.y + EditorGUIUtility.singleLineHeight, HEIGHT, HEIGHT);
 
