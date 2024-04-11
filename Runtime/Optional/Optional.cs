@@ -8,7 +8,12 @@ public struct Optional<T>
     [SerializeField] private bool enabled;
     [SerializeField] private T value;
 
-    public bool Enabled => enabled;
+    public bool Enabled
+    {
+	    get => enabled;
+	    set => enabled = value;
+    }
+
     public T Value => value;
 
     public Optional(T initialValue)
