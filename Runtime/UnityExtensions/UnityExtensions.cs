@@ -549,4 +549,16 @@ public static class UnityExtensions
         c.a = useAlpha ? ((aux >> 24) & 0xFF) / 255f : 1;
         return c;
     }
+
+    public static IEnumerator WaitForAll(this IEnumerable<YieldInstruction> yieldInstructions)
+    {
+	    List<YieldInstruction> instructions = new List<YieldInstruction>(yieldInstructions);
+	    while (instructions.Count>0)
+	    {
+		    for (int i = instructions.Count - 1; i >= 0; i--)
+		    {
+			    yield return instructions[i];
+		    }
+	    }
+    }
 }
