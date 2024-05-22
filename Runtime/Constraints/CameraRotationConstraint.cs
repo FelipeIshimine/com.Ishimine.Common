@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(RotationConstraint))]
 public class CameraRotationConstraint : MonoBehaviour
@@ -10,10 +11,33 @@ public class CameraRotationConstraint : MonoBehaviour
     public RotationConstraint constraint;
     public Vector3 offset;
 
+    private Camera cam;
+
     private void Reset()
     {
         constraint = GetComponent<RotationConstraint>();
         constraint.constraintActive = true;
+
+    }
+
+    private void Awake()
+    {
+	    SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDestroy()
+    {
+	    SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+
+    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+    {
+	    if (!cam)
+	    {
+		    StopAllCoroutines();
+		    StartCoroutine(GetCamera());
+	    }
     }
 
     private IEnumerator GetCamera()
@@ -29,6 +53,7 @@ public class CameraRotationConstraint : MonoBehaviour
 
     public void Initialize(Camera cam)
     {
+	    this.cam = cam;
         if (constraint.sourceCount > 0)
             for (int i = constraint.sourceCount - 1; i >= 0; i--)
                 constraint.RemoveSource(i);
