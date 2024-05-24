@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public static class EnumExtensions
 {
@@ -11,4 +12,6 @@ public static class EnumExtensions
                 yield return value;
         }
     }
+    
+    public static int AsIndexFlag<T>(this T flag) where T : Enum => Array.IndexOf(Enum.GetValues(typeof(T)), flag);
 }

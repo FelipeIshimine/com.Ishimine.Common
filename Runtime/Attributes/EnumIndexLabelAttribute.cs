@@ -1,20 +1,20 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class EnumIndexLabelAttribute : PropertyAttribute
+namespace Attributes
 {
-	public System.Type EnumType { get; private set; }
-
-	public EnumIndexLabelAttribute(System.Type enumType)
+	public class EnumIndexLabelAttribute : PropertyAttribute
 	{
-		if (!enumType.IsEnum)
-		{
-			Debug.LogError("EnumIndexLabelAttribute must be used with an Enum type.");
-			return;
-		}
+		public System.Type EnumType { get; private set; }
 
-		EnumType = enumType;
+		public EnumIndexLabelAttribute(System.Type enumType)
+		{
+			if (!enumType.IsEnum)
+			{
+				Debug.LogError("EnumIndexLabelAttribute must be used with an Enum type.");
+				return;
+			}
+
+			EnumType = enumType;
+		}
 	}
 }
