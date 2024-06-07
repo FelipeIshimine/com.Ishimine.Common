@@ -22,16 +22,16 @@ namespace AttributesDrawers
 					enum_names = enum_names[1..];
 				}
 				
-				
-				var match = Regex.Match(property.propertyPath, "\\[(\\d)\\]", RegexOptions.RightToLeft);
+				var match = Regex.Match(property.propertyPath, @"\[(\d+)\]", RegexOptions.RightToLeft);
 				int pos = int.Parse(match.Groups[1].Value);
  
 				// Make names nicer to read (but won't exactly match enum definition).
 				//var enum_label = ObjectNames.NicifyVariableName(enum_names[pos].ToLower());
 				label = new GUIContent(enum_names[pos]);
 			}
-			catch
+			catch (Exception e)
 			{
+				Debug.LogWarning(e);
 				// keep default label
 			}
 			EditorGUI.PropertyField(position, property, label, property.isExpanded);
