@@ -36,7 +36,10 @@ public class CameraRotationConstraint : MonoBehaviour
 	    if (!cam)
 	    {
 		    StopAllCoroutines();
-		    StartCoroutine(GetCamera());
+		    if (gameObject.activeInHierarchy)
+		    {
+			    StartCoroutine(GetCamera());
+		    }
 	    }
     }
 
@@ -48,7 +51,10 @@ public class CameraRotationConstraint : MonoBehaviour
 
     private void OnEnable()
     {
-        StartCoroutine(GetCamera());
+	    if (gameObject.activeInHierarchy)
+	    {
+		    StartCoroutine(GetCamera());
+	    }
     }
 
     public void Initialize(Camera cam)
