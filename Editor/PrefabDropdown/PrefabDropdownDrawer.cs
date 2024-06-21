@@ -1,144 +1,130 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace PrefabDropdown
 {
-	// Added for path manipulation
+    [CustomPropertyDrawer(typeof(PrefabDropdownAttribute))]
+    public class PrefabDropdownDrawer : PropertyDrawer
+    {
+        private struct Result
+        {
+            public GameObject Prefab;
+            public string Path;
+        }
 
-	[CustomPropertyDrawer(typeof(PrefabDropdownAttribute))]
-	public class PrefabDropdownDrawer : PropertyDrawer
-	{
-		private struct Result
-		{
-			public GameObject Prefab;
-			public string Path;
-		}
+        private List<Result> prefabList;
+        private int selectedPrefabIndex = -1;
 
-		private List<Result> prefabList;
-		private int selectedPrefabIndex = -1;
+        public override VisualElement CreatePropertyGUI(SerializedProperty property)
+        {
+            if (prefabList == null)
+                LoadPrefabs();
 
-		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-		{
-			if (prefabList == null)
-				LoadPrefabs();
+            var container = new VisualElement()
+            {
+	            style = { flexDirection = FlexDirection.Row}
+            };
 
-			if (prefabList.Count == 0)
-			{
-				EditorGUI.PropertyField(position, property, label);
-				return;
-			}
+            if (prefabList.Count == 0)
+            {
+                container.Add(new PropertyField(property));
+                return container;
+            }
 
-			EditorGUI.BeginProperty(position, label, property);
+            
+            var label = new Label(property.displayName);
+            container.Add(label);
 
-			// Calculate the label and dropdown widths
-			float labelWidth = EditorGUIUtility.labelWidth;
-			float dropdownWidth = 20; // Subtract a button's width
+            container.Add(new VisualElement()
+            {
+	            style = { flexGrow = 1}
+            });
+            container.Add(new PropertyField(property, string.Empty));
+            
+            var dropdown = new PopupField<string>();
+            bool useFullPath = ((PrefabDropdownAttribute)attribute).showFullPath;
+            dropdown.choices = prefabList.Select(x => useFullPath ? RemoveCommonPath(x.Path) : x.Prefab.name).ToList();
+            dropdown.index = prefabList.FindIndex(x => x.Path == AssetDatabase.GetAssetPath(property.objectReferenceValue));
 
-			// Calculate the width of the property field
-			float propertyFieldWidth = position.width - labelWidth - dropdownWidth - EditorGUIUtility.singleLineHeight;
+            dropdown.RegisterValueChangedCallback(evt =>
+            {
+                selectedPrefabIndex = dropdown.index;
+                property.objectReferenceValue = selectedPrefabIndex >= 0 ? prefabList[selectedPrefabIndex].Prefab : null;
+                property.serializedObject.ApplyModifiedProperties();
+            });
 
-			// Split the position into label, dropdown, property field, and button portions
-			Rect labelRect = new Rect(position.x, position.y, labelWidth, position.height);
-			Rect dropdownRect = new Rect(position.x + labelWidth, position.y, dropdownWidth, position.height);
-			Rect propertyFieldRect = new Rect(position.x + labelWidth + dropdownWidth, position.y, propertyFieldWidth, position.height);
-			Rect buttonRect = new Rect(position.x + labelWidth + dropdownWidth + propertyFieldWidth, position.y, EditorGUIUtility.singleLineHeight, position.height);
+            container.Add(dropdown);
 
-			// Draw the label using EditorGUI.PrefixLabel
-			EditorGUI.PrefixLabel(labelRect, label);
+            var clearButton = new Button(() =>
+            {
+                property.objectReferenceValue = null;
+                property.serializedObject.ApplyModifiedProperties();
+            })
+            {
+                text = "X"
+            };
 
-			// Get the index of the currently selected prefab
-			string currentPrefabPath = property.objectReferenceValue != null
-				? AssetDatabase.GetAssetPath(property.objectReferenceValue)
-				: null;
+            container.Add(clearButton);
 
-			selectedPrefabIndex = prefabList.FindIndex(x => x.Path == currentPrefabPath);
+            return container;
+        }
 
-			// Show the dropdown for selecting a prefab
-			EditorGUI.BeginChangeCheck();
-			bool useFullPath = ((PrefabDropdownAttribute)attribute).showFullPath;
-			selectedPrefabIndex = EditorGUI.Popup(
-				dropdownRect,
-				selectedPrefabIndex,
-				prefabList.Select(x => useFullPath ? RemoveCommonPath(x.Path) : x.Prefab.name).ToArray()
-			);
+        private void LoadPrefabs()
+        {
+            prefabList = new List<Result>();
+            string[] allPrefabPaths = AssetDatabase.GetAllAssetPaths().Where(path => path.EndsWith(".prefab")).ToArray();
 
-			// Draw the property field
-			EditorGUI.PropertyField(propertyFieldRect, property, GUIContent.none);
+            foreach (string prefabPath in allPrefabPaths)
+            {
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                if (prefab != null && prefab.TryGetComponent(fieldInfo.FieldType, out var value))
+                {
+                    prefabList.Add(new Result()
+                    {
+                        Prefab = prefab,
+                        Path = prefabPath
+                    });
+                }
+            }
+        }
 
-			if (EditorGUI.EndChangeCheck())
-			{
-				property.objectReferenceValue = selectedPrefabIndex >= 0 ? prefabList[selectedPrefabIndex].Prefab : null;
-			}
+        private string RemoveCommonPath(string fullPath)
+        {
+            string commonPrefix = prefabList.Select(x => x.Path).GetCommonPrefix();
+            if (fullPath.StartsWith(commonPrefix))
+            {
+                return fullPath.Substring(commonPrefix.Length);
+            }
+            return fullPath;
+        }
+    }
 
-			// Add a button to clear the field
-			if (GUI.Button(buttonRect, "X", EditorStyles.miniButton))
-			{
-				property.objectReferenceValue = null;
-			}
-			EditorGUI.EndProperty();
-		}
+    public static class EnumerableExtensions
+    {
+        public static string GetCommonPrefix(this IEnumerable<string> strings)
+        {
+            if (strings == null || !strings.Any())
+            {
+                return string.Empty;
+            }
 
+            string shortest = strings.OrderBy(s => s.Length).First();
+            int length = shortest.Length;
 
-		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-		{
-			return EditorGUIUtility.singleLineHeight;
-		}
+            for (int i = 0; i < length; i++)
+            {
+                char c = shortest[i];
+                if (!strings.All(s => s[i] == c))
+                {
+                    return shortest.Substring(0, i);
+                }
+            }
 
-		private void LoadPrefabs()
-		{
-			prefabList = new List<Result>();
-			// Find all prefabs in the project that have any of the specified component types
-			string[] allPrefabPaths = AssetDatabase.GetAllAssetPaths().Where(path => path.EndsWith(".prefab")).ToArray();
-
-			foreach (string prefabPath in allPrefabPaths)
-			{
-				GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-				if (prefab != null && prefab.TryGetComponent(fieldInfo.FieldType, out var value))
-				{
-					prefabList.Add(new Result()
-					{
-						Prefab = prefab,
-						Path = prefabPath
-					});
-				}
-			}
-		}
-
-		private string RemoveCommonPath(string fullPath)
-		{
-			string commonPrefix = prefabList.Select(x => x.Path).GetCommonPrefix();
-			if (fullPath.StartsWith(commonPrefix))
-			{
-				return fullPath.Substring(commonPrefix.Length);
-			}
-			return fullPath;
-		}
-	}
-
-	public static class EnumerableExtensions
-	{
-		public static string GetCommonPrefix(this IEnumerable<string> strings)
-		{
-			if (strings == null || !strings.Any())
-			{
-				return string.Empty;
-			}
-
-			string shortest = strings.OrderBy(s => s.Length).First();
-			int length = shortest.Length;
-
-			for (int i = 0; i < length; i++)
-			{
-				char c = shortest[i];
-				if (!strings.All(s => s[i] == c))
-				{
-					return shortest.Substring(0, i);
-				}
-			}
-
-			return shortest;
-		}
-	}
+            return shortest;
+        }
+    }
 }
