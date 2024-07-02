@@ -6,8 +6,6 @@ namespace Manipulators
 {
 	public class DoubleClickManipulator : MouseManipulator
 	{
-		public float doubleClickTimeThreshold = 0.3f; // Adjust this threshold as needed
-		private float lastClickTime = 0f;
 		public Action Callback { get; set; }
 
 		public DoubleClickManipulator()
@@ -27,15 +25,10 @@ namespace Manipulators
 
 		private void OnMouseDown(MouseDownEvent evt)
 		{
-			if (evt.clickCount == 2 && Time.time - lastClickTime < doubleClickTimeThreshold)
+			if (evt.clickCount == 2)
 			{
-				lastClickTime = 0f;
 				evt.StopImmediatePropagation();
 				DoubleClickAction();
-			}
-			else
-			{
-				lastClickTime = Time.time;
 			}
 		}
 
