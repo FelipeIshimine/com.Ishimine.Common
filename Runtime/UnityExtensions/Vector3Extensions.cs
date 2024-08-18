@@ -111,4 +111,12 @@ public static class Vector3Extensions
     }
 
     public static Vector3 ClosestPointOnLine(this Vector3 point, Vector3 lineDirection, Vector3 targetPoint) => targetPoint + lineDirection * Vector3.Dot(point - targetPoint, lineDirection);
+    
+    public static float InverseLerp(this Vector3 value, Vector3 a, Vector3 b)
+    {
+	    Vector3 AB = b - a;
+	    Vector3 AV = value - a;
+	    var result = Vector3.Dot(AV, AB) / Vector3.Dot(AB, AB);
+	    return result;
+    }
 }
