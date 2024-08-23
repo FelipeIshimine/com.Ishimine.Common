@@ -352,6 +352,10 @@ public static class UnityExtensions
     }
 
 
+    public static T GetWithNormalizedIndex<T>(this T[] value, float normalizedValue)
+    {
+	    return value[Mathf.FloorToInt(normalizedValue * (value.Length - 1))];
+    }
 
     public static T GetRandom<T>(this T[] value)
     {
