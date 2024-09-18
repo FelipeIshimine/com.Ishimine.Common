@@ -1,7 +1,3 @@
-using Sirenix.OdinInspector.Editor;
-using UnityEditor;
-using UnityEditor.SceneManagement;
-
 #if ODIN_INSPECTOR
 using DisableInPrefabVariants;
 

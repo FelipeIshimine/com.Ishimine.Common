@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
 
 namespace DataStructures.BiDictionary
 {
@@ -11,8 +10,8 @@ namespace DataStructures.BiDictionary
         public event Action<TKey, TValue> OnRemove;
         public event Action OnClear;
         
-        [ShowInInspector] private readonly Dictionary<TKey, TValue> _forward = new Dictionary<TKey, TValue>();
-        [ShowInInspector] private readonly Dictionary<TValue, TKey> _backward = new Dictionary<TValue, TKey>();
+        private readonly Dictionary<TKey, TValue> _forward = new Dictionary<TKey, TValue>();
+        private readonly Dictionary<TValue, TKey> _backward = new Dictionary<TValue, TKey>();
 
         public Dictionary<TKey, TValue> KeyMap => _forward;
         public Dictionary<TValue, TKey> ValueMap => _backward;

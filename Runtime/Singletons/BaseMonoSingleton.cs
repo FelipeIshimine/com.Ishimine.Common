@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class BaseMonoSingleton<T> : BaseMonoSingleton where T : BaseMonoSingleton<T>
 {

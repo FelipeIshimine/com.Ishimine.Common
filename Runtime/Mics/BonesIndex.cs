@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Sirenix.OdinInspector;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class BonesIndex : MonoBehaviour
 {
     public Transform[] bones;
-    [ShowInInspector] private Dictionary<string, Transform> _index = null;
+     private Dictionary<string, Transform> _index = null;
 
     private void Start()
     {
@@ -21,7 +18,6 @@ public class BonesIndex : MonoBehaviour
             _index.Add(bone.name, bone);
     }
 
-    [Button]
     public void FillWithChildBones(Transform t)
     {
         if (_index == null)

@@ -1,7 +1,3 @@
-        using System;
-using System.Collections;
-using System.Collections.Generic;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -9,7 +5,7 @@ using Random = UnityEngine.Random;
 public class ConstantOrbit : MonoBehaviour
 {
     public Transform targetTransform;
-    [HideIf("HasTargetTransform")]public Vector3 targetPosition;
+    public Vector3 targetPosition;
 
     private Vector3 TargetPosition => targetTransform ? targetTransform.position : targetPosition;
 
@@ -17,7 +13,7 @@ public class ConstantOrbit : MonoBehaviour
     public float radius = 1;
     public float speedMultiplier = 1;
     public bool useRandomOffset = true;
-    [HideIf("useRandomOffset")]public Vector3 offset;
+	public Vector3 offset;
     
     private float t;
 

@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
@@ -17,10 +15,10 @@ public class AnimationPlayer : MonoBehaviour
     public bool useAnimationEvents = false;
     public AnimationClip fallbackAnimation;
     private AnimationMixerPlayable _mixerPlayable;
-    [ShowInInspector] private readonly List<TransitionData> _transitions = new List<TransitionData>();
+    private readonly List<TransitionData> _transitions = new List<TransitionData>();
     private readonly Queue<Action> _transitionCallbacksQueue = new Queue<Action>();
     
-    [ShowInInspector] private readonly Dictionary<AnimationClipPlayable, Action> _playableCallbacks = new Dictionary<AnimationClipPlayable, Action>();
+    private readonly Dictionary<AnimationClipPlayable, Action> _playableCallbacks = new Dictionary<AnimationClipPlayable, Action>();
 
     [Tooltip("If TRUE, an overwritten animation may not invoke their Callback")]
     public bool canSkipAnimationCallback = false;
@@ -39,7 +37,7 @@ public class AnimationPlayer : MonoBehaviour
     {
         public WrapMode Mode;
         public AnimationClip Clip;
-        [MinValue(0)] public float Speed = 1;
+        public float Speed = 1;
         public Action Callback;
     }
     
@@ -51,7 +49,7 @@ public class AnimationPlayer : MonoBehaviour
             Callback = null
         };
         
-        [MinValue(0)] public float Duration = .25f;
+        public float Duration = .25f;
         public AnimationCurve Curve = AnimationCurve.Linear(0,0,1,1);
         public Action Callback;
         
@@ -156,10 +154,8 @@ public class AnimationPlayer : MonoBehaviour
         _output.SetSourcePlayable(_mixerPlayable);
     }
 
-    [Button]
     public void Play() => _graph.Play();
 
-    [Button]
     public void Stop() => _graph.Stop(); 
 
     private void OnDestroy()

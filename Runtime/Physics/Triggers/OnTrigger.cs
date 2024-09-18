@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -15,9 +12,9 @@ public class
 
     public bool useUnityEvents = false;
 
-    [ShowIf(nameof(useUnityEvents))] public UnityEvent<Collider> OnEnterUE;
-    [ShowIf(nameof(useUnityEvents))] public UnityEvent<Collider> OnStayUE;
-    [ShowIf(nameof(useUnityEvents))] public UnityEvent<Collider> OnExitUE;
+    public UnityEvent<Collider> OnEnterUE;
+    public UnityEvent<Collider> OnStayUE;
+    public UnityEvent<Collider> OnExitUE;
 
     public void OnTriggerEnter(Collider other)
     {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine.Assertions;
 
 public sealed class IndexedPriorityQueue<T> where T : IComparable

@@ -1,5 +1,4 @@
 ﻿using System;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -12,9 +11,9 @@ public class OnTrigger2D : MonoBehaviour
 
     public bool useUnityEvents = false;
 
-    [ShowIf(nameof(useUnityEvents))] public UnityEvent<Collider2D> OnEnterUE;
-    [ShowIf(nameof(useUnityEvents))] public UnityEvent<Collider2D> OnStayUE;
-    [ShowIf(nameof(useUnityEvents))] public UnityEvent<Collider2D> OnExitUE;
+    public UnityEvent<Collider2D> OnEnterUE;
+    public UnityEvent<Collider2D> OnStayUE;
+    public UnityEvent<Collider2D> OnExitUE;
 
     public void OnTriggerEnter2D(Collider2D other)
     {

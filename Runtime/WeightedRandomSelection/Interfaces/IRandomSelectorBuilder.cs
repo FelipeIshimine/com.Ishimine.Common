@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System;
-
-namespace DataStructures.RandomSelector {
+﻿namespace DataStructures.RandomSelector {
 
     /// <summary>
     /// Interface for Random Selector Builders.

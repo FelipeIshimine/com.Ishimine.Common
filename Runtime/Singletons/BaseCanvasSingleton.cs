@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 public abstract class BaseCanvasSingleton<T> : BaseMonoSingleton<T> where T : BaseCanvasSingleton<T>
@@ -67,21 +66,17 @@ public abstract class BaseCanvasSingleton<T> : BaseMonoSingleton<T> where T : Ba
     public static void Hide() => Instance.HideInstance();
 
     
-    [Button("Show"), ButtonGroup("ShowHide")]
 
     protected virtual void ShowInstance() => mainContainer.Show();
-    [Button("Hide"), ButtonGroup("ShowHide")]
 
     protected virtual void HideInstance() => mainContainer.Hide();
     
-    [Button("Open")]
     protected virtual void OpenInstance(Action callback)
     {
         gameObject.SetActive(true);
         mainContainer.Open(callback);
     }
 
-    [Button("Close")]
     protected virtual void CloseInstance(Action callback)
     {
         if (deactivateOnClose)

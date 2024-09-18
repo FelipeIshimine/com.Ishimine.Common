@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Playables;
@@ -53,10 +51,8 @@ public class AnimationArrayPlayer : MonoBehaviour
         _playableGraph.Destroy();
     }
 
-    [Button]
     public void Play() => _playableGraph.Play();
 
-    [Button]
     public void Pause() => _playableGraph.Stop();
 
     public void SetSpeed(float nSpeed)
@@ -67,7 +63,6 @@ public class AnimationArrayPlayer : MonoBehaviour
 
     public float GetAnimationDuration(int index) => clips[index].length;
     
-    [Button]
     public void SetAnimation(int index)
     {
         if(!Application.isPlaying || _animationArrayPlayable.GetIndex() == index)
@@ -81,7 +76,6 @@ public class AnimationArrayPlayer : MonoBehaviour
     }
 
 
-    [Button]
     public void PrintWeights()
     {
         _animationArrayPlayable.PrintWeights();

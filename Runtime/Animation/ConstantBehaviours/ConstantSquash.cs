@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -28,13 +24,11 @@ public class ConstantSquash : MonoBehaviour
         transform.localScale = new Vector3(1-deformation, 1+deformation, transform.localScale.z);
     }
 
-    [Button]
     public void Activate()
     {
         _active = true;
     }
 
-    [Button]
     public void Deactivate()
     {
         _active = false;

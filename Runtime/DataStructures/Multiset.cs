@@ -1,11 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
-using UnityEngine;
 
 public class Multiset<T> : IEnumerable<KeyValuePair<T,int>>, IEnumerable<(T,int)>
 {
-    [ShowInInspector] private readonly Dictionary<T, int> _values = new Dictionary<T, int>();
+     private readonly Dictionary<T, int> _values = new Dictionary<T, int>();
 
     public Dictionary<T, int>.KeyCollection Keys => _values.Keys;
     public Dictionary<T, int>.ValueCollection Values => _values.Values;

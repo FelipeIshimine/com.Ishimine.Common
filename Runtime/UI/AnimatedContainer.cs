@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Sirenix.OdinInspector;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -39,38 +38,39 @@ public class AnimatedContainer : MonoBehaviour
 	private RectTransform rectTransform;
 	private RectTransform RectTransform => rectTransform ??= (RectTransform)transform; 
 	
-	[FoldoutGroup("Dependencies"),SerializeField] private CanvasGroup canvasGroup;
-	[FoldoutGroup("Dependencies"),SerializeField] private Optional<EventSystem> optEventSystem;
+	[SerializeField] private CanvasGroup canvasGroup;
+	[SerializeField] private Optional<EventSystem> optEventSystem;
 
-	[SerializeField, BoxGroup("General")] private InitState awakeBehaviour = InitState.None;
-	[SerializeField, BoxGroup("General")] private bool deactivateGameObjectOnHide = true;
-	[SerializeField, BoxGroup("General")] private bool setBlockRaycast = true;
-	[SerializeField, BoxGroup("General")] private bool setInteractivity = true;
-	[SerializeField, BoxGroup("General")] private bool debugPrint = false;
-	[SerializeField, BoxGroup("General")] private List<AnimatedContainer> subContainers = new List<AnimatedContainer>();
+	[SerializeField] private InitState awakeBehaviour = InitState.None;
+	[SerializeField] private bool deactivateGameObjectOnHide = true;
+	[SerializeField] private bool setBlockRaycast = true;
+	[SerializeField] private bool setInteractivity = true;
+	[SerializeField] private bool debugPrint = false;
+	[SerializeField] private List<AnimatedContainer> subContainers = new List<AnimatedContainer>();
 
-	[FormerlySerializedAs("durationIn"), SerializeField,  BoxGroup("Animation")] private float openDuration = .3f;
-	[FormerlySerializedAs("durationOut"), SerializeField, BoxGroup("Animation")] private float closeDuration = .3f;
-	[field:SerializeField, BoxGroup("General")] public TimeScale Time { get; private set; } = TimeScale.Unscaled;
+	[FormerlySerializedAs("durationIn"), SerializeField] private float openDuration = .3f;
+	[FormerlySerializedAs("durationOut"), SerializeField] private float closeDuration = .3f;
+	[field:SerializeField] public TimeScale Time { get; private set; } = TimeScale.Unscaled;
 
-	[TabGroup("Alpha")] public bool useAlpha = true;
-	[TabGroup("Alpha"),EnableIf("useAlpha"),  LabelText("Open Curve")] public AnimationCurve alphaCurveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
-	[TabGroup("Alpha"),EnableIf("useAlpha"),  LabelText("Close Curve")] public AnimationCurve alphaCurveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
-	[TabGroup("Scale")] public bool useScale = false;
-	[TabGroup("Scale"), EnableIf("useScale") ] public Vector3 closeScale = new Vector3(0, 0, 0);
-	[TabGroup("Scale"), EnableIf("useScale") , LabelText("Open Curve")] public AnimationCurve curveInScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
-	[TabGroup("Scale"), EnableIf("useScale") , LabelText("Close Curve")] public AnimationCurve curveOutScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
-	[TabGroup("Movement")] public bool useMovement = false;
-	[TabGroup("Movement"), EnableIf("useMovement")] public bool useParentSizeForDisplacement = true;
-	[TabGroup("Movement"), EnableIf("useMovement")] public Direction direction = Direction.Down;
-	[TabGroup("Movement"), EnableIf("useMovement"), LabelText("Close Curve")] public AnimationCurve curveOutMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
-	[TabGroup("Movement"), EnableIf("useMovement"), LabelText("Open Curve")] public AnimationCurve curveInMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
+	
+	public bool useAlpha = true;
+	public AnimationCurve alphaCurveIn = AnimationCurve.EaseInOut(0, 0, 1, 1);
+	public AnimationCurve alphaCurveOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
+	public bool useScale = false;
+	public Vector3 closeScale = new Vector3(0, 0, 0);
+	public AnimationCurve curveInScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
+	public AnimationCurve curveOutScale = AnimationCurve.EaseInOut(0, 0, 1, 1);
+	public bool useMovement = false;
+	public bool useParentSizeForDisplacement = true;
+	public Direction direction = Direction.Down;
+	public AnimationCurve curveOutMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
+	public AnimationCurve curveInMovement = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
 	private RectTransform _parent;
 
 	private Coroutine _currentRoutine;
 
-	[ShowInInspector, ReadOnly] public State CurrentState { get; private set; } = State.None;
+	public State CurrentState { get; private set; } = State.None;
 
 	public bool InAnimation { get; private set; }
 
@@ -115,7 +115,6 @@ public class AnimatedContainer : MonoBehaviour
 
 	public Coroutine Close() => Close(null);
 
-	[Button, ButtonGroup("Animated", GroupName = "Animated")]
     public Coroutine Close(Action postAction)
     {
 	    //Debug.Log($">>>Close() {transform.GetHierarchyAsString()}");
@@ -140,7 +139,6 @@ public class AnimatedContainer : MonoBehaviour
         return gameObject.activeInHierarchy ? Play(CloseRoutine(postAction)) : null;
     }
 
-    [Button, ButtonGroup("Animated")]
     public Coroutine Open() => Open(null);
     
     public Coroutine Open(Action postAction)
@@ -164,7 +162,6 @@ public class AnimatedContainer : MonoBehaviour
         return gameObject.activeInHierarchy ? Play(OpenRoutine(postAction)) :  null;
     }
 
-    [ResponsiveButtonGroup]
 	public async UniTask OpenAsync(CancellationToken token = default)
 	{
 		if (CurrentState == State.Open)
@@ -212,7 +209,6 @@ public class AnimatedContainer : MonoBehaviour
 		}
 	}
 
-	[ResponsiveButtonGroup]
 	public async UniTask CloseAsync(CancellationToken token = default)
 	{
 		if (optEventSystem) optEventSystem.Value.enabled = false;
@@ -256,7 +252,6 @@ public class AnimatedContainer : MonoBehaviour
 		OnOpenOrCloseEnd?.Invoke(false);
 	}
 	
-    [Button, ButtonGroup("Snap")]
     public void Hide()
     {
         if (optEventSystem) optEventSystem.Value.enabled = false;
@@ -283,7 +278,6 @@ public class AnimatedContainer : MonoBehaviour
     }
 
 
-    [Button, ButtonGroup("Snap", GroupName = "Snap")]
     public void Show()
     {
         gameObject.SetActive(true);
@@ -357,7 +351,6 @@ public class AnimatedContainer : MonoBehaviour
         }
     }
 
-    [Button]
     public void CollectSubContainers()
     {
         foreach (Transform child in transform)

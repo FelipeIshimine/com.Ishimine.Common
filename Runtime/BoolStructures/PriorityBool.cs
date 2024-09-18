@@ -1,11 +1,10 @@
 ﻿using System;
-using Sirenix.OdinInspector;
 
 public class PriorityBool
 {
-    [ShowInInspector] private bool _value = false;
-    [ShowInInspector] private object _source = null;
-    [ShowInInspector] private int _priority = -1;
+    private bool _value = false;
+    private object _source = null;
+    private int _priority = -1;
 
     public bool Set(bool value, object source, int priority)
     {

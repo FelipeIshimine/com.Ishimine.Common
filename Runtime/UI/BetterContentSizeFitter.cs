@@ -1,9 +1,5 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Sirenix.OdinInspector;
 
 [RequireComponent(typeof(HorizontalOrVerticalLayoutGroup))]
 public class BetterContentSizeFitter : MonoBehaviour
@@ -24,10 +20,8 @@ public class BetterContentSizeFitter : MonoBehaviour
         Horizontal, Vertical
     }
 
-    [Button]
     public void Refresh() => Refresh(Target is HorizontalLayoutGroup?Orientation.Horizontal:Orientation.Vertical);
 
-    [Button]
     public float Refresh(Orientation orientation)
     {
         RectTransform rTransform = transform as RectTransform; 

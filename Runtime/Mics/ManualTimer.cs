@@ -1,7 +1,5 @@
 ﻿using System;
-using Sirenix.OdinInspector;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 [System.Serializable]
 public class ManualTimer
@@ -11,11 +9,11 @@ public class ManualTimer
     public event Action<float> OnTick;
     
     public bool Completed { get; private set; }
-    [ShowInInspector] public readonly bool Loop;
+     public readonly bool Loop;
     
-    [ShowInInspector] public float Duration => _duration;
+     public float Duration => _duration;
     private float _duration;
-    [ShowInInspector] protected float _currentValue = 0;
+     protected float _currentValue = 0;
     
     public float ProgressUnclamped => _currentValue / _duration;
     public float Progress => Mathf.Clamp01(_currentValue / _duration);

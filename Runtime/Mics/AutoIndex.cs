@@ -1,5 +1,4 @@
 ﻿using System;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 [System.Serializable]
@@ -8,8 +7,8 @@ public class AutoIndex
     private readonly int _maxValue;
     private readonly Func<int> _maxValueFunc;
 
-    [ShowInInspector, HorizontalGroup("A")] public int Value { get; private set; } = 0;
-    [ShowInInspector, HorizontalGroup("A")] public int MaxValue => _maxValueFunc?.Invoke() ?? _maxValue;
+    public int Value { get; private set; } = 0;
+    public int MaxValue => _maxValueFunc?.Invoke() ?? _maxValue;
 
     private readonly Func<int,int> _calculate;
 
