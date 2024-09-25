@@ -45,13 +45,28 @@ namespace Common.Editor.ToolbarExtender
 					flexGrow = 1
 				}
 			};
+            
+			LeftToolbarGUI.Sort(CompareElements);
 			foreach (var visualElement in LeftToolbarGUI)
 			{
 				container.Add(visualElement);
 			}
 			return container;
 		}
-		
+
+		private static int CompareElements(VisualElement x, VisualElement y)
+		{
+			// Check if x.userData is an int, if not, treat its priority as 0
+			int xPriority = x.userData is int xValue ? xValue : 0;
+    
+			// Check if y.userData is an int, if not, treat its priority as 0
+			int yPriority = y.userData is int yValue ? yValue : 0;
+
+			// Compare the priorities
+			return xPriority.CompareTo(yPriority);
+		}
+
+
 		public static VisualElement BuildRightVisualElement()
 		{
 			VisualElement container = new VisualElement()
@@ -62,6 +77,7 @@ namespace Common.Editor.ToolbarExtender
 					flexGrow = 1
 				}
 			};
+			RightToolbarGUI.Sort(CompareElements);
 			foreach (var visualElement in RightToolbarGUI)
 			{
 				container.Add(visualElement);
