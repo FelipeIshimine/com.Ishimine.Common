@@ -516,11 +516,11 @@ public class AnimatedContainer : MonoBehaviour
         {
             t += (Time == TimeScale.Scaled ? UnityEngine.Time.deltaTime : UnityEngine.Time.unscaledDeltaTime) / duration;
             step?.Invoke(t);
-            await UniTask.NextFrame(token);
+            await UniTask.NextFrame(token, cancelImmediately:true);
             LayoutRebuilder.MarkLayoutForRebuild(RectTransform);
             LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform.parent);
         } while (t < 1);
-	    await UniTask.NextFrame(token);
+	    await UniTask.NextFrame(token, cancelImmediately:true);
 
       
     }

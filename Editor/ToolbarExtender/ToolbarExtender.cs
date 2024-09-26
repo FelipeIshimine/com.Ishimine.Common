@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 using UnityToolbarExtender;
 
@@ -45,13 +46,43 @@ namespace Common.Editor.ToolbarExtender
 					flexGrow = 1
 				}
 			};
-            
+
+
+			AddMethodsByAttribute(ToolbarButtonAttribute.SideMode.Left,LeftToolbarGUI);
 			LeftToolbarGUI.Sort(CompareElements);
+
 			foreach (var visualElement in LeftToolbarGUI)
 			{
 				container.Add(visualElement);
 			}
+			
+			
+			
 			return container;
+		}
+
+		private static void AddMethodsByAttribute(ToolbarButtonAttribute.SideMode side,
+		                                          List<VisualElement> list)
+		{
+			foreach (MethodInfo methodInfo in TypeCache.GetMethodsWithAttribute<ToolbarButtonAttribute>())
+			{
+				if (!methodInfo.IsStatic)
+				{
+					continue;
+				}
+				var attribute = methodInfo.GetCustomAttribute<ToolbarButtonAttribute>();
+
+				if (attribute.Side == side)
+				{
+					ToolbarButton button = new ToolbarButton()
+					{
+						text = attribute.Label
+					};
+					button.userData = attribute.Priority;
+					button.clicked += ()=> methodInfo.Invoke(null,null);
+					list.Add(button);
+				}
+			}
 		}
 
 		private static int CompareElements(VisualElement x, VisualElement y)
@@ -77,6 +108,7 @@ namespace Common.Editor.ToolbarExtender
 					flexGrow = 1
 				}
 			};
+			AddMethodsByAttribute(ToolbarButtonAttribute.SideMode.Right,LeftToolbarGUI);
 			RightToolbarGUI.Sort(CompareElements);
 			foreach (var visualElement in RightToolbarGUI)
 			{
@@ -84,5 +116,30 @@ namespace Common.Editor.ToolbarExtender
 			}
 			return container;
 		}
+	}
+
+
+	[AttributeUsage(AttributeTargets.Method)]
+	public class ToolbarButtonAttribute : Attribute
+	{
+		public int Priority;
+		public SideMode Side;
+		public string Label;
+
+		public ToolbarButtonAttribute(string label, SideMode side, int priority)
+		{
+			Priority = priority;
+			Side = side;
+			Label = label;
+		}
+
+		public enum SideMode
+		{
+			Left,
+			Right
+		}
+
+	
+
 	}
 }

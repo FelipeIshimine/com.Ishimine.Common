@@ -2,8 +2,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-/// Requires Unity 2020.1+
-public struct Optional<T>
+public class Optional<T>
 {
     [SerializeField] private bool enabled;
     [SerializeField] private T value;
@@ -36,4 +35,5 @@ public struct Optional<T>
 	    SetValue(nValue);
 	    enabled = true;
     }
+
 }
