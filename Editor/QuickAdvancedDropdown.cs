@@ -27,7 +27,7 @@ public class QuickAdvancedDropdown : AdvancedDropdown
 public class AdvancedDropdownBuilder
 {
 	private string title;
-	private List<string> labels = new();
+	private List<(string,Texture2D)> values = new();
 	private int startingID;
 	private Action<int> callback;
 	private char splitCharacter = '/';
@@ -43,16 +43,34 @@ public class AdvancedDropdownBuilder
 		indices = new List<int>();
 		foreach (string element in elements)
 		{
-			labels.Add(element);
-			indices.Add(labels.Count-1);
+			values.Add((element,null));
+			indices.Add(values.Count-1);
 		}
 		return this;
 	}
 	
-	public AdvancedDropdownBuilder AddElement(string element, out int index)
+	public AdvancedDropdownBuilder AddElements(IEnumerable<(string,Texture2D)> elements, out List<int> indices)
 	{
-		 labels.Add(element);
-		 index = labels.Count - 1;
+		indices = new List<int>();
+		foreach (var element in elements)
+		{
+			values.Add(element);
+			indices.Add(values.Count-1);
+		}
+		return this;
+	}
+	
+	public AdvancedDropdownBuilder AddElement(string element, Texture2D icon, out int index)
+	{
+		 values.Add((element, icon));
+		 index = values.Count - 1;
+		 return this;
+	}
+	
+	public AdvancedDropdownBuilder AddElement(string element,out int index)
+	{
+		 values.Add((element,null));
+		 index = values.Count - 1;
 		 return this;
 	}
 
@@ -73,9 +91,9 @@ public class AdvancedDropdownBuilder
 		Dictionary<string, AdvancedDropdownItem> pathToDropdownItems = new Dictionary<string, AdvancedDropdownItem>();
 		AdvancedDropdownItem root = new AdvancedDropdownItem(title);
 		AdvancedDropdownItem startingItem = null;
-		for (int i = 0; i < labels.Count; i++)
+		for (int i = 0; i < values.Count; i++)
 		{
-			var split = labels[i].Split(splitCharacter);
+			var split = values[i].Item1.Split(splitCharacter);
 			var previous = root;
 			for (var j = 0; j < split.Length; j++)
 			{
@@ -84,7 +102,8 @@ public class AdvancedDropdownBuilder
 				{
 					item = pathToDropdownItems[s] = new AdvancedDropdownItem(s)
 					{
-						id = i
+						id = i, 
+						icon = values[i].Item2
 					};
 
 					if (i == startingID)
