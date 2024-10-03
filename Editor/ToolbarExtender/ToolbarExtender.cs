@@ -48,7 +48,7 @@ namespace Common.Editor.ToolbarExtender
 			};
 
 
-			AddMethodsByAttribute(ToolbarButtonAttribute.SideMode.Left,LeftToolbarGUI);
+			AddMethodsByAttribute(UnityToolbarButtonAttribute.SideMode.Left,LeftToolbarGUI);
 			LeftToolbarGUI.Sort(CompareElements);
 
 			foreach (var visualElement in LeftToolbarGUI)
@@ -61,16 +61,16 @@ namespace Common.Editor.ToolbarExtender
 			return container;
 		}
 
-		private static void AddMethodsByAttribute(ToolbarButtonAttribute.SideMode side,
+		private static void AddMethodsByAttribute(UnityToolbarButtonAttribute.SideMode side,
 		                                          List<VisualElement> list)
 		{
-			foreach (MethodInfo methodInfo in TypeCache.GetMethodsWithAttribute<ToolbarButtonAttribute>())
+			foreach (MethodInfo methodInfo in TypeCache.GetMethodsWithAttribute<UnityToolbarButtonAttribute>())
 			{
 				if (!methodInfo.IsStatic)
 				{
 					continue;
 				}
-				var attribute = methodInfo.GetCustomAttribute<ToolbarButtonAttribute>();
+				var attribute = methodInfo.GetCustomAttribute<UnityToolbarButtonAttribute>();
 
 				if (attribute.Side == side)
 				{
@@ -108,7 +108,8 @@ namespace Common.Editor.ToolbarExtender
 					flexGrow = 1
 				}
 			};
-			AddMethodsByAttribute(ToolbarButtonAttribute.SideMode.Right,LeftToolbarGUI);
+            
+			AddMethodsByAttribute(UnityToolbarButtonAttribute.SideMode.Right,LeftToolbarGUI);
 			RightToolbarGUI.Sort(CompareElements);
 			foreach (var visualElement in RightToolbarGUI)
 			{
@@ -120,13 +121,13 @@ namespace Common.Editor.ToolbarExtender
 
 
 	[AttributeUsage(AttributeTargets.Method)]
-	public class ToolbarButtonAttribute : Attribute
+	public class UnityToolbarButtonAttribute : Attribute
 	{
 		public int Priority;
 		public SideMode Side;
 		public string Label;
 
-		public ToolbarButtonAttribute(string label, SideMode side, int priority)
+		public UnityToolbarButtonAttribute(string label, SideMode side, int priority=0)
 		{
 			Priority = priority;
 			Side = side;
