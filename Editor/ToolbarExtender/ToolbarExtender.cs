@@ -109,7 +109,7 @@ namespace Common.Editor.ToolbarExtender
 				}
 			};
             
-			AddMethodsByAttribute(UnityToolbarButtonAttribute.SideMode.Right,LeftToolbarGUI);
+			AddMethodsByAttribute(UnityToolbarButtonAttribute.SideMode.Right,RightToolbarGUI);
 			RightToolbarGUI.Sort(CompareElements);
 			foreach (var visualElement in RightToolbarGUI)
 			{
@@ -123,9 +123,9 @@ namespace Common.Editor.ToolbarExtender
 	[AttributeUsage(AttributeTargets.Method)]
 	public class UnityToolbarButtonAttribute : Attribute
 	{
-		public int Priority;
-		public SideMode Side;
-		public string Label;
+		public readonly int Priority;
+		public readonly SideMode Side;
+		public readonly string Label;
 
 		public UnityToolbarButtonAttribute(string label, SideMode side, int priority=0)
 		{
