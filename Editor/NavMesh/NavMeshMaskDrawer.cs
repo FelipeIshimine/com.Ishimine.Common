@@ -1,4 +1,4 @@
-using UnityEditor;
+/*using UnityEditor;
 using UnityEngine;
 
 [CustomPropertyDrawer(typeof(NavMeshMaskAttribute))]
@@ -20,4 +20,4 @@ public class NavMeshMaskDrawer : PropertyDrawer
 		if (EditorGUI.EndChangeCheck())
 			serializedProperty.intValue = mask;
 	}
-}
+}*/
