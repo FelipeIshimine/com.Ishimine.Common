@@ -183,4 +183,11 @@ public class IndexPriorityQueue
         var index = DequeueIndex();
         return (index, priority);
     }
+    public int Dequeue(out int cost)
+    {
+        var priority = PeekPriority();
+        var index = DequeueIndex();
+        cost = priority;
+        return index;
+    }
 }
