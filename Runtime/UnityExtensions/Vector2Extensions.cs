@@ -132,4 +132,12 @@ public static class Vector2Extensions
     
     public static Vector3 AsVector3XY(this Vector2 value)=> new Vector3(value.x,value.y);
     public static Vector3 AsVector3XZ(this Vector2 value)=> new Vector3(value.x,0,value.y);
+    
+    public static Vector2 MaxAbs(this Vector2 a, Vector2 b)
+    {
+	    return new Vector2(
+		    Mathf.Abs(a.x) > Mathf.Abs(b.x) ? a.x : b.x,
+		    Mathf.Abs(a.y) > Mathf.Abs(b.y) ? a.y : b.y
+	    );
+    }
 }
