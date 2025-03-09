@@ -1,9 +1,13 @@
 using System;
+using Optional;
 using UnityEngine;
 
 [Serializable]
-public class Optional<T>
+public class Optional<T> : ISerializationCallbackReceiver
 {
+#if UNITY_EDITOR
+	[SerializeField,HideInInspector] private string name;
+#endif
     [SerializeField] private bool enabled;
     [SerializeField] private T value;
 
@@ -36,4 +40,17 @@ public class Optional<T>
 	    enabled = true;
     }
 
+    public void OnBeforeSerialize()
+    {
+	    #if UNITY_EDITOR
+	    if (value is IName iName)
+	    {
+		    name = iName.GetName();
+	    }
+	    #endif
+    }
+
+    public void OnAfterDeserialize()
+    {
+    }
 }
