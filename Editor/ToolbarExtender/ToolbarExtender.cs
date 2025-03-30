@@ -47,7 +47,11 @@ namespace Common.Editor.ToolbarExtender
 				}
 			};
 
-
+            /*foreach (var visualElement in LeftToolbarGUI)
+            {
+                visualElement.RemoveFromHierarchy();
+            }
+            LeftToolbarGUI.Clear();*/
 			AddMethodsByAttribute(UnityToolbarButtonAttribute.SideMode.Left,LeftToolbarGUI);
 			LeftToolbarGUI.Sort(CompareElements);
 
@@ -55,8 +59,6 @@ namespace Common.Editor.ToolbarExtender
 			{
 				container.Add(visualElement);
 			}
-			
-			
 			
 			return container;
 		}
@@ -108,6 +110,12 @@ namespace Common.Editor.ToolbarExtender
 					flexGrow = 1
 				}
 			};
+            /*
+            foreach (var visualElement in RightToolbarGUI)
+            {
+                visualElement.RemoveFromHierarchy();
+            }
+            RightToolbarGUI.Clear();*/
             
 			AddMethodsByAttribute(UnityToolbarButtonAttribute.SideMode.Right,RightToolbarGUI);
 			RightToolbarGUI.Sort(CompareElements);
