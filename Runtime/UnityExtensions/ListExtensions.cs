@@ -84,6 +84,21 @@ public static class ListExtensions
         return current;
     }
     
+    public static T FindHighest<T>(this T[] source, Func<T, float> testing)
+    {
+        float highest = float.MinValue;
+        T current = default(T);
+        for (int i = source.Length - 1; i >= 0; i--)
+        {
+            if (testing.Invoke(source[i]) > highest)
+            {
+                highest = testing.Invoke(source[i]);
+                current = source[i];
+            }
+        }
+        return current;
+    }
+    
     public static List<T> ExtractAll<T>(this List<T> source, Func<T, bool> validation)
     {
         List<T> values = new List<T>();
