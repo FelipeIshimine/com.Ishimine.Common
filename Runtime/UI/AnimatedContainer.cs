@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -162,6 +160,7 @@ public class AnimatedContainer : MonoBehaviour
         return gameObject.activeInHierarchy ? Play(OpenRoutine(postAction)) :  null;
     }
 
+	/*
 	public async UniTask OpenAsync(CancellationToken token = default)
 	{
 		if (CurrentState == State.Open)
@@ -251,6 +250,7 @@ public class AnimatedContainer : MonoBehaviour
 		OnClosingEnd?.Invoke();
 		OnOpenOrCloseEnd?.Invoke(false);
 	}
+	*/
 	
     public void Hide()
     {
@@ -494,7 +494,7 @@ public class AnimatedContainer : MonoBehaviour
     
 	
 	
-    private async UniTask AnimationAsync(float duration,
+    /*private async UniTask AnimationAsync(float duration,
                                          Vector3 targetPosition, AnimationCurve movementCurve,
                                          Vector3 targetScale, AnimationCurve scaleCurve,
                                          float targetAlpha, AnimationCurve alphaCurve,
@@ -524,6 +524,7 @@ public class AnimatedContainer : MonoBehaviour
 
       
     }
+    */
 
 
     public enum InitState
