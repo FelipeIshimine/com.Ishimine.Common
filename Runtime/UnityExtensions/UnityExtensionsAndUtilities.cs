@@ -6,7 +6,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
-public static class UnityExtensions
+public static class UnityExtensionsAndUtilities
 {
     public const float GoldenRatio = 1.61803398875f;
 
