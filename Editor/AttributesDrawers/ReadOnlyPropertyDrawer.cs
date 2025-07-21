@@ -1,17 +1,18 @@
 ﻿using GE;
 using UnityEditor;
-using UnityEngine;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
 
 namespace AttributesDrawers
 {
     [CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
     public class ReadOnlyPropertyDrawer : PropertyDrawer
     {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            GUI.enabled = false;
-            base.OnGUI(position, property, label);
-            GUI.enabled = true;
+            var propertyField = new PropertyField(property);
+            propertyField.SetEnabled(false);
+            return propertyField;
         }
     }
 }
