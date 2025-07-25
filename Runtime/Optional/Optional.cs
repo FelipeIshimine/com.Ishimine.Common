@@ -53,4 +53,6 @@ public class Optional<T> : ISerializationCallbackReceiver
     public void OnAfterDeserialize()
     {
     }
+
+    public T TryGet(T valueOnFail = default) => Enabled ? Value : valueOnFail;
 }
