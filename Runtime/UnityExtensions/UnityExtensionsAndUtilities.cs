@@ -43,11 +43,13 @@ public static class UnityExtensionsAndUtilities
     }
 
     public static bool CanSee(this Camera cam, Vector3 pos, Vector3 boundSize) => CanSee(cam, new Bounds(pos, boundSize));
+
+    private static readonly Plane[] Planes = new Plane[6];
     
     public static bool CanSee(this Camera cam, Bounds bounds) 
     {
-        var planes = GeometryUtility.CalculateFrustumPlanes(cam);
-        return GeometryUtility.TestPlanesAABB(planes, bounds);
+        GeometryUtility.CalculateFrustumPlanes(cam,Planes);
+        return GeometryUtility.TestPlanesAABB(Planes, bounds);
     }
     
     
