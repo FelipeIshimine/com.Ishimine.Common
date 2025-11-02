@@ -4,7 +4,7 @@ using Random = System.Random;
 
 public static class ListExtensions
 {
-    public static T Last<T>(this List<T> source) => source[source.Count - 1];
+    public static T Last<T>(this List<T> source) => source[^1];
     public static T First<T>(this List<T> source) => source[0];
 
     public static void ReplaceAt<T>(this List<T> source, int index,T nElement)
