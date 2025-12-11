@@ -7,4 +7,15 @@ public static class ParticleSystemExtensions
 		var particleSystemMain = particleSystem.main;
 		particleSystemMain.stopAction = stopAction;
 	}
+	public static void Toggle(this ParticleSystem particleSystem, bool shouldPlay)
+	{
+		if (shouldPlay)
+		{
+			particleSystem.Play();
+		}
+		else
+		{
+			particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+		}
+	}
 }
